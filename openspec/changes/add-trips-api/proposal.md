@@ -5,19 +5,19 @@ The app is greenfield — no data model, no API, no migrations exist. To start l
 ## What Changes
 
 - Add `dbmate` as a dev dependency and configure it for local Postgres (docker-compose).
-- Add the initial SQL migration creating three tables: `cars`, `locations`, `trips`.
+- Add the initial SQL migration creating three tables: `vehicles`, `locations`, `trips`.
 - Add a Postgres client singleton (`Bun.sql`) in `src/db/client.ts`.
 - Add Hono server entrypoint in `src/backend/index.ts` with two REST endpoints:
   - `POST /api/trips` — validate input, insert a trip, return `201` with the created record.
   - `GET /api/trips` — return trips for the current calendar month (based on display timezone), default to current month.
-- `daypart` (`morning` | `afternoon`) is derived from `end_time` at write time and stored as an enum.
-- Trip `id` is a synthetic UUID; `UNIQUE(car_id, end_time)` enforces no duplicate trips per car.
+- `daypart`comes from request (derivation will happen at a later stage in the frontend) and stored as an enum.
+- Trip `id` is a synthetic UUID; `UNIQUE(vehicle_id, end_time)` enforces no duplicate trips per vehicle.
 - No UI, no HTMX, no Pico in this slice — API only.
 
 ## Capabilities
 
 ### New Capabilities
-- `trips-api`: REST endpoints to create and retrieve commute trips, including input validation, timezone-aware "current month" filtering, and the trips/cars/locations data model.
+- `trips-api`: REST endpoints to create and retrieve commute trips, including input validation, timezone-aware "current month" filtering, and the trips/vehicles/locations data model.
 
 ### Modified Capabilities
 <!-- None — greenfield, no existing specs -->
@@ -26,7 +26,7 @@ The app is greenfield — no data model, no API, no migrations exist. To start l
 
 - **New code**: `src/db/` (client, migrations runner config), `src/backend/` (Hono app, route handlers, validation).
 - **New dependency**: `dbmate` (dev dep, already installed), `hono` (runtime dep, needs install).
-- **Database**: initial migration creates `schema_migrations` (dbmate-managed), `cars`, `locations`, `trips` tables.
+- **Database**: initial migration creates `schema_migrations` (dbmate-managed), `vehicles`, `locations`, `trips` tables.
 - **API surface**: two new public endpoints under `/api/trips`.
 - **No breaking changes** — nothing existed before.
 
