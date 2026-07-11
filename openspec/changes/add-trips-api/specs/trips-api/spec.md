@@ -27,16 +27,16 @@ The system SHALL maintain a `locations` table storing commute endpoints with `id
 - **THEN** the trip SHALL store the foreign key and the location's `timezone` SHALL be usable for display timezone resolution
 
 ### Requirement: Trips table
-The system SHALL maintain a `trips` table with a synthetic UUID primary key, a `UNIQUE(vehicle_id, end_time)` constraint, and the following columns: `vehicle_id` (NOT NULL FK), `start_time` (NOT NULL timestamptz), `end_time` (NOT NULL timestamptz), `start_location_id` (nullable FK), `end_location_id` (nullable FK), `daypart` (enum `morning`/`afternoon`, NOT NULL), `duration_min` (nullable int, set only when `start_time` is NULL), `distance_km` (NOT NULL NUMERIC(8,2)), `avg_speed_kmh` (nullable NUMERIC(5,1)), `avg_consumption_kwh_100km` (nullable NUMERIC(6,2)), `weather_start` (nullable JSONB), `weather_end` (nullable JSONB), `odometer_km` (nullable NUMERIC(8,1)), `tracking_created` (timestamptz default now()), `tracking_updated` (timestamptz default now()).
+The system SHALL maintain a `trips` table with a synthetic UUID primary key, a `UNIQUE(vehicle_id, end_time)` constraint, and the following columns: `vehicle_id` (NOT NULL FK), `start_time` (NOT NULL timestamptz), `end_time` (NOT NULL timestamptz), `start_location_id` (nullable FK), `end_location_id` (nullable FK), `daypart` (enum `morning`/`afternoon`, NOT NULL), `duration_min` (NOT NULL int), `distance_km` (NOT NULL NUMERIC(8,2)), `avg_speed_kmh` (nullable NUMERIC(5,1)), `avg_consumption_kwh_100km` (nullable NUMERIC(6,2)), `weather_start` (nullable JSONB), `weather_end` (nullable JSONB), `odometer_km` (nullable NUMERIC(8,1)), `tracking_created` (timestamptz default now()), `tracking_updated` (timestamptz default now()).
 
 #### Scenario: Trip with full data
 - **GIVEN** a vehicle and a start location exist
-- **WHEN** a trip is created with `vehicle_id`, `start_time`, `end_time`, `daypart`, `duration`, `start_location_id`, `end_location_id`, `distance_km`, `avg_speed_kmh`, `avg_consumption_kwh_100km`
+- **WHEN** a trip is created with `vehicle_id`, `start_time`, `end_time`, `daypart`, `duration_min`, `start_location_id`, `end_location_id`, `distance_km`, `avg_speed_kmh`, `avg_consumption_kwh_100km`
 - **THEN** the system SHALL store all fields and set `tracking_created` and `tracking_updated` to the current timestamp
 
 #### Scenario: Trip with minimal data
 - **GIVEN** a vehicle exists
-- **WHEN** a trip is created with only `vehicle_id`, `start_time`, `end_time`, `daypart`, `distance_km`, and `daypart`
+- **WHEN** a trip is created with only the required fields `vehicle_id`, `start_time`, `end_time`, `daypart`, `duration_min`, and `distance_km`
 - **THEN** the system SHALL store the trip with nullable fields set to NULL
 
 #### Scenario: Duplicate trip rejected
@@ -44,27 +44,26 @@ The system SHALL maintain a `trips` table with a synthetic UUID primary key, a `
 - **WHEN** another trip is created with the same `vehicle_id` X and `end_time` T
 - **THEN** the system SHALL reject the request with `409 Conflict`
 
-### Requirement: Duration derivation
-The system SHALL compute trip duration as `end_time - start_time` at write time when `duration` is not present.
-If present, the passed duration is stored.
+### Requirement: Duration handling
+The system SHALL store the `duration_min` value provided in the request. This value SHALL take precedence over the computed `end_time - start_time` value.
 
-#### Scenario: Duration from timestamps
-- **GIVEN** a trip creation with `start_time=08:00` and `end_time=08:45` (UTC) and no `duration`
+#### Scenario: Duration from request overrides calculation
+- **GIVEN** a trip creation with `start_time=08:00`, `end_time=08:45` (UTC, 45 min computed), and `duration_min=40`
 - **WHEN** the trip is stored
-- **THEN** the system SHALL store the trip with `duration_min=45`
+- **THEN** the system SHALL store the trip with `duration_min=40`
 
-#### Scenario: Duration from manual entry
-- **GIVEN** a trip creation with `duration_min=40`
+#### Scenario: Duration matches calculation
+- **GIVEN** a trip creation with `start_time=08:00`, `end_time=08:45` (UTC) and `duration_min=45`
 - **WHEN** the trip is retrieved
-- **THEN** the response SHALL include `duration_min=40` regardless of what the computed duration would be
+- **THEN** the response SHALL include `duration_min=45`
 
 ### Requirement: POST /api/trips endpoint
-The system SHALL expose `POST /api/trips` accepting a JSON body. Required fields: `vehicle_id`, `start_time`, `end_time`, `daypart`, `distance_km`. Optional fields: `start_location_id`, `end_location_id`, `duration_min`, `avg_speed_kmh`, `avg_consumption_kwh_100km`, `weather_start`, `weather_end`, `odometer_km`. On success, the system SHALL return `201 Created` with the full trip record (including generated `id`, `tracking_created`, `tracking_updated`). On validation failure, the system SHALL return `400 Bad Request` with field-level error messages.
+The system SHALL expose `POST /api/trips` accepting a JSON body. Required fields: `vehicle_id`, `start_time`, `end_time`, `daypart`, `duration_min`, `distance_km`. Optional fields: `start_location_id`, `end_location_id`, `avg_speed_kmh`, `avg_consumption_kwh_100km`, `weather_start`, `weather_end`, `odometer_km`. On success, the system SHALL return `201 Created` with the full trip record (including generated `id`, `tracking_created`, `tracking_updated`). On validation failure, the system SHALL return `400 Bad Request` with field-level error messages.
 
 #### Scenario: Successful trip creation
 - **GIVEN** a vehicle with `id` exists
-- **WHEN** a `POST /api/trips` request is sent with valid `vehicle_id`, `end_time`, and `distance_km`
-- **THEN** the system SHALL insert the trip, compute `daypart`, and return `201` with the created record including its `id`
+- **WHEN** a `POST /api/trips` request is sent with valid `vehicle_id`, `start_time`, `end_time`, `daypart`, `duration_min`, and `distance_km`
+- **THEN** the system SHALL insert the trip, store `daypart` from the request, and return `201` with the created record including its `id`
 
 #### Scenario: Missing required field
 - **GIVEN** a vehicle exists
