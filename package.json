@@ -1,0 +1,17 @@
+{
+	"name": "juice-journal",
+	"module": "index.ts",
+	"type": "module",
+	"private": true,
+	"devDependencies": {
+		"@types/bun": "latest",
+		"prettier": "^3.9.5"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"scripts": {
+		"format": "prettier --write .",
+		"format:check": "prettier --check ."
+	}
+}

@@ -1,0 +1,15 @@
+{
+	"$schema": "https://www.schemastore.org/prettierrc.json",
+	// .editorconfig alignment
+	"overrides": [
+		{
+			"files": "json",
+			"options": {
+				"tabWidth": 2
+			}
+		}
+	],
+	"semi": false,
+	"singleQuote": false,
+	"trailingComma": "none"
+}
