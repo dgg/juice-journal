@@ -1,0 +1,18 @@
+schema: spec-driven
+
+context: |
+  Domain: personal commute trip tracking
+  Tech stack:
+  - Backend: bun, typescript, htmx, postgresql, dbmate
+  - Frontend: semantic html, picocss, vanilla js if absolutely needed
+  API style: restful anchored in /api
+  Testing: bun tests
+  Conventional commits, do not use git worktrees, prefer feature branches
+
+rules:
+  proposal:
+    - Include rollback plan
+    - Keep proposals under 500 words
+  specs:
+    - Use Given/When/Then format
+    - Reference existing patterns before inventing new ones
