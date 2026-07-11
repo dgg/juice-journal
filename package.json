@@ -5,6 +5,7 @@
 	"private": true,
 	"devDependencies": {
 		"@types/bun": "latest",
+		"dbmate": "^2.34.1",
 		"prettier": "^3.9.5"
 	},
 	"peerDependencies": {

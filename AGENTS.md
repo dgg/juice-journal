@@ -42,17 +42,10 @@ Default to using Bun instead of Node.js.
 
 Use internal Bun APIs when possible (`Bun.sql`, `Bun.file`, ...) by default instead of other popular packages.
 
-
 ### Commits
-* **Convention:** `type(scope): description` — all lowercase
-* **Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+* **Conventional Commits:** usual types `type(scope): description` — all lowercase
 * **Link issues:** Use `fixes #123` or `closes #456` in commit body to auto-link GitHub issues
-
-### Data & API
-* **Trip fields:** `distance_km`, `avg_speed_kmh`, `consumption_kwh_100km`, `timestamp`
-* **Default:** Timestamps → `NOW()` if not provided
-* **Odometer:** Optional
-* **API:** Extend endpoints, never break them
+* **Feature branches**: do not use git worktrees
 
 ### Before Committing
 1. Run tests: `bun test` (or repo default)
