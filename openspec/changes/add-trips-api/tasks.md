@@ -9,8 +9,8 @@
 
 ## 2. Database Schema Migration
 
-- [ ] 2.1 Create initial up migration `db/migrations/YYYYMMDDHHMMSS_init.up.sql` with: `schema_migrations` table (dbmate manages), `cars` table (id UUID PK, description TEXT, created_at, updated_at), `locations` table (id UUID PK, label TEXT, latitude DECIMAL(9,6), longitude DECIMAL(9,6), timezone TEXT, created_at, updated_at), `trips` table (id UUID PK default gen_random_uuid(), car_id UUID FK NOT NULL, start_time TIMESTAMPTZ NULL, end_time TIMESTAMPTZ NOT NULL, start_location_id UUID FK NULL, end_location_id UUID FK NULL, daypart daypart_enum NOT NULL, duration_min INT NULL, distance_km NUMERIC(8,2) NOT NULL, avg_speed_kmh NUMERIC(5,1) NULL, avg_consumption_kwh_100km NUMERIC(6,2) NULL, weather_start JSONB NULL, weather_end JSONB NULL, odometer_km NUMERIC(8,1) NULL, tracking_created TIMESTAMPTZ DEFAULT now(), tracking_updated TIMESTAMPTZ DEFAULT now(), UNIQUE(car_id, end_time))
-- [ ] 2.2 Create matching down migration `YYYYMMDDHHMMSS_init.down.sql` dropping tables in FK order: trips, locations, cars, then the daypart enum type
+- [ ] 2.1 Create initial up migration `db/migrations/YYYYMMDDHHMMSS_init.up.sql` with: `schema_migrations` table (dbmate manages), `vehicles` table (id UUID PK, description TEXT, created_at, updated_at), `locations` table (id UUID PK, label TEXT, latitude DECIMAL(9,6), longitude DECIMAL(9,6), timezone TEXT, created_at, updated_at), `trips` table (id UUID PK default gen_random_uuid(), vehicle_id UUID FK NOT NULL, start_time TIMESTAMPTZ NOT NULL, end_time TIMESTAMPTZ NOT NULL, start_location_id UUID FK NULL, end_location_id UUID FK NULL, daypart daypart_enum NOT NULL, duration_min INT NOT NULL, distance_km NUMERIC(8,2) NOT NULL, avg_speed_kmh NUMERIC(5,1) NULL, avg_consumption_kwh_100km NUMERIC(6,2) NULL, weather_start JSONB NULL, weather_end JSONB NULL, odometer_km NUMERIC(8,1) NULL, tracking_created TIMESTAMPTZ DEFAULT now(), tracking_updated TIMESTAMPTZ DEFAULT now(), UNIQUE(vehicle_id, end_time))
+- [ ] 2.2 Create matching down migration `YYYYMMDDHHMMSS_init.down.sql` dropping tables in FK order: trips, locations, vehicles, then the daypart enum type
 - [ ] 2.3 Create `daypart` enum type (`CREATE TYPE daypart_enum AS ENUM('morning', 'afternoon')`) in the up migration before the trips table
 - [ ] 2.4 Start docker-compose Postgres (`docker compose up -d`)
 - [ ] 2.5 Run `bunx dbmate up` and verify all tables exist
@@ -29,32 +29,30 @@
 
 ## 5. POST /api/trips Handler
 
-- [ ] 5.1 Define the trip input type (required: `car_id`, `end_time`, `distance_km`; optional: `start_time`, `start_location_id`, `end_location_id`, `duration_min`, `avg_speed_kmh`, `avg_consumption_kwh_100km`, `weather_start`, `weather_end`, `odometer_km`)
-- [ ] 5.2 Implement validation: check required fields present, validate types, validate `distance_km > 0`, validate `car_id` exists in `cars` table, validate location FKs if provided
-- [ ] 5.3 Implement `daypart` derivation from `end_time` (hour < 12 → `morning`, else `afternoon`) using display timezone
-- [ ] 5.4 Implement INSERT query with all fields, returning the full row (including generated `id`, `tracking_created`, `tracking_updated`)
-- [ ] 5.5 Handle `UNIQUE(car_id, end_time)` violation → return `409 Conflict`
-- [ ] 5.6 Return `201 Created` with the trip record as JSON on success
-- [ ] 5.7 Return `400 Bad Request` with field-level error messages on validation failure
+- [ ] 5.1 Define the trip input type (required: `vehicle_id`, `start_time`, `end_time`, `daypart`, `duration_min`, `distance_km`; optional: `start_location_id`, `end_location_id`, `avg_speed_kmh`, `avg_consumption_kwh_100km`, `weather_start`, `weather_end`, `odometer_km`)
+- [ ] 5.2 Implement validation: check required fields present, validate types, validate `daypart` ∈ {`morning`, `afternoon`}, validate `distance_km > 0`, validate `vehicle_id` exists in `vehicles` table, validate location FKs if provided
+- [ ] 5.3 Implement INSERT query with all fields (including `daypart` and `duration_min` from the request), returning the full row (including generated `id`, `tracking_created`, `tracking_updated`)
+- [ ] 5.4 Handle `UNIQUE(vehicle_id, end_time)` violation → return `409 Conflict`
+- [ ] 5.5 Return `201 Created` with the trip record as JSON on success
+- [ ] 5.6 Return `400 Bad Request` with field-level error messages on validation failure
 
 ## 6. GET /api/trips Handler
 
 - [ ] 6.1 Implement display timezone resolution: `end_location.timezone` → `start_location.timezone` → `DISPLAY_TZ` env (default `Europe/Copenhagen`)
 - [ ] 6.2 Compute current month bounds in display timezone (first day of month 00:00 → first day of next month 00:00), convert to UTC
 - [ ] 6.3 Query trips where `end_time >= month_start_utc AND end_time < month_end_utc`, sorted by `end_time` DESC
-- [ ] 6.4 Derive `duration_min` at read time: if `start_time` present, compute `end_time - start_time` in minutes; else use stored `duration_min`
-- [ ] 6.5 Return `200 OK` with JSON array of trip objects (empty array if no trips)
+- [ ] 6.4 Return `200 OK` with JSON array of trip objects (empty array if no trips)
 
 ## 7. Tests
 
-- [ ] 7.1 Test: `POST /api/trips` with valid input returns `201` and the created record with correct `daypart`
+- [ ] 7.1 Test: `POST /api/trips` with valid input returns `201` and the created record with `daypart` stored from the request
 - [ ] 7.2 Test: `POST /api/trips` missing `distance_km` returns `400` with field error
-- [ ] 7.3 Test: `POST /api/trips` with invalid `car_id` returns `400`
-- [ ] 7.4 Test: `POST /api/trips` duplicate `(car_id, end_time)` returns `409`
+- [ ] 7.3 Test: `POST /api/trips` with invalid `vehicle_id` returns `400`
+- [ ] 7.4 Test: `POST /api/trips` duplicate `(vehicle_id, end_time)` returns `409`
 - [ ] 7.5 Test: `GET /api/trips` returns only current-month trips, sorted desc
 - [ ] 7.6 Test: `GET /api/trips` with no trips returns `200` `[]`
-- [ ] 7.7 Test: `daypart` derivation — trip ending before 12:00 → `morning`, after → `afternoon`
-- [ ] 7.8 Test: duration derivation from `start_time`/`end_time` and fallback to stored `duration_min`
+- [ ] 7.7 Test: `duration_min` from request is stored as-is and returned in the response
+- [ ] 7.8 Test: `POST /api/trips` with `daypart='evening'` returns `400` with a field error
 
 ## 8. Verification & Cleanup
 
