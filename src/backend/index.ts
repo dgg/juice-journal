@@ -16,11 +16,7 @@ app.onError(
 	problemDetailsHandler({
 		autoInstance: true,
 		includeStack: process.env.NODE_ENV !== "production",
-		defaultType: "about:blank",
-		mapError: (error) => {
-			console.error("Error:", error)
-			return undefined
-		}
+		defaultType: "about:blank"
 	})
 )
 

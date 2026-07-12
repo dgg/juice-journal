@@ -6,11 +6,9 @@ import { problems } from "./problems"
 export async function creationHandler(c: Context) {
 	const input = c.req.valid("json") as TripInput
 
-	console.log(input)
-
-	// TODO: get conditions from weather api
-	const weather_start = {}
-	const weather_end = {}
+	// TODO: get conditions from weather api if locations are set
+	const weather_start = null
+	const weather_end = null
 
 	try {
 		const result = await db`
@@ -40,8 +38,8 @@ export async function creationHandler(c: Context) {
           ${input.distance_km},
           ${input.avg_speed_kmh || null},
           ${input.avg_consumption_kwh_100km || null},
-          ${JSON.stringify(weather_start)},
-          ${JSON.stringify(weather_end)},
+          ${weather_start},
+          ${weather_end},
           ${input.odometer_km || null}
         )
         RETURNING *
