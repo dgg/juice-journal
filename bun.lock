@@ -7,6 +7,7 @@
       "dependencies": {
         "@hono/zod-validator": "0.8.0",
         "hono": "4.12.29",
+        "hono-problem-details": "0.8.2",
         "postgres": "3.4.9",
         "zod": "4.4.3",
       },
@@ -46,6 +47,8 @@
     "dbmate": ["dbmate@2.34.1", "", { "optionalDependencies": { "@dbmate/darwin-arm64": "2.34.1", "@dbmate/darwin-x64": "2.34.1", "@dbmate/linux-arm": "2.34.1", "@dbmate/linux-arm64": "2.34.1", "@dbmate/linux-ia32": "2.34.1", "@dbmate/linux-x64": "2.34.1", "@dbmate/win32-x64": "2.34.1" }, "bin": { "dbmate": "dist/cli.js" } }, "sha512-fB+M/mnR0b6uyaPTK4ng7CDb2dHsEnxdkUCkQKiNq/I9mwExb/W11UEmhmdcxpBRm30I+E5TApf15PfDpEnEZA=="],
 
     "hono": ["hono@4.12.29", "", {}, "sha512-1hNiRjawYrLq/4m3DQQjPGFg0VZkk4RjQJDff/excI6Dm9BiL75qxGrd7/c6YOxPdq6AscP3LiXhQ6fKFC1Waw=="],
+
+    "hono-problem-details": ["hono-problem-details@0.8.2", "", { "peerDependencies": { "@hono/standard-validator": "^0.2.0", "@hono/valibot-validator": "^0.6.0", "@hono/zod-openapi": "^1.0.0", "@hono/zod-validator": "^0.7.5", "@opentelemetry/api": "^1.0.0", "@standard-schema/spec": "^1.0.0", "hono": ">=4.12.27", "valibot": "^1.0.0", "zod": "^3.25.0 || ^4.0.0" }, "optionalPeers": ["@hono/standard-validator", "@hono/valibot-validator", "@hono/zod-openapi", "@hono/zod-validator", "@opentelemetry/api", "@standard-schema/spec", "valibot", "zod"] }, "sha512-T8Ox7QIZMidhMaUQ8bbFUR9wySjtrErVp7KrZUmAFHGyCzuEVHtHl0H1zdKynSsPCJMz/bKcBuRz4iUBbDC7yw=="],
 
     "postgres": ["postgres@3.4.9", "", {}, "sha512-GD3qdB0x1z9xgFI6cdRD6xu2Sp2WCOEoe3mtnyB5Ee0XrrL5Pe+e4CCnJrRMnL1zYtRDZmQQVbvOttLnKDLnaw=="],
 

@@ -1,10 +1,28 @@
 import { Hono } from "hono"
+import { problemDetailsHandler } from "hono-problem-details"
 import { creationHandler, getTrips } from "./handlers"
-import { endLocationValidator, creationValidator, startLocationValidator, vehicleValidator } from "./validators"
+import {
+	endLocationValidator,
+	creationValidator,
+	startLocationValidator,
+	vehicleValidator
+} from "./validators"
 
 const app = new Hono()
 
 const PORT = process.env.PORT || 3000
+
+app.onError(
+	problemDetailsHandler({
+		autoInstance: true,
+		includeStack: process.env.NODE_ENV !== "production",
+		defaultType: "about:blank",
+		mapError: (error) => {
+			console.error("Error:", error)
+			return undefined
+		}
+	})
+)
 
 app.get("/api/health", (c) => c.json({ status: "ok" }))
 	// Trips routes

@@ -16,9 +16,11 @@ Error responses across the API are inconsistent and hand-rolled: `POST /api/trip
 ## Capabilities
 
 ### New Capabilities
+
 - `error-handling`: Unified RFC 9457 Problem Details error contract for all API error responses (`application/problem+json`, single `app.onError` handler, problem type registry, validation/FK/conflict/500 mapping).
 
 ### Modified Capabilities
+
 - `request-validation`: Validation failure responses change from a custom `400 { error, details }` envelope to a `422` problem+json body with an `errors` extension; FK existence checks throw problem details instead of returning a custom `400 { path, message }` body.
 - `trips-api`: `POST /api/trips` conflict and internal-error responses change from `{ error, message }` envelopes to problem+json; status codes for conflict (`409`) and server error (`500`) are preserved.
 
