@@ -5,20 +5,23 @@ Instructions for AI agents on `juice-journal`.
 ---
 
 ## Stack
-* **Backend:** Bun (/oven-sh/bun v1.3.10/latest) + Hono (/honojs/website, /honojs/hono)
-* **Frontend:** HTMX (server-side interactions, /bigskysoftware/htmx) + Pico CSS (styling, /picocss/pico v2.1.1). Semantic HTML only; no custom CSS or client-side frameworks.
-* **Charts:** Chart.js (/chartjs/chart.js v4.5.1) for data visualization (approved dependency)
-* **Database:** Hosted PostgreSQL (v17.10)
-* **Deployment:** Docker container
+
+- **Backend:** Bun (/oven-sh/bun v1.3.10/latest) + Hono (/honojs/website, /honojs/hono)
+- **Frontend:** HTMX (server-side interactions, /bigskysoftware/htmx) + Pico CSS (styling, /picocss/pico v2.1.1). Semantic HTML only; no custom CSS or client-side frameworks.
+- **Charts:** Chart.js (/chartjs/chart.js v4.5.1) for data visualization (approved dependency)
+- **Database:** Hosted PostgreSQL (v17.10)
+- **Deployment:** Docker container
 
 ---
 
 ## What You Can Do
+
 ✅ Add features, fix bugs, refactor code
 ✅ Update tests, docs, dependencies (within constraints)
 ✅ Improve performance, error handling, UI
 
 ## What Requires Human Review
+
 ❌ Database schema changes
 ❌ Breaking or renaming public API endpoints
 ❌ Changing trip data structure
@@ -30,15 +33,17 @@ Instructions for AI agents on `juice-journal`.
 ## Rules
 
 ### Styling
+
 All generated code must follow the rules stated in `.editorconfig` and `.prettierrc`.
 
 ### Documentation
+
 Always use Context7 when I need library/API documentation, code generation, setup or configuration steps without me having to explicitly ask.
 
 Stack description contains libray identifier and version (if version missing, it is in package.json).
 
-
 ### Bun
+
 Default to using Bun instead of Node.js.
 
 - Use `bun <file>` instead of `node <file>` or `ts-node <file>`
@@ -52,16 +57,19 @@ Default to using Bun instead of Node.js.
 Use internal Bun APIs when possible (`Bun.sql`, `Bun.file`, ...) by default instead of other popular packages.
 
 ### Commits
-* **Conventional Commits:** usual types `type(scope): description` — all lowercase
-* **Link issues:** Use `fixes #123` or `closes #456` in commit body to auto-link GitHub issues
-* **Feature branches**: do not use git worktrees
+
+- **Conventional Commits:** usual types `type(scope): description` — all lowercase
+- **Link issues:** Use `fixes #123` or `closes #456` in commit body to auto-link GitHub issues
+- **Feature branches**: do not use git worktrees
 
 ### Before Committing
+
 1. Run tests: `bun test` (or repo default)
 2. Verify Docker builds: `docker build .`
 3. Check for unnecessary dependencies
 
 ### File Locations
+
 ```
 src/backend/   # Hono routes & handlers
 src/frontend/  # HTMX templates (HTML + Pico CSS)
@@ -72,8 +80,9 @@ src/utils/     # Shared helpers
 ---
 
 ## When to Ask
-* "Should we change the trip schema?"
-* "Can I add [dependency]?"
-* "Is this API design OK?"
+
+- "Should we change the trip schema?"
+- "Can I add [dependency]?"
+- "Is this API design OK?"
 
 **Otherwise, proceed with confidence.**
