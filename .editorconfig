@@ -17,3 +17,8 @@ tab_width = 2
 [.prettierrc]
 indent_size = 2
 tab_width = 2
+
+[*.{yaml,yml}]
+indent_style = space
+indent_size = 2
+tab_width = 2

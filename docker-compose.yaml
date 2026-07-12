@@ -1,23 +1,37 @@
 services:
-    db:
-        image: postgres:17.10-alpine
-        container_name: juice-journal-db
-        restart: unless-stopped
-        environment:
-            POSTGRES_DB: juice_journal_db
-            POSTGRES_USER: juice_journal_usr
-            POSTGRES_PASSWORD: juice_journal_pwd
-        ports:
-            - "5432:5432"
-        volumes:
-            - pg_data:/var/lib/postgresql/data
-        healthcheck:
-            test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
-            interval: 10s
-            timeout: 5s
-            retries: 5
-            start_period: 10s
+  db:
+    image: postgres:${PG_VERSION:-17.10-alpine}
+    container_name: juice-journal-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: juice_journal_db
+      POSTGRES_USER: juice_journal_usr
+      POSTGRES_PASSWORD: juice_journal_pwd
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  migrator:
+    image: ghcr.io/amacneil/dbmate:${DBMATE_VERSION:-2.34.1}
+    container_name: juice-journal-migrator
+    restart: no
+    environment:
+      DATABASE_URL: postgres://juice_journal_usr:juice_journal_pwd@db:5432/juice_journal_db?sslmode=disable
+      DBMATE_NO_DUMP_SCHEMA: true
+    volumes:
+      - ./db:/db
+    command: up
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
-    pg_data:
-        driver: local
+  pg_data:
+    driver: local
