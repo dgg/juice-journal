@@ -17,10 +17,14 @@
 		"db:status": "bunx --bun --no-install dbmate status",
 		"db:up": "bunx --bun --no-install dbmate up",
 		"db:down": "bunx --bun --no-install dbmate down",
-		"db:new": "bunx --bun --no-install dbmate new"
+		"db:new": "bunx --bun --no-install dbmate new",
+		"serve": "bun src/backend/index.ts",
+		"dev": "bun --watch src/backend/index.ts"
 	},
 	"dependencies": {
+		"@hono/zod-validator": "0.8.0",
 		"hono": "4.12.29",
-		"postgres": "3.4.9"
+		"postgres": "3.4.9",
+		"zod": "4.4.3"
 	}
 }

@@ -5,6 +5,7 @@
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Single declarative source of truth for `POST /api/trips` request shape via a Zod schema.
 - Typed handler input derived from the schema (`z.infer`), eliminating manual casts.
 - Return a `400` JSON response on validation failure carrying error details — the envelope does NOT need to match the legacy `ValidationError[]` contract (there are no external callers); tests are updated to the new shape.
@@ -12,6 +13,7 @@
 - Maintain existing 201/409/500 status-code behavior on the happy/conflict/error paths.
 
 **Non-Goals:**
+
 - Validating query params, headers, or response bodies (only the JSON request body of `POST /api/trips`).
 - Validating `GET /api/trips` (no request body).
 - Auto-generating OpenAPI docs from schemas.
@@ -21,30 +23,35 @@
 ## Decisions
 
 ### Decision 1: Use `@hono/zod-validator` middleware (`zValidator`)
+
 Adopt `zValidator('json', schema, hook)` on the route rather than calling validation inside the handler.
 
 - **Why**: Idiomatic Hono integration; middleware runs before the handler, parses + validates, and feeds the handler a typed `c.req.valid('json')`. The `hook` callback produces a `400` response with error details on failure.
 - **Alternative considered**: Hono's built-in `validator('json', fn)` with `schema.safeParse()` — avoids one dependency (`@hono/zod-validator`) but requires manually handling `ZodError` in every route. Rejected: less ergonomic and less consistent across future endpoints. (User confirmed `@hono/zod-validator`.)
 
 ### Decision 2: Schemas co-located in `src/backend/types.ts`
+
 Define `tripInputSchema` in the existing `types.ts` (no new `schemas.ts`).
 
 - **Why**: The schema is the source of truth for the `TripInput` type (`z.infer<typeof tripInputSchema>`); keeping them together avoids a separate file and an extra import hop. Keeps `index.ts` focused on routing.
 - **Alternative**: A dedicated `src/backend/schemas.ts` — rejected; unnecessary indirection for a single schema. (Original proposal named `schemas.ts`; the user revised it to `types.ts`.)
 
 ### Decision 3: FK checks live in a dedicated validation step, NOT in the handler
+
 Zod handles shape/type/enum/range/ISO-date (synchronous). DB FK existence checks move to `src/backend/validators.ts` as an async Hono middleware that runs AFTER `zValidator` and BEFORE `createTrip`, reading `c.req.valid('json')`.
 
 - **Why**: Zod schemas are synchronous and cannot query Postgres. Moving FK checks into their own middleware keeps `createTrip` focused on insertion and makes the validation pipeline explicit: `zValidator` → `fkCheckMiddleware` → handler. The user explicitly required FK checks NOT to live in the handler.
 - **Alternative considered**: Inline FK checks in `createTrip` — rejected per the user's revision; couples handler to DB-existence logic and hides the validation step. A custom Zod `.refine(async ...)` — rejected; async refinements complicate `safeParse` and couple validation to the DB layer.
 
 ### Decision 4: Error envelope is NOT bound to the legacy contract
+
 The `zValidator` hook returns `c.json({ error: "Validation failed", details: result.error.issues }, 400)` (Zod issue objects: `{ path, message, code, ... }`). The FK middleware returns `c.json({ error: "Validation failed", details: [{ field, message }] }, 400)` for its failures. The legacy `ValidationError` interface is removed from `types.ts`.
 
 - **Why**: There are no external callers depending on the old `{ field, message }[]` shape, so the envelope is free to carry richer Zod-native detail. Tests are updated to assert `400` + presence of error details rather than the exact legacy shape.
 - **Alternative considered**: Preserve the exact legacy envelope by mapping `ZodError` → `{ field, message }[]` — rejected as unnecessary coupling now that the contract is unconstrained.
 
 ### Decision 5: Schema field rules mirror current `validation.ts`
+
 - `vehicle_id`, `start_time`, `end_time`, `daypart`, `duration_min`, `distance_km` — required.
 - `daypart` → `z.enum(["morning", "afternoon"])`.
 - `duration_min` → `z.number().int()`.

@@ -1,25 +1,16 @@
 import { db } from "../db/client"
 import type { Context } from "hono"
 import type { TripInput, Trip } from "./types"
-import { validateTripInput } from "./validation"
 
-export async function createTrip(c: Context) {
+export async function creationHandler(c: Context) {
 	try {
-		const body = await c.req.json().catch(() => ({}))
+		const input = c.req.valid("json") as TripInput
 
-		const validation = await validateTripInput(body)
+		console.log(input)
 
-		if (!validation.valid) {
-			return c.json(
-				{
-					error: "Validation failed",
-					details: validation.errors
-				},
-				400
-			)
-		}
-
-		const input = validation.data!
+		// TODO: get conditions from weather api
+		const weather_start = {}
+		const weather_end = {}
 
 		try {
 			const result = await db`
@@ -49,8 +40,8 @@ export async function createTrip(c: Context) {
           ${input.distance_km},
           ${input.avg_speed_kmh || null},
           ${input.avg_consumption_kwh_100km || null},
-          ${input.weather_start ? JSON.stringify(input.weather_start) : null},
-          ${input.weather_end ? JSON.stringify(input.weather_end) : null},
+          ${JSON.stringify(weather_start)},
+          ${JSON.stringify(weather_end)},
           ${input.odometer_km || null}
         )
         RETURNING *
@@ -94,17 +85,6 @@ export async function createTrip(c: Context) {
 						message: "A trip with this vehicle_id and end_time already exists"
 					},
 					409
-				)
-			}
-
-			// Check for FK constraint violation
-			if (errorMsg.includes("foreign key")) {
-				return c.json(
-					{
-						error: "Invalid reference",
-						message: "Referenced vehicle or location does not exist"
-					},
-					400
 				)
 			}
 

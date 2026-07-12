@@ -6,12 +6,12 @@ A lightweight, open-source trip logger for EV commuters to track distance, time,
 
 ## ✨ Features
 
-* **Responsive Design:** Log and view commutes seamlessly on mobile devices or bigger screens.
-* **Flexible Input Methods:**
-  * **Manual Entry:** Punch in trip time (defaults to now), kilometers driven, average speed (km/h), consumption (kWh/100 km), and an optional odometer reading.
-  * **OCR Smart Upload (Planned):** Upload a photo of your dashboard or charging screen to automatically extract and populate trip data.
-* **Developer-Friendly API:** Built-in API endpoints so you can script and automate data logging from external devices or shortcuts.
-* **Efficient Analytics:** Monitor your EV's actual energy efficiency trends over time.
+- **Responsive Design:** Log and view commutes seamlessly on mobile devices or bigger screens.
+- **Flexible Input Methods:**
+    - **Manual Entry:** Punch in trip time (defaults to now), kilometers driven, average speed (km/h), consumption (kWh/100 km), and an optional odometer reading.
+    - **OCR Smart Upload (Planned):** Upload a photo of your dashboard or charging screen to automatically extract and populate trip data.
+- **Developer-Friendly API:** Built-in API endpoints so you can script and automate data logging from external devices or shortcuts.
+- **Efficient Analytics:** Monitor your EV's actual energy efficiency trends over time.
 
 ## 🛠️ Tech Stack
 

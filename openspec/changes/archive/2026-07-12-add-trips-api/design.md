@@ -7,6 +7,7 @@ Tech stack: Bun, Hono, PostgreSQL, dbmate (dev dep, already installed). No front
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Define and migrate the database schema (`cars`, `locations`, `trips`).
 - Provide `POST /api/trips` to create a trip record with validation.
 - Provide `GET /api/trips` to retrieve trips for the current calendar month.
@@ -14,6 +15,7 @@ Tech stack: Bun, Hono, PostgreSQL, dbmate (dev dep, already installed). No front
 - Establish the Postgres client singleton and Hono server entrypoint.
 
 **Non-Goals:**
+
 - UI / HTMX / Pico CSS — deferred to a later slice.
 - OCR upload feature.
 - Analytics/charts endpoints.
@@ -30,6 +32,7 @@ Tech stack: Bun, Hono, PostgreSQL, dbmate (dev dep, already installed). No front
 **Rationale**: `end_time` will be corrected (user mistype, OCR error). A mutating PK cascades to all FK references. UUID is stable; the UNIQUE constraint preserves the business rule (no two trips for the same car ending at the same instant). Duplicate inserts return 409 Conflict.
 
 **Alternatives considered**:
+
 - Composite PK `(car_id, end_time)`: natural dedupe and human-readable, but compound FKs in future tables (trip segments, notes) are painful, and editing `end_time` changes the PK.
 
 ### D2: `duration_min` — derive at read vs store
@@ -51,6 +54,7 @@ Tech stack: Bun, Hono, PostgreSQL, dbmate (dev dep, already installed). No front
 **Rationale**: Coordinates in decimal degrees are directly passable to weather APIs (OpenWeather, MET Norway). No PostGIS extension needed for this slice — plain decimal columns are sufficient. Timezone stored per-location so display timezone is self-contained per record.
 
 **Alternatives considered**:
+
 - PostGIS `GEOGRAPHY(POINT, 4326)`: more standard for spatial queries, but adds extension + complexity. Migratable later if radius/search needed.
 - Per-trip timezone column: redundant with location, error-prone.
 
