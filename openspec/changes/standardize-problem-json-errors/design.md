@@ -2,18 +2,19 @@
 
 `juice-journal` exposes two routes — `POST /api/trips` and `GET /api/trips`. Error handling is ad-hoc: each handler/validator calls `c.json({ error, ... }, status)` directly, `Content-Type` is `application/json`, and there is no `app.onError`. Current error shapes:
 
-| Path | Status | Body |
-|------|--------|------|
-| Zod body validation fail | `400` | `{ error: "Validation failed", details: <zod issues> }` |
-| FK existence check fail | `400` | `{ path: [...], message: "..." }` |
-| UNIQUE constraint conflict | `409` | `{ error: "Conflict", message: "..." }` |
-| Unhandled error | `500` | `{ error: "Internal server error" }` |
+| Path                       | Status | Body                                                    |
+| -------------------------- | ------ | ------------------------------------------------------- |
+| Zod body validation fail   | `400`  | `{ error: "Validation failed", details: <zod issues> }` |
+| FK existence check fail    | `400`  | `{ path: [...], message: "..." }`                       |
+| UNIQUE constraint conflict | `409`  | `{ error: "Conflict", message: "..." }`                 |
+| Unhandled error            | `500`  | `{ error: "Internal server error" }`                    |
 
 Stack: Hono `4.12.29`, `@hono/zod-validator` `0.8.0`, zod `4.4.3`, Bun runtime. The chosen library `hono-problem-details` requires Hono `>= 4.12.14` (satisfied) and integrates with `@hono/zod-validator` via a `zodProblemHook`. No external API consumers exist (personal project), so the response envelope is freely breakable; only the test suite must follow.
 
 ## Goals / Non-Goals
 
 **Goals:**
+
 - One error-response contract for every failure path: RFC 9457 `application/problem+json` with `{ type, status, title, detail, instance }` plus extension members.
 - Single `app.onError(problemDetailsHandler(...))` registration owns the response shape; handlers/validators throw, they do not shape error bodies.
 - Validation failures report field-level errors via a problem+json `errors` extension, status `422`.
@@ -21,6 +22,7 @@ Stack: Hono `4.12.29`, `@hono/zod-validator` `0.8.0`, zod `4.4.3`, Bun runtime. 
 - Preserve existing success status codes (`201`, `200`) and the `409` conflict status.
 
 **Non-Goals:**
+
 - OpenAPI / `@hono/zod-openapi` integration (no OpenAPI spec exists yet; can be added later via `hono-problem-details/openapi`).
 - OpenTelemetry trace injection (`otelApi` option) — not wired in this project.
 - Localization (`localize` callback) — single-locale app.
