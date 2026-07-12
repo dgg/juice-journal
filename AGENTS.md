@@ -5,10 +5,10 @@ Instructions for AI agents on `juice-journal`.
 ---
 
 ## Stack
-* **Backend:** Bun + Hono (lightweight framework)
-* **Frontend:** HTMX (server-side interactions) + Pico CSS (styling). Semantic HTML only; no custom CSS or client-side frameworks.
-* **Charts:** Chart.js for data visualization (approved dependency)
-* **Database:** Hosted PostgreSQL
+* **Backend:** Bun (/oven-sh/bun v1.3.10/latest) + Hono (/honojs/website, /honojs/hono)
+* **Frontend:** HTMX (server-side interactions, /bigskysoftware/htmx) + Pico CSS (styling, /picocss/pico v2.1.1). Semantic HTML only; no custom CSS or client-side frameworks.
+* **Charts:** Chart.js (/chartjs/chart.js v4.5.1) for data visualization (approved dependency)
+* **Database:** Hosted PostgreSQL (v17.10)
 * **Deployment:** Docker container
 
 ---
@@ -21,13 +21,22 @@ Instructions for AI agents on `juice-journal`.
 ## What Requires Human Review
 ❌ Database schema changes
 ❌ Breaking or renaming public API endpoints
-❌ Changing trip data structure (`distance_km`, `avg_speed_kmh`, `consumption_kwh_100km`, `timestamp`)
+❌ Changing trip data structure
 ❌ Adding dependencies beyond Hono, HTMX, Pico CSS, Chart.js, and standard Bun libs
 ❌ Writing custom CSS or client-side frameworks (stay semantic + Pico)
 
 ---
 
 ## Rules
+
+### Styling
+All generated code must follow the rules stated in `.editorconfig` and `.prettierrc`.
+
+### Documentation
+Always use Context7 when I need library/API documentation, code generation, setup or configuration steps without me having to explicitly ask.
+
+Stack description contains libray identifier and version (if version missing, it is in package.json).
+
 
 ### Bun
 Default to using Bun instead of Node.js.
