@@ -13,6 +13,14 @@
 	},
 	"scripts": {
 		"format": "prettier --write .",
-		"format:check": "prettier --check ."
+		"format:check": "prettier --check .",
+		"db:status": "bunx --bun --no-install dbmate status",
+		"db:up": "bunx --bun --no-install dbmate up",
+		"db:down": "bunx --bun --no-install dbmate down",
+		"db:new": "bunx --bun --no-install dbmate new"
+	},
+	"dependencies": {
+		"hono": "^4.12.29",
+		"postgres": "^3.4.9"
 	}
 }

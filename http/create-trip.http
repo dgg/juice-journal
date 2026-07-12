@@ -1,0 +1,11 @@
+POST {{$dotenv PROTOCOL}}://{{$dotenv HOST}}:{{$dotenv PORT}}/api/trips
+Content-Type: application/json
+
+{
+	"vehicle_id": "222d45c7-f546-4379-a7a9-74db8bdb67ed",
+	"start_time": "2026-07-12T06:45:41Z",
+	"end_time": "2026-07-12T06:45:41Z",
+	"daypart": "morning",
+	"duration_min": 1,
+	"distance_km": 1
+}
