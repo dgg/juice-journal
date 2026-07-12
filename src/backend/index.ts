@@ -5,7 +5,8 @@ import {
 	endLocationValidator,
 	creationValidator,
 	startLocationValidator,
-	vehicleValidator
+	vehicleValidator,
+	tripConflictValidator
 } from "./validators"
 
 const app = new Hono()
@@ -28,6 +29,7 @@ app.get("/api/health", (c) => c.json({ status: "ok" }))
 		endLocationValidator,
 		startLocationValidator,
 		vehicleValidator,
+		tripConflictValidator,
 		creationHandler
 	)
 	.get("/api/trips", getTrips)

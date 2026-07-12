@@ -7,12 +7,14 @@ The `nanoid-postgres` extension (https://github.com/viascom/nanoid-postgres) exp
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Replace UUID primary keys on `vehicles`, `locations`, `trips` with 16-char nanoid generated in Postgres.
 - Keep ID generation database-side — application code continues to rely on `DEFAULT` and never sets `id`.
 - Update the Zod schema and validators to accept the new ID format.
 - Provide a reversible dbmate migration with extension install + column type changes.
 
 **Non-Goals:**
+
 - Changing non-key columns or the `UNIQUE(vehicle_id, end_time)` constraint semantics.
 - Migrating existing UUID values to nanoid (dev data will be cleared; there is no production data).
 - Adding nanoid generation to the JavaScript layer — generation stays in Postgres.
@@ -25,6 +27,7 @@ The `nanoid-postgres` extension (https://github.com/viascom/nanoid-postgres) exp
 nanoid produces URL-safe strings (e.g. `V1StGXR8_Z5jdHi6B-mBw`), which are not valid UUIDs. Columns must be `TEXT` (or `VARCHAR(16)`). We choose `TEXT` over `VARCHAR(16)` to avoid a fixed-length constraint that would need future migration if the nanoid length changes, and because Postgres treats them identically for indexing.
 
 **Alternatives considered:**
+
 - `VARCHAR(16)`: saves a few bytes per row on disk; rejected because the length is an implementation detail and Postgres stores `TEXT`/`VARCHAR` identically anyway.
 
 ### Decision: 16 characters
@@ -36,12 +39,14 @@ nanoid produces URL-safe strings (e.g. `V1StGXR8_Z5jdHi6B-mBw`), which are not v
 The current design has Postgres default the key (`DEFAULT gen_random_uuid()`). To preserve "insert paths unchanged" (handlers never set `id`), we keep generation in Postgres by switching the default to `nanoid(16)`. This requires the `nanoid-postgres` extension to be installed in the database.
 
 **Alternatives considered:**
+
 - Generate nanoid in Bun (e.g. `nanoid` npm package): would move ID assignment into the application, changing every insert path and violating the "DB-generated keys" constraint in AGENTS.md (`continue with db-generated identifiers`). Rejected.
 - Use `pgcrypto`'s `gen_random_bytes` + custom encoding: reinvents nanoid; rejected in favor of the maintained extension.
 
 ### Decision: Column type changed via `ALTER TABLE`, FKs dropped and recreated
 
 Postgres cannot directly convert `UUID` → `TEXT` while data is present, and the existing UUID values are not castable to nanoid. Since there is no production data, the migration:
+
 1. Installs `nanoid-postgres` extension.
 2. Drops the FK constraints on `trips`.
 3. Alters all key columns (`id` on all three tables; the three FK columns on `trips`) from `UUID` to `TEXT`.

@@ -1,14 +1,25 @@
 import { z } from "zod"
 
 export const tripInputSchema = z.object({
-	vehicle_id: z.string().length(16).regex(/^[A-Za-z0-9_-]{16}$/),
+	vehicle_id: z
+		.string()
+		.length(16)
+		.regex(/^[A-Za-z0-9_-]{16}$/),
 	start_time: z.iso.datetime(),
 	end_time: z.iso.datetime(),
 	daypart: z.enum(["morning", "afternoon"]),
 	duration_min: z.number().int().positive(),
 	distance_km: z.number().positive(),
-	start_location_id: z.string().length(16).regex(/^[A-Za-z0-9_-]{16}$/).optional(),
-	end_location_id: z.string().length(16).regex(/^[A-Za-z0-9_-]{16}$/).optional(),
+	start_location_id: z
+		.string()
+		.length(16)
+		.regex(/^[A-Za-z0-9_-]{16}$/)
+		.optional(),
+	end_location_id: z
+		.string()
+		.length(16)
+		.regex(/^[A-Za-z0-9_-]{16}$/)
+		.optional(),
 	avg_speed_kmh: z.number().positive().optional(),
 	avg_consumption_kwh_100km: z.number().positive().optional(),
 	odometer_km: z.number().optional()
