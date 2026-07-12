@@ -1,0 +1,1 @@
+GET {{$dotenv PROTOCOL}}://{{$dotenv HOST}}:{{$dotenv PORT}}/api/trips
