@@ -22,7 +22,7 @@ describe("Trip Input Schema (Zod)", () => {
 
 		it("should reject missing distance_km", () => {
 			const result = tripInputSchema.safeParse({
-				vehicle_id: "550e8400-e29b-41d4-a716-446655440002",
+				vehicle_id: "V1StGXR8_Z5jdHi6",
 				start_time: "2026-07-12T08:00:00Z",
 				end_time: "2026-07-12T08:45:00Z",
 				daypart: "morning",
@@ -41,7 +41,7 @@ describe("Trip Input Schema (Zod)", () => {
 	describe("Type Validation", () => {
 		it("should reject non-numeric distance_km", () => {
 			const result = tripInputSchema.safeParse({
-				vehicle_id: "550e8400-e29b-41d4-a716-446655440002",
+				vehicle_id: "V1StGXR8_Z5jdHi6",
 				start_time: "2026-07-12T08:00:00Z",
 				end_time: "2026-07-12T08:45:00Z",
 				daypart: "morning",
@@ -61,7 +61,7 @@ describe("Trip Input Schema (Zod)", () => {
 	describe("Daypart Validation", () => {
 		it("should reject invalid daypart", () => {
 			const result = tripInputSchema.safeParse({
-				vehicle_id: "550e8400-e29b-41d4-a716-446655440002",
+				vehicle_id: "V1StGXR8_Z5jdHi6",
 				start_time: "2026-07-12T08:00:00Z",
 				end_time: "2026-07-12T08:45:00Z",
 				daypart: "evening",
@@ -79,7 +79,7 @@ describe("Trip Input Schema (Zod)", () => {
 
 		it("should accept 'morning' and 'afternoon'", () => {
 			const result1 = tripInputSchema.safeParse({
-				vehicle_id: "550e8400-e29b-41d4-a716-446655440002",
+				vehicle_id: "V1StGXR8_Z5jdHi6",
 				start_time: "2026-07-12T08:00:00Z",
 				end_time: "2026-07-12T08:45:00Z",
 				daypart: "morning",
@@ -88,7 +88,7 @@ describe("Trip Input Schema (Zod)", () => {
 			})
 
 			const result2 = tripInputSchema.safeParse({
-				vehicle_id: "550e8400-e29b-41d4-a716-446655440002",
+				vehicle_id: "V1StGXR8_Z5jdHi6",
 				start_time: "2026-07-12T14:00:00Z",
 				end_time: "2026-07-12T14:45:00Z",
 				daypart: "afternoon",
@@ -104,7 +104,7 @@ describe("Trip Input Schema (Zod)", () => {
 	describe("Distance Validation", () => {
 		it("should reject distance_km <= 0", () => {
 			const result = tripInputSchema.safeParse({
-				vehicle_id: "550e8400-e29b-41d4-a716-446655440002",
+				vehicle_id: "V1StGXR8_Z5jdHi6",
 				start_time: "2026-07-12T08:00:00Z",
 				end_time: "2026-07-12T08:45:00Z",
 				daypart: "morning",
@@ -124,7 +124,7 @@ describe("Trip Input Schema (Zod)", () => {
 	describe("Timestamp Validation", () => {
 		it("should reject invalid ISO 8601 timestamps", () => {
 			const result = tripInputSchema.safeParse({
-				vehicle_id: "550e8400-e29b-41d4-a716-446655440002",
+				vehicle_id: "V1StGXR8_Z5jdHi6",
 				start_time: "not a timestamp",
 				end_time: "2026-07-12T08:45:00Z",
 				daypart: "morning",
@@ -144,7 +144,7 @@ describe("Trip Input Schema (Zod)", () => {
 	describe("Optional Fields", () => {
 		it("should accept valid optional fields", () => {
 			const result = tripInputSchema.safeParse({
-				vehicle_id: "550e8400-e29b-41d4-a716-446655440002",
+				vehicle_id: "V1StGXR8_Z5jdHi6",
 				start_time: "2026-07-12T08:00:00Z",
 				end_time: "2026-07-12T08:45:00Z",
 				daypart: "morning",

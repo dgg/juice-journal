@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll } from "bun:test"
 import { db } from "../db/client"
 
-const TEST_VEHICLE_ID = "550e8400-e29b-41d4-a716-446655440000"
-const TEST_LOCATION_ID = "550e8400-e29b-41d4-a716-446655440001"
+const TEST_VEHICLE_ID = "V1StGXR8_Z5jdHi6"
+const TEST_LOCATION_ID = "Bw_0wK4q2xJp5m7n"
 
 // Setup and teardown
 beforeAll(async () => {
@@ -11,7 +11,7 @@ beforeAll(async () => {
 	try {
 		await db`
       INSERT INTO vehicles (id, description)
-      VALUES (${TEST_VEHICLE_ID}::uuid, 'Test Vehicle')
+      VALUES (${TEST_VEHICLE_ID}, 'Test Vehicle')
     `
 	} catch {}
 
@@ -19,7 +19,7 @@ beforeAll(async () => {
 	try {
 		await db`
       INSERT INTO locations (id, label, latitude, longitude, timezone)
-      VALUES (${TEST_LOCATION_ID}::uuid, 'Home', 55.676098, 12.568337, 'Europe/Copenhagen')
+      VALUES (${TEST_LOCATION_ID}, 'Home', 55.676098, 12.568337, 'Europe/Copenhagen')
     `
 	} catch {}
 })
@@ -27,9 +27,9 @@ beforeAll(async () => {
 afterAll(async () => {
 	// Clean up test data
 	try {
-		await db`DELETE FROM trips WHERE vehicle_id = ${TEST_VEHICLE_ID}::uuid`
-		await db`DELETE FROM vehicles WHERE id = ${TEST_VEHICLE_ID}::uuid`
-		await db`DELETE FROM locations WHERE id = ${TEST_LOCATION_ID}::uuid`
+		await db`DELETE FROM trips WHERE vehicle_id = ${TEST_VEHICLE_ID}`
+		await db`DELETE FROM vehicles WHERE id = ${TEST_VEHICLE_ID}`
+		await db`DELETE FROM locations WHERE id = ${TEST_LOCATION_ID}`
 	} catch {}
 })
 
@@ -80,7 +80,7 @@ describe("Trips API Database", () => {
           avg_consumption_kwh_100km
         )
         VALUES (
-          ${TEST_VEHICLE_ID}::uuid,
+          ${TEST_VEHICLE_ID},
           '2026-07-01T08:00:00Z',
           '2026-07-01T08:45:00Z',
           'morning',
@@ -108,7 +108,7 @@ describe("Trips API Database", () => {
           distance_km
         )
         VALUES (
-          ${TEST_VEHICLE_ID}::uuid,
+          ${TEST_VEHICLE_ID},
           '2026-07-02T08:00:00Z',
           '2026-07-02T08:45:00Z',
           'morning',
@@ -134,7 +134,7 @@ describe("Trips API Database", () => {
           distance_km
         )
         VALUES (
-          ${TEST_VEHICLE_ID}::uuid,
+          ${TEST_VEHICLE_ID},
           '2026-07-07T08:00:00Z',
           '2026-07-07T08:45:00Z',
           'morning',
@@ -158,7 +158,7 @@ describe("Trips API Database", () => {
           distance_km
         )
         VALUES (
-          ${TEST_VEHICLE_ID}::uuid,
+          ${TEST_VEHICLE_ID},
           '2026-07-08T14:00:00Z',
           '2026-07-08T14:45:00Z',
           'afternoon',
@@ -183,7 +183,7 @@ describe("Trips API Database", () => {
             distance_km
           )
           VALUES (
-            ${TEST_VEHICLE_ID}::uuid,
+            ${TEST_VEHICLE_ID},
             '2026-07-09T20:00:00Z',
             '2026-07-09T20:45:00Z',
             'evening',
@@ -214,7 +214,7 @@ describe("Trips API Database", () => {
           distance_km
         )
         VALUES (
-          ${TEST_VEHICLE_ID}::uuid,
+          ${TEST_VEHICLE_ID},
           '2026-07-04T10:00:00Z',
           '2026-07-04T10:45:00Z',
           'morning',
@@ -235,7 +235,7 @@ describe("Trips API Database", () => {
             distance_km
           )
           VALUES (
-            ${TEST_VEHICLE_ID}::uuid,
+            ${TEST_VEHICLE_ID},
             '2026-07-04T11:00:00Z',
             '2026-07-04T10:45:00Z',
             'afternoon',
@@ -268,7 +268,7 @@ describe("Trips API Database", () => {
             distance_km
           )
           VALUES (
-            'a5000000-0000-0000-0000-000000000000'::uuid,
+            'invalid-test-id3',
             '2026-07-05T08:00:00Z',
             '2026-07-05T08:45:00Z',
             'morning',
@@ -298,13 +298,13 @@ describe("Trips API Database", () => {
             start_location_id
           )
           VALUES (
-            ${TEST_VEHICLE_ID}::uuid,
+            ${TEST_VEHICLE_ID},
             '2026-07-06T08:00:00Z',
             '2026-07-06T08:45:00Z',
             'morning',
             45,
             10.0,
-            'a5000000-0000-0000-0000-000000000000'::uuid
+            'invalid-test-id4'
           )
         `
 				expect.fail("Should have thrown foreign key constraint")
@@ -329,7 +329,7 @@ describe("Trips API Database", () => {
           distance_km
         )
         VALUES (
-          ${TEST_VEHICLE_ID}::uuid,
+          ${TEST_VEHICLE_ID},
           '2026-07-10T08:00:00Z',
           '2026-07-10T08:45:00Z',
           'morning',
