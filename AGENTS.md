@@ -9,7 +9,7 @@ Instructions for AI agents on `juice-journal`.
 - **Backend:** Bun (/oven-sh/bun v1.3.10/latest) + Hono (/honojs/website, /honojs/hono, /honojs/middleware). Zod validation (/colinhacks/zod) with problem details (https://github.com/paveg/hono-problem-details)
 - **Frontend:** HTMX (server-side interactions, /bigskysoftware/htmx) + Pico CSS (styling, /picocss/pico v2.1.1). Semantic HTML only; no custom CSS or client-side frameworks.
 - **Charts:** Chart.js (/chartjs/chart.js v4.5.1) for data visualization (approved dependency)
-- **Database:** Hosted PostgreSQL (v17.10)
+- **Database:** Hosted PostgreSQL (v17.10) using nanoid as PKs
 - **Deployment:** Docker container
 
 ---
