@@ -113,3 +113,28 @@ export const endLocationValidator = validator("json", async (req: TripInput) => 
 		})
 	}
 })
+
+export const tripConflictValidator = validator("json", async (req: TripInput) => {
+	try {
+		const existing = await db`
+				SELECT 1 FROM trips WHERE vehicle_id = ${req.vehicle_id as string} AND end_time = ${req.end_time as string}
+			`
+		if (existing.length > 0) {
+			throw problems.create("TRIP_CONFLICT", {
+				detail: `A trip with this vehicle_id and end_time already exists`,
+				extensions: { vehicle_id: req.vehicle_id, end_time: req.end_time }
+			})
+		} else {
+			return req
+		}
+	} catch (error) {
+		// pass-through conflict errors from the same validator
+		if (error instanceof ProblemDetailsError) {
+			throw error
+		}
+		throw problems.create("TRIP_CONFLICT", {
+			detail: `Could not verify trip uniqueness`,
+			extensions: { vehicle_id: req.vehicle_id, end_time: req.end_time }
+		})
+	}
+})

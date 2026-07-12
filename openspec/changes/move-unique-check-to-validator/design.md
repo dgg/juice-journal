@@ -26,8 +26,9 @@ The `request-validation` spec currently mandates (in its "Handler contains no FK
 Add `tripConflictValidator = validator("json", async (req: TripInput) => { ... })` in `src/backend/validators.ts`. It runs a `SELECT 1 FROM trips WHERE vehicle_id = $1 AND end_time = $2 LIMIT 1`; if a row is found it throws `problems.create("TRIP_CONFLICT", { detail, extensions: { vehicle_id, end_time } })`, otherwise returns `req`.
 
 **Why over alternatives:** This is the exact pattern already used by `vehicleValidator` / `startLocationValidator` / `endLocationValidator`, so it is consistent, testable in isolation, and keeps the handler free of DB-introspection logic.
-- *Alternative A (keep handler catch but parse `error.code === '23505'`):* rejected — still couples the handler to Postgres internals and contradicts the "handler does only the INSERT" goal.
-- *Alternative B (DB-side `ON CONFLICT` returning a sentinel row):* rejected — would require shaping the error body inside the handler again, undoing the separation.
+
+- _Alternative A (keep handler catch but parse `error.code === '23505'`):_ rejected — still couples the handler to Postgres internals and contradicts the "handler does only the INSERT" goal.
+- _Alternative B (DB-side `ON CONFLICT` returning a sentinel row):_ rejected — would require shaping the error body inside the handler again, undoing the separation.
 
 ### Decision 2: Ordering — conflict check runs after the FK checks
 
@@ -40,7 +41,8 @@ In `src/backend/index.ts`, the chain becomes `creationValidator → endLocationV
 `creationHandler` loses its `try/catch` and becomes the bare INSERT + `201` response. If a row is inserted between the pre-check and the INSERT (a race), Postgres raises `23505`, which propagates uncaught to `app.onError` and becomes a `500` per the `error-handling` capability.
 
 **Why:** This is the explicit user request — "let the error naturally surface if it actually happens." Catching the constraint error would reintroduce the DB-error introspection we are removing.
-- *Alternative (pre-check + catch `23505` as a 409 fallback):* rejected by the request — it reintroduces handler-side error matching and muddies the contract (sometimes 409, sometimes the validator's 409).
+
+- _Alternative (pre-check + catch `23505` as a 409 fallback):_ rejected by the request — it reintroduces handler-side error matching and muddies the contract (sometimes 409, sometimes the validator's 409).
 
 ### Decision 4: Mirror the FK validator's `ProblemDetailsError` pass-through
 

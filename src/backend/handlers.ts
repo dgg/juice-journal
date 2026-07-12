@@ -1,7 +1,6 @@
 import { db } from "../db/client"
 import type { Context } from "hono"
 import type { TripInput, Trip } from "./types"
-import { problems } from "./problems"
 
 export async function creationHandler(c: Context) {
 	const input = c.req.valid("json") as TripInput
@@ -10,8 +9,7 @@ export async function creationHandler(c: Context) {
 	const weather_start = null
 	const weather_end = null
 
-	try {
-		const result = await db`
+	const result = await db`
         INSERT INTO trips (
           vehicle_id,
           start_time,
@@ -45,47 +43,29 @@ export async function creationHandler(c: Context) {
         RETURNING *
       `
 
-		const trip = result[0]
+	const trip = result[0]
 
-		return c.json(
-			{
-				id: trip.id,
-				vehicle_id: trip.vehicle_id,
-				start_time: trip.start_time,
-				end_time: trip.end_time,
-				start_location_id: trip.start_location_id,
-				end_location_id: trip.end_location_id,
-				daypart: trip.daypart,
-				duration_min: trip.duration_min,
-				distance_km: trip.distance_km,
-				avg_speed_kmh: trip.avg_speed_kmh,
-				avg_consumption_kwh_100km: trip.avg_consumption_kwh_100km,
-				weather_start: trip.weather_start,
-				weather_end: trip.weather_end,
-				odometer_km: trip.odometer_km,
-				tracking_created: trip.tracking_created,
-				tracking_updated: trip.tracking_updated
-			},
-			201
-		)
-	} catch (error: unknown) {
-		const errorMsg = String(error)
-
-		// Check for UNIQUE constraint violation
-		if (
-			errorMsg.includes("duplicate key") ||
-			errorMsg.includes("UNIQUE") ||
-			errorMsg.includes("unique")
-		) {
-			throw problems.create("TRIP_CONFLICT", {
-				detail: `A trip with this vehicle_id and end_time already exists`,
-				instance: `/api/trips`,
-				extensions: { vehicle_id: input.vehicle_id, end_time: input.end_time }
-			})
-		}
-
-		throw error
-	}
+	return c.json(
+		{
+			id: trip.id,
+			vehicle_id: trip.vehicle_id,
+			start_time: trip.start_time,
+			end_time: trip.end_time,
+			start_location_id: trip.start_location_id,
+			end_location_id: trip.end_location_id,
+			daypart: trip.daypart,
+			duration_min: trip.duration_min,
+			distance_km: trip.distance_km,
+			avg_speed_kmh: trip.avg_speed_kmh,
+			avg_consumption_kwh_100km: trip.avg_consumption_kwh_100km,
+			weather_start: trip.weather_start,
+			weather_end: trip.weather_end,
+			odometer_km: trip.odometer_km,
+			tracking_created: trip.tracking_created,
+			tracking_updated: trip.tracking_updated
+		},
+		201
+	)
 }
 
 export async function getTrips(c: Context) {
