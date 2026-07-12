@@ -5,11 +5,11 @@ Trip input validation is hand-rolled in `src/backend/validation.ts` (206 lines o
 ## What Changes
 
 - Add `zod` and `@hono/zod-validator` dependencies (requires human review per AGENTS.md dependency policy).
-- Define Zod schemas for `TripInput` (and its optional fields) in a new `src/backend/schemas.ts`, replacing the manual rules in `validation.ts`.
+- Derive `TripInput` (and its optional fields) from the Zod schemas that will be created in the existing `src/backend/types.ts`, replacing the manual rules in `validation.ts`.
 - Adopt Hono's `zValidator` middleware on `POST /api/trips` so request bodies are parsed, validated, and typed before the handler runs.
-- Preserve the existing async FK checks (vehicle/location existence) that cannot be expressed purely in a Zod schema; run them after Zod parsing in the handler or a dedicated post-validation step.
-- Standardize the validation error response shape (`{ error: "Validation failed", details: ValidationError[] }`) to match the current contract so callers and tests remain compatible.
-- **BREAKING** (internal): `validateTripInput` is removed; handlers consume the Zod-parsed body directly. No public API contract change.
+- Preserve the existing async FK checks (vehicle/location existence) that cannot be expressed purely in a Zod schema; run them after Zod parsing in a dedicated validation step (not in the handler, after the schema validation).
+- No need to standardize the validation error response shape to match the current contract as there are no callers. Modify the tests accordingly.
+- **BREAKING** (internal): `validateTripInput` is removed; handlers consume the Zod-parsed body directly. Maybe API contract change as validation errors may come in a different shape.
 - Update `validation.test.ts` to assert behavior through the schema/validator rather than the deleted function.
 
 ## Capabilities
@@ -24,8 +24,8 @@ Trip input validation is hand-rolled in `src/backend/validation.ts` (206 lines o
 
 ## Impact
 
-- **Code**: `src/backend/validation.ts` (removed), `src/backend/handlers.ts` (consume typed body), `src/backend/types.ts` (`ValidationError` retained; `TripInput` may be derived from the Zod schema via `z.infer`), new `src/backend/schemas.ts`.
-- **APIs**: `POST /api/trips` keeps the same 400/409/201 contract and error envelope; only the internal validation path changes.
+- **Code**: `src/backend/validation.ts` (removed), `src/backend/handlers.ts` (consume typed body only — no FK logic), `src/backend/types.ts` (Zod `tripInputSchema` + `TripInput` via `z.infer`; `ValidationError` removed), `src/backend/validators.ts` (new — dedicated async FK validation step).
+- **APIs**: `POST /api/trips` keeps the same 400/409/201 status codes; the 400 error envelope MAY differ in shape (no external callers).
 - **Dependencies**: adds `zod` + `@hono/zod-validator` (human-review item per AGENTS.md).
 - **Tests**: `src/backend/validation.test.ts` and `src/backend/trips.test.ts` updated to exercise the schema/validator.
 - **Rollback plan**: Revert the commit; restore `validation.ts` from git history; remove `zod`/`@hono/zod-validator` from `package.json` via `bun install`. No DB migration is involved, so rollback is a single `git revert` with `bun install`.
