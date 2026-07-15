@@ -112,7 +112,7 @@ The system SHALL expose `POST /api/trips` accepting a JSON body. Required fields
 
 ### Requirement: GET /api/trips endpoint (current month)
 
-The system SHALL expose `GET /api/trips` returning trips for the current calendar month in the display timezone. Display timezone SHALL be resolved as: `end_location.timezone` → `start_location.timezone` → app config default (`DISPLAY_TZ`, default `Europe/Copenhagen`). Month bounds SHALL be computed as inclusive start / exclusive end in UTC. The response SHALL be `200 OK` with a JSON array of trip objects, sorted by `end_time` descending. If no trips exist, the response SHALL be an empty array.
+The system SHALL expose `GET /api/trips` returning trips for the current calendar month in the display timezone. Display timezone SHALL be resolved via the `date-handling` capability's `resolveDisplayTz` using the fallback chain: `end_location.timezone` → `start_location.timezone` → app config default (`DISPLAY_TZ`, default `Europe/Copenhagen`). Month bounds SHALL be computed via the `date-handling` capability's `currentMonthBoundsUtc` as inclusive start / exclusive end in UTC. The response SHALL be `200 OK` with a JSON array of trip objects, sorted by `end_time` descending. If no trips exist, the response SHALL be an empty array.
 
 #### Scenario: Trips exist in current month
 
@@ -134,7 +134,7 @@ The system SHALL expose `GET /api/trips` returning trips for the current calenda
 
 ### Requirement: Display timezone resolution
 
-The system SHALL resolve the display timezone for month-boundary computation using the following fallback chain: `end_location.timezone` → `start_location.timezone` → `DISPLAY_TZ` env var (default `Europe/Copenhagen`). All stored timestamps SHALL be in UTC; only display and month-boundary computation uses the resolved timezone.
+The system SHALL resolve the display timezone for month-boundary computation using the `date-handling` capability's `resolveDisplayTz` function, which implements the following fallback chain: `end_location.timezone` → `start_location.timezone` → `DISPLAY_TZ` env var (default `Europe/Copenhagen`). All stored timestamps SHALL be in UTC; only display and month-boundary computation uses the resolved timezone.
 
 #### Scenario: Location timezone takes priority
 
