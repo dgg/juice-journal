@@ -1,4 +1,5 @@
 import { db } from "../db/client"
+import { resolveDisplayTz, currentMonthBoundsUtc } from "../utils/dates"
 import type { Context } from "hono"
 import type { TripInput, Trip } from "./types"
 import type { Env } from "../utils/logger"
@@ -70,47 +71,27 @@ export async function creationHandler(c: Context) {
 }
 
 export async function getTrips(c: Context<Env>) {
-	// Get current month in display timezone
-	const DISPLAY_TZ = process.env.DISPLAY_TZ || "Europe/Copenhagen"
-
-	// Get today's date in display timezone
-	const today = new Date()
-	const formatter = new Intl.DateTimeFormat("en-US", {
-		year: "numeric",
-		month: "2-digit",
-		day: "2-digit",
-		timeZone: DISPLAY_TZ
-	})
-
-	const parts = formatter.formatToParts(today)
-	const year = parseInt(parts.find((p) => p.type === "year")?.value || "2026", 10)
-	const month = parseInt(parts.find((p) => p.type === "month")?.value || "01", 10)
-
-	// Month start in display timezone: 1st day at 00:00
-	const monthStart = new Date(`${year}-${String(month).padStart(2, "0")}-01T00:00:00`)
-
-
-	// Month end in display timezone: 1st day of next month at 00:00
-	const nextMonth = new Date(year, month, 1)
-	const monthEnd = new Date(
-		nextMonth.getFullYear(),
-		nextMonth.getMonth(),
-		nextMonth.getDate(),
-		0,
-		0,
-		0
+	// Resolve display timezone using config (location timezones could be fetched if needed in future)
+	const displayTz = resolveDisplayTz(
+		undefined, // end_location.timezone could be fetched if we had a trips sample first
+		undefined, // start_location.timezone could be fetched if we had a trips sample first
+		process.env.DISPLAY_TZ || "Europe/Copenhagen"
 	)
-	c.var.logger.info("[%o .. %o]", monthStart, monthEnd)
 
-	// Convert to UTC for database query
-	// This is a simplified approach - in production you'd want to use proper timezone math
-	const startUTC = monthStart.toISOString()
-	const endUTC = monthEnd.toISOString()
+	// Compute month bounds in display timezone, converted to UTC for query
+	const { startUtc, endUtc } = currentMonthBoundsUtc(displayTz)
+
+	c.var.logger.info(
+		"Fetching trips for month [%s .. %s] (display tz: %s)",
+		startUtc,
+		endUtc,
+		displayTz
+	)
 
 	const trips = await db`
       SELECT * FROM trips
-      WHERE end_time >= ${startUTC}
-        AND end_time < ${endUTC}
+      WHERE end_time >= ${startUtc}
+        AND end_time < ${endUtc}
       ORDER BY end_time DESC
     `
 
