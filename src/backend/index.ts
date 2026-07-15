@@ -1,5 +1,8 @@
 import { Hono } from "hono"
+import { requestId } from "hono/request-id"
+import { structuredLogger } from "@hono/structured-logger"
 import { problemDetailsHandler } from "hono-problem-details"
+import { rootLogger, type Env } from "../utils/logger"
 import { creationHandler, getTrips } from "./handlers"
 import {
 	endLocationValidator,
@@ -9,9 +12,16 @@ import {
 	tripConflictValidator
 } from "./validators"
 
-const app = new Hono()
+const app = new Hono<Env>()
 
 const PORT = process.env.PORT || 3000
+
+app.use(requestId())
+app.use(
+	structuredLogger({
+		createLogger: (c) => rootLogger.child({ requestId: c.var.requestId })
+	})
+)
 
 app.onError(
 	problemDetailsHandler({
@@ -34,7 +44,7 @@ app.get("/api/health", (c) => c.json({ status: "ok" }))
 	)
 	.get("/api/trips", getTrips)
 
-console.log(`Server listening on port ${PORT}`)
+rootLogger.info({ port: PORT }, "Server listening on port")
 
 export default {
 	port: PORT,

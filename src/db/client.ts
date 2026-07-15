@@ -1,4 +1,5 @@
 import postgres from "postgres"
+import { rootLogger } from "../utils/logger"
 
 const DATABASE_URL = process.env.DATABASE_URL
 
@@ -12,10 +13,10 @@ export const db = postgres(DATABASE_URL)
 export async function testConnection() {
 	try {
 		const result = await db`SELECT 1 as test`
-		console.log("Database connection successful:", result)
+		rootLogger.info({ connected: true }, "Database connection successful")
 		return true
 	} catch (error) {
-		console.error("Database connection failed:", error)
+		rootLogger.error({ err: error }, "Database connection failed")
 		return false
 	}
 }
