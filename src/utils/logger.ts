@@ -1,5 +1,4 @@
 import pino from "pino"
-import type { HonoRequest } from "hono"
 
 const isProduction = process.env.NODE_ENV === "production"
 const logLevel = process.env.LOG_LEVEL || (isProduction ? "info" : "debug")
