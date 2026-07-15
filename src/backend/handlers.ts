@@ -1,6 +1,7 @@
 import { db } from "../db/client"
 import type { Context } from "hono"
 import type { TripInput, Trip } from "./types"
+import type { Env } from "../utils/logger"
 
 export async function creationHandler(c: Context) {
 	const input = c.req.valid("json") as TripInput
@@ -68,7 +69,7 @@ export async function creationHandler(c: Context) {
 	)
 }
 
-export async function getTrips(c: Context) {
+export async function getTrips(c: Context<Env>) {
 	// Get current month in display timezone
 	const DISPLAY_TZ = process.env.DISPLAY_TZ || "Europe/Copenhagen"
 
@@ -88,6 +89,7 @@ export async function getTrips(c: Context) {
 	// Month start in display timezone: 1st day at 00:00
 	const monthStart = new Date(`${year}-${String(month).padStart(2, "0")}-01T00:00:00`)
 
+
 	// Month end in display timezone: 1st day of next month at 00:00
 	const nextMonth = new Date(year, month, 1)
 	const monthEnd = new Date(
@@ -98,6 +100,7 @@ export async function getTrips(c: Context) {
 		0,
 		0
 	)
+	c.var.logger.info("[%o .. %o]", monthStart, monthEnd)
 
 	// Convert to UTC for database query
 	// This is a simplified approach - in production you'd want to use proper timezone math
