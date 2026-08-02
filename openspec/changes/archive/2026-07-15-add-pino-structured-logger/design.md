@@ -28,8 +28,8 @@ The requester explicitly chose `@hono/structured-logger` (the official Hono midd
 Use `@hono/structured-logger` with a `pino` root logger, as requested. The middleware exposes a request-scoped logger on `c.var.logger`, supports `onRequest`/`onResponse`/`onError` hooks, and integrates natively with `hono/request-id`.
 
 - **Alternatives considered:**
-  - `hono-pino` (`@maou-shonen/hono-pino`): community plugin, also Pino-based, but not the official Hono middleware and not what the requester selected.
-  - Hono's built-in `hono/logger`: line-only, not structured, not level-aware — insufficient.
+    - `hono-pino` (`@maou-shonen/hono-pino`): community plugin, also Pino-based, but not the official Hono middleware and not what the requester selected.
+    - Hono's built-in `hono/logger`: line-only, not structured, not level-aware — insufficient.
 - **Rationale:** official Hono middleware, library-agnostic `BaseLogger` interface, type-safe `Variables.logger`, peers only on `hono`.
 
 ### Decision 2: Single root logger module at `src/utils/logger.ts`

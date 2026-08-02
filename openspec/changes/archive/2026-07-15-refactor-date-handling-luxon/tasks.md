@@ -37,4 +37,3 @@
 - [x] 6.2 Run `docker build .` — image builds successfully
 - [x] 6.3 Confirm no new dependencies beyond `luxon` were introduced
 - [x] 6.4 Update AGENTS.md stack note if needed to reflect Luxon as installed (already listed as the date library)
-

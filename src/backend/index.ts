@@ -4,6 +4,7 @@ import { structuredLogger } from "@hono/structured-logger"
 import { problemDetailsHandler } from "hono-problem-details"
 import { rootLogger, type Env } from "../utils/logger"
 import { creationHandler, getTrips } from "./handlers"
+import { homeHandler } from "./home"
 import {
 	endLocationValidator,
 	creationValidator,
@@ -32,6 +33,7 @@ app.onError(
 )
 
 app.get("/api/health", (c) => c.json({ status: "ok" }))
+	.get("/", homeHandler)
 	// Trips routes
 	.post(
 		"/api/trips",

@@ -13,9 +13,11 @@ Date and timezone handling is scattered and fragile. `GET /api/trips` computes t
 ## Capabilities
 
 ### New Capabilities
+
 - `date-handling`: Luxon-based utilities for display-timezone resolution and inclusive-start / exclusive-end calendar-month boundary computation in UTC, consumed by trip-listing handlers.
 
 ### Modified Capabilities
+
 - `trips-api`: The `GET /api/trips endpoint (current month)` and `Display timezone resolution` requirements are unchanged in contract; their month-boundary implementation now delegates to the `date-handling` capability, closing the gap between spec and the prior simplified code.
 
 ## Impact
