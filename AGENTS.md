@@ -7,7 +7,7 @@ Instructions for AI agents on `juice-journal`.
 ## Stack
 
 - **Backend:** Bun (/oven-sh/bun v1.3.10/latest) + Hono (/honojs/website, /honojs/hono, /honojs/middleware). Zod validation (/colinhacks/zod) with problem details (https://github.com/paveg/hono-problem-details). Pino (/pinojs/pino) for logging. Luxon (/moment/luxon) for date handling.
-- **Frontend:** HTMX (server-side interactions, /bigskysoftware/htmx) + Pico CSS (styling, /picocss/pico v2.1.1). Semantic HTML only; no custom CSS or client-side frameworks.
+- **Frontend:** `hono/jsx` SSR components (/honojs/hono, server-side templating only — no client bundle shipped) + HTMX (server-side interactions, /bigskysoftware/htmx) + Pico CSS (styling, /picocss/pico v2.1.1). Semantic HTML only; no client-side JS frameworks. A single `public/app.css` holds any custom CSS (Pico-grounded, see Styling rules).
 - **Charts:** Chart.js (/chartjs/chart.js v4.5.1) for data visualization (approved dependency)
 - **Database:** Hosted PostgreSQL (v17.10) using nanoid as PKs
 - **Deployment:** Docker container
@@ -25,8 +25,9 @@ Instructions for AI agents on `juice-journal`.
 ❌ Database schema changes
 ❌ Breaking or renaming public API endpoints
 ❌ Changing trip data structure
-❌ Adding dependencies beyond Hono, HTMX, Pico CSS, Chart.js, and standard Bun libs
-❌ Writing custom CSS or client-side frameworks (stay semantic + Pico)
+❌ Adding dependencies beyond Hono, HTMX, Pico CSS, Chart.js, `hono/jsx`, and standard Bun libs
+❌ Client-side JS frameworks (React/Vue/Svelte client runtime shipped to browser). `hono/jsx` SSR templating is allowed — nothing runs in the browser.
+❌ Inline `<style>` blocks in view components. Custom CSS lives only in `public/app.css` (Pico-grounded, see Styling rules).
 
 ---
 
@@ -35,6 +36,12 @@ Instructions for AI agents on `juice-journal`.
 ### Styling
 
 All generated code must follow the rules stated in `.editorconfig` and `.prettierrc`.
+
+**Pico CSS is the styling basis.** Apply CSS in this order of preference:
+
+1. **Use out-of-the-box Pico or semantic HTML** — if Pico natively styles the element or a Pico class exists, use it. No custom CSS.
+2. **Override Pico classes/variables** — if Pico's look is close but not exact, override `--pico-*` custom properties on `:root` or extend a Pico class. Prefer variables over new rules.
+3. **Custom CSS in `public/app.css` only as last resort** — if no clean Pico or override path exists, add a rule to `public/app.css`. Never inline `<style>` in components; never add client-side CSS frameworks.
 
 ### Documentation
 

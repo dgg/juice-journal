@@ -56,6 +56,7 @@ export async function homeHandler(c: Context<Env>) {
 
 	const monthLabel = now.setZone(displayTz).toFormat("MMMM yyyy")
 
+	// TODO: merge into a single query
 	// Find displayed vehicle (vehicle of most recent trip)
 	const vehicleId = await tripsQueries.findLatestTripVehicleId()
 	let vehicle = null
