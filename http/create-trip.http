@@ -2,13 +2,13 @@ POST {{$dotenv PROTOCOL}}://{{$dotenv HOST}}:{{$dotenv PORT}}/api/trips
 Content-Type: application/json
 
 {
-	"vehicle_id": "-owZdUG2AiSvNJ6U",
-	"start_time": "2026-08-01T16:45:41Z",
-	"end_time": "2026-08-01T16:55:43Z",
-	"daypart": "afternoon",
-	"duration_min": 43,
-	"distance_km": 54,
+	"vehicle_id": "MD8MDOanL7GaSBxf",
+	"start_time": "2026-08-03T07:45:41Z",
+	"end_time": "2026-08-03T07:55:43Z",
+	"daypart": "morning",
+	"duration_min": 46,
+	"distance_km": 53,
 	"start_location_id": "9nPCnL0a166x29RQ",
 	"end_location_id": "P48N0F_3P5q3Q_1X",
-	"avg_consumption_kwh_100km": 12.7
+	"avg_consumption_kwh_100km": 12.5
 }
