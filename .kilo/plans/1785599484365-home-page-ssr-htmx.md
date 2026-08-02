@@ -5,6 +5,7 @@ SSR home page for juice-journal. Server renders current-calendar-month stats + t
 ## Scope
 
 In scope:
+
 - New Hono route `GET /` rendering HTML.
 - Server-side stat aggregation from DB (current calendar month, display tz).
 - Trip list (current month, newest first) with tap-to-expand rows.
@@ -12,6 +13,7 @@ In scope:
 - Sticky full-width "Log new trip" CTA linking to `/trips/new`.
 
 Out of scope (separate changes):
+
 - `/trips/new` input form page (CTA target only here).
 - `avg_consumption_kwh_100km` NOT NULL migration + backfill.
 - Distance pro-rata MoM delta (city-pair comparison future).
@@ -24,15 +26,15 @@ Out of scope (separate changes):
 1. **SSR, no UI API.** `GET /` handler queries DB directly and renders HTML. `GET /api/trips` untouched (tooling only).
 2. **Month scope = current calendar month** in display tz, not rolling 30 days. Reuse `resolveDisplayTz` + `currentMonthBoundsUtc` (`src/utils/dates.ts`).
 3. **Stats (computed server-side):**
-   - HERO: `AVG(avg_consumption_kwh_100km)` (kWh/100km) + MoM delta vs prev calendar month.
-   - Secondary: `AVG(duration_min)` (min) + MoM delta; `SUM(distance_km)` (km) plain, **no delta v1** (cumulative metric, misleading mid-month).
-   - `avg_speed_kmh` excluded from hero/strip — lives only in expanded trip row.
+    - HERO: `AVG(avg_consumption_kwh_100km)` (kWh/100km) + MoM delta vs prev calendar month.
+    - Secondary: `AVG(duration_min)` (min) + MoM delta; `SUM(distance_km)` (km) plain, **no delta v1** (cumulative metric, misleading mid-month).
+    - `avg_speed_kmh` excluded from hero/strip — lives only in expanded trip row.
 4. **MoM delta source:** separate query bounded to previous calendar month (same tz bounds logic). If prev month has zero non-null rows → hide that delta. Averages are per-trip so fair any day of month.
 5. **NULL consumption handling:** SQL `AVG()` skips NULLs automatically. If zero non-null rows → render `—`. No schema change in this plan.
 6. **Displayed vehicle = latest trip's `vehicle_id`** (most recent `end_time`). Header shows `vehicle.description`. All stats + list scoped to that vehicle. No selection UI v1. Future `?vehicle=<id>` override parked.
 7. **CTA "Log new trip"** = sticky full-width. Phone: above stats. Desktop: top of left (trip list) column. Links to `/trips/new`.
 8. **Trip row (collapsed):** date, start–end time, daypart icon+color, consumption. Tap expands detail (no lazy load, no JS):
-   - Detail fields: `distance_km`, `avg_speed_kmh`, `odometer_km`, start/end location `label` (join to `locations`), `duration_min`.
+    - Detail fields: `distance_km`, `avg_speed_kmh`, `odometer_km`, start/end location `label` (join to `locations`), `duration_min`.
 9. **Tap-expand mechanism:** pure `<details>`/`<summary>` HTML. Data already in DOM. No HTMX, no client JS.
 10. **Daypart encoding:** icon + color both. morning = ☀ amber; afternoon = 🌙 indigo. Both for colorblind a11y (color alone insufficient).
 11. **Empty state (option A):** zero trips → hero `—`, strip `0 km · — min`, list replaced by message "No trips yet — log your first commute ↑" pointing at CTA. Deltas hidden (no prev data either). Keeps layout stable across empty→populated.
@@ -61,6 +63,7 @@ All queries scoped to displayed `vehicle_id`. tz bounds reused from existing hel
 ## Layout wireframes
 
 ### Phone
+
 ```
 ┌─────────────────────┐
 │ Aug 2026 · 🚗 Leaf  │
@@ -86,6 +89,7 @@ All queries scoped to displayed `vehicle_id`. tz bounds reused from existing hel
 ```
 
 ### Desktop D2
+
 ```
 ┌──────────────────────────────────────────────────────┐
 │ Aug 2026 · 🚗 Leaf                                   │
