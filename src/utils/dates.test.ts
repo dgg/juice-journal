@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test"
-import { resolveDisplayTz, currentMonthBoundsUtc } from "./dates"
+import { resolveDisplayTz, currentMonthBoundsUtc, prevMonthBoundsUtc } from "./dates"
 import { DateTime } from "luxon"
 
 describe("resolveDisplayTz", () => {
@@ -61,7 +61,7 @@ describe("currentMonthBoundsUtc", () => {
 
 		// August 1, 2026 00:00 UTC exactly matches endUtc (as UTC ISO string)
 		expect(endUtc).toMatch(/2026-08-01T00:00:00/)
-		
+
 		// Verify it's in UTC format (Z suffix)
 		expect(endUtc).toMatch(/Z$/)
 	})
@@ -80,6 +80,57 @@ describe("currentMonthBoundsUtc", () => {
 
 	it("uses current system time when now is not provided", () => {
 		const { startUtc, endUtc } = currentMonthBoundsUtc("UTC")
+
+		// Should parse without error
+		const start = DateTime.fromISO(startUtc)
+		const end = DateTime.fromISO(endUtc)
+
+		expect(start.isValid).toBe(true)
+		expect(end.isValid).toBe(true)
+
+		// End should be after start
+		expect(end > start).toBe(true)
+	})
+})
+
+describe("prevMonthBoundsUtc", () => {
+	it("computes previous month from mid-July correctly", () => {
+		// July 15, 2026, 10:00 Copenhagen (UTC+2)
+		const now = DateTime.fromISO("2026-07-15T10:00:00", { zone: "Europe/Copenhagen" })
+		const { startUtc, endUtc } = prevMonthBoundsUtc("Europe/Copenhagen", now)
+
+		// June 1, 2026 00:00 Copenhagen (UTC+2) = May 31, 2026 22:00 UTC
+		expect(startUtc).toBe("2026-05-31T22:00:00.000Z")
+
+		// July 1, 2026 00:00 Copenhagen (UTC+2) = June 30, 2026 22:00 UTC
+		expect(endUtc).toBe("2026-06-30T22:00:00.000Z")
+	})
+
+	it("computes previous month for January (crosses year boundary)", () => {
+		const now = DateTime.fromISO("2026-01-15T10:00:00", { zone: "UTC" })
+		const { startUtc, endUtc } = prevMonthBoundsUtc("UTC", now)
+
+		// December 1, 2025 00:00 UTC
+		expect(startUtc).toBe("2025-12-01T00:00:00.000Z")
+
+		// January 1, 2026 00:00 UTC
+		expect(endUtc).toBe("2026-01-01T00:00:00.000Z")
+	})
+
+	it("handles DST transition correctly for previous month", () => {
+		// April 20, 2026 noon Copenhagen
+		const now = DateTime.fromISO("2026-04-20T12:00:00", { zone: "Europe/Copenhagen" })
+		const { startUtc, endUtc } = prevMonthBoundsUtc("Europe/Copenhagen", now)
+
+		// March 1, 2026 00:00 Copenhagen (UTC+1) = Feb 28, 2026 23:00 UTC
+		expect(startUtc).toBe("2026-02-28T23:00:00.000Z")
+
+		// April 1, 2026 00:00 Copenhagen (UTC+2) = March 31, 2026 22:00 UTC
+		expect(endUtc).toBe("2026-03-31T22:00:00.000Z")
+	})
+
+	it("uses current system time when now is not provided", () => {
+		const { startUtc, endUtc } = prevMonthBoundsUtc("UTC")
 
 		// Should parse without error
 		const start = DateTime.fromISO(startUtc)

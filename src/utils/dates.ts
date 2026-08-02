@@ -53,3 +53,38 @@ export function currentMonthBoundsUtc(
 		endUtc
 	}
 }
+
+/**
+ * Computes the previous calendar month's bounds in UTC.
+ * Returns inclusive start and exclusive end as ISO 8601 strings.
+ *
+ * @param zone IANA timezone string (e.g., "Europe/Copenhagen")
+ * @param now Optional DateTime to use as "now" (defaults to DateTime.now())
+ * @returns Object with startUtc and endUtc as ISO strings in UTC
+ */
+export function prevMonthBoundsUtc(
+	zone: string,
+	now: DateTime = DateTime.now()
+): { startUtc: string; endUtc: string } {
+	// Create a DateTime in the specified zone
+	const nowInZone = now.setZone(zone)
+
+	// Start of previous month at 00:00:00 in the zone
+	const prevMonthStart = nowInZone.startOf("month").minus({ months: 1 })
+
+	// Start of current month at 00:00:00 in the zone (exclusive end for prev month)
+	const currentMonthStart = prevMonthStart.plus({ months: 1 })
+
+	// Convert both to UTC ISO strings
+	const startUtc = prevMonthStart.toUTC().toISO()
+	const endUtc = currentMonthStart.toUTC().toISO()
+
+	if (!startUtc || !endUtc) {
+		throw new Error("Failed to compute previous month bounds")
+	}
+
+	return {
+		startUtc,
+		endUtc
+	}
+}

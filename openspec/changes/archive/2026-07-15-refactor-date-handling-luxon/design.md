@@ -5,6 +5,7 @@ Trip listing (`GET /api/trips`) needs a current-month window in a display timezo
 The project stack (AGENTS.md) already names Luxon for date handling; it is not yet installed. This change adds Luxon as an approved dependency and centralizes date logic in one tested utility module.
 
 Constraints:
+
 - Backend only; no frontend, schema, or API-shape changes.
 - Conventional commits, feature branches (no worktrees).
 - Bun test runner; Pino logging.
@@ -12,12 +13,14 @@ Constraints:
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Replace native `Date`/`Intl.DateTimeFormat` month-boundary code with Luxon-backed utilities.
 - Implement the full display-timezone fallback chain to match the existing `trips-api` spec.
 - Centralize date logic in `src/utils/dates.ts` with unit-testable pure functions.
 - Keep API request/response shapes and DB queries unchanged.
 
 **Non-Goals:**
+
 - Rewriting `start_time`/`end_time` storage (stays timestamptz UTC in Postgres).
 - Changing the `daypart` enum or `duration_min` precedence rules.
 - Frontend date formatting (HTMX layer untouched).
@@ -32,12 +35,14 @@ Constraints:
 **Rationale:** Luxon has first-class IANA timezone support without manual UTC offsets, handles DST automatically, and is already sanctioned in the stack. The alternative — keeping native `Date` — is exactly the fragility being removed.
 
 **Alternatives considered:**
-- *date-fns-tz*: functional API, butLuxon's `DateTime` with a `zone` argument maps more directly to "compute month bounds in a display tz". date-fns is not in the stack and would add two packages.
-- *Temporal (TC39 proposal)*: not shipped in Bun yet; not a safe dependency.
+
+- _date-fns-tz_: functional API, butLuxon's `DateTime` with a `zone` argument maps more directly to "compute month bounds in a display tz". date-fns is not in the stack and would add two packages.
+- _Temporal (TC39 proposal)_: not shipped in Bun yet; not a safe dependency.
 
 ### Decision 2: Module `src/utils/dates.ts` with two pure functions
 
 **Choice:** Expose:
+
 - `resolveDisplayTz(endLocationTz?: string | null, startLocationTz?: string | null, fallback?: string): string`
 - `currentMonthBoundsUtc(zone: string, now?: DateTime): { startUtc: string; endUtc: string }`
 
@@ -60,13 +65,14 @@ Constraints:
 ## Risks / Trade-offs
 
 - **[Risk] Luxon dependency added → must stay within allowed deps.** Mitigation: AGENTS.md already lists Luxon as the stack's date library; this is the sanctioned install. Human approval step explicitly flagged in tasks.
-- **[Risk] DST edge changes boundary output vs. old code.** Mitigation: This is the *correct* behavior (the old code's "simplified approach" was the bug). Add a test mirroring the spec's "Timezone boundary at month edge" scenario to lock it in.
+- **[Risk] DST edge changes boundary output vs. old code.** Mitigation: This is the _correct_ behavior (the old code's "simplified approach" was the bug). Add a test mirroring the spec's "Timezone boundary at month edge" scenario to lock it in.
 - **[Risk] ISO string format differs from `Date.toISOString()`.** Mitigation: Luxon's `toISO()` produces the same `YYYY-MM-DDTHH:mm:ss.sssZ` shape Postgres accepts; add an assertion test comparing formats.
 - **[Trade-off] Two small functions vs. inline.** Slightly more indirection, but buys testability and a single source of truth for month math.
 
 ## Migration Plan
 
 No schema or data migration. Deploy steps:
+
 1. `bun install luxon` (after human approval).
 2. Add `src/utils/dates.ts` and its test.
 3. Refactor `getTrips` to call the utilities.

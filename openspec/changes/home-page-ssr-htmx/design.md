@@ -5,12 +5,14 @@ The juice-journal app currently has backend API endpoints but no user-facing UI.
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Implement server-rendered home page with current month trip statistics
 - Create responsive layout optimized for mobile first
 - Provide smooth UX for viewing and expanding trip details
 - Enable month-over-month comparisons for key metrics
 
 **Non-Goals:**
+
 - Implement the trip creation form (separate change)
 - Modify database schema (consumption NOT NULL migration separate)
 - Add advanced charting beyond basic stats display
@@ -19,22 +21,28 @@ The juice-journal app currently has backend API endpoints but no user-facing UI.
 ## Decisions
 
 ### Server-Side Rendering Approach
+
 Use Hono framework to implement GET `/` route that queries database directly and renders HTML template. This avoids API round-trips for UI rendering and keeps implementation simple. The existing date utility functions `resolveDisplayTz` and `currentMonthBoundsUtc` will be reused for timezone-aware month calculations.
 
 ### Data Aggregation Strategy
+
 Compute statistics server-side using direct PostgreSQL queries:
+
 - Current month aggregates: AVG consumption, AVG duration, SUM distance
 - Previous month aggregates: same metrics for MoM comparison
 - Trip list: current month trips joined with location data, ordered by end_time DESC
 - Vehicle selection: query MAX(end_time) trip to determine displayed vehicle
 
 ### Frontend Implementation
+
 Use HTMX for progressive enhancement and PicoCSS for responsive styling. Implement trip row expand/collapse using `<details>`/`<summary>` elements to avoid JavaScript complexity. Layout will adapt from stacked (mobile) to split columns (desktop) using CSS Grid/Flexbox.
 
 ### Daypart Visualization
+
 Encode morning/afternoon as both icon and color for accessibility: morning = ☀ amber, afternoon = 🌙 indigo. This provides visual distinction while maintaining color-blind friendliness.
 
 ### Empty State Handling
+
 When no trips exist for current month, display special message "No trips yet — log your first commute" pointing to the CTA, while maintaining consistent layout structure.
 
 ## Risks / Trade-offs

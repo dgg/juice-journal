@@ -14,6 +14,7 @@ Need a server-rendered home page for juice-journal that displays monthly trip st
 ## Capabilities
 
 ### New Capabilities
+
 - `home-page-ssr`: Server-rendered home page displaying monthly trip statistics and list with responsive design optimized for mobile
 
 ### Modified Capabilities
