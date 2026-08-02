@@ -1,9 +1,11 @@
-import { db } from "../db/client"
 import {
 	resolveDisplayTz,
 	currentMonthBoundsUtc,
 	prevMonthBoundsUtc
 } from "../utils/dates"
+import { tripsQueries } from "../db/queries/trips"
+import { vehiclesQueries } from "../db/queries/vehicles"
+import { statsQueries } from "../db/queries/stats"
 import type { Context } from "hono"
 import type { Env } from "../utils/logger"
 import { DateTime } from "luxon"
@@ -55,127 +57,44 @@ export async function homeHandler(c: Context<Env>) {
 	const monthLabel = now.setZone(displayTz).toFormat("MMMM yyyy")
 
 	// Find displayed vehicle (vehicle of most recent trip)
-	const latestTripResult = await db`
-		SELECT vehicle_id FROM trips
-		ORDER BY end_time DESC
-		LIMIT 1
-	`
-
-	let vehicleId: string | null = null
+	const vehicleId = await tripsQueries.findLatestTripVehicleId()
 	let vehicle = null
 
-	if (latestTripResult.length > 0) {
-		vehicleId = latestTripResult[0].vehicle_id
-		const vehicleResult = await db`
-			SELECT id, description FROM vehicles WHERE id = ${vehicleId}
-		`
-		if (vehicleResult.length > 0) {
-			vehicle = vehicleResult[0]
-		}
+	if (vehicleId) {
+		vehicle = await vehiclesQueries.findVehicleById(vehicleId)
 	}
 
 	// Current month aggregates
-	const currentAggResult = vehicleId
-		? await db`
-			SELECT
-				AVG(avg_consumption_kwh_100km) as avg_consumption,
-				AVG(duration_min) as avg_duration,
-				SUM(distance_km) as total_distance
-			FROM trips
-			WHERE end_time >= ${startUtc}
-				AND end_time < ${endUtc}
-				AND vehicle_id = ${vehicleId}
-		`
-		: await db`
-			SELECT
-				AVG(avg_consumption_kwh_100km) as avg_consumption,
-				AVG(duration_min) as avg_duration,
-				SUM(distance_km) as total_distance
-			FROM trips
-			WHERE end_time >= ${startUtc}
-				AND end_time < ${endUtc}
-		`
+	const currentStats = await statsQueries.monthlyAggregates({
+		startUtc,
+		endUtc,
+		vehicleId: vehicleId ?? undefined
+	})
 
 	// Previous month aggregates
-	const prevAggResult = vehicleId
-		? await db`
-			SELECT
-				AVG(avg_consumption_kwh_100km) as avg_consumption,
-				AVG(duration_min) as avg_duration,
-				SUM(distance_km) as total_distance
-			FROM trips
-			WHERE end_time >= ${prevStartUtc}
-				AND end_time < ${prevEndUtc}
-				AND vehicle_id = ${vehicleId}
-		`
-		: await db`
-			SELECT
-				AVG(avg_consumption_kwh_100km) as avg_consumption,
-				AVG(duration_min) as avg_duration,
-				SUM(distance_km) as total_distance
-			FROM trips
-			WHERE end_time >= ${prevStartUtc}
-				AND end_time < ${prevEndUtc}
-		`
+	const prevStats = await statsQueries.monthlyAggregates({
+		startUtc: prevStartUtc,
+		endUtc: prevEndUtc,
+		vehicleId: vehicleId ?? undefined
+	})
 
 	// Trip list with location joins
-	const tripsResult = vehicleId
-		? await db`
-			SELECT
-				t.id,
-				t.start_time,
-				t.end_time,
-				t.daypart,
-				t.duration_min,
-				t.distance_km,
-				t.avg_speed_kmh,
-				t.avg_consumption_kwh_100km,
-				t.odometer_km,
-				start_loc.label as start_location,
-				end_loc.label as end_location,
-				start_loc.timezone as start_tz,
-				end_loc.timezone as end_tz
-			FROM trips t
-			LEFT JOIN locations start_loc ON t.start_location_id = start_loc.id
-			LEFT JOIN locations end_loc ON t.end_location_id = end_loc.id
-			WHERE t.end_time >= ${startUtc}
-				AND t.end_time < ${endUtc}
-				AND t.vehicle_id = ${vehicleId}
-			ORDER BY t.end_time DESC
-		`
-		: await db`
-			SELECT
-				t.id,
-				t.start_time,
-				t.end_time,
-				t.daypart,
-				t.duration_min,
-				t.distance_km,
-				t.avg_speed_kmh,
-				t.avg_consumption_kwh_100km,
-				t.odometer_km,
-				start_loc.label as start_location,
-				end_loc.label as end_location,
-				start_loc.timezone as start_tz,
-				end_loc.timezone as end_tz
-			FROM trips t
-			LEFT JOIN locations start_loc ON t.start_location_id = start_loc.id
-			LEFT JOIN locations end_loc ON t.end_location_id = end_loc.id
-			WHERE t.end_time >= ${startUtc}
-				AND t.end_time < ${endUtc}
-			ORDER BY t.end_time DESC
-		`
+	const tripsResult = await tripsQueries.findTripsWithLocations({
+		startUtc,
+		endUtc,
+		vehicleId: vehicleId ?? undefined
+	})
 
 	const trips = tripsResult.map((trip) => ({
 		id: trip.id,
-		startTime: DateTime.fromISO(trip.start_time.toISOString()),
-		endTime: DateTime.fromISO(trip.end_time.toISOString()),
+		startTime: trip.start_time,
+		endTime: trip.end_time,
 		daypart: trip.daypart,
 		durationMin: trip.duration_min,
-		distanceKm: asNumber(trip.distance_km)!,
-		avgSpeedKmh: asNumber(trip.avg_speed_kmh),
-		avgConsumptionKwh100km: asNumber(trip.avg_consumption_kwh_100km),
-		odometerKm: asNumber(trip.odometer_km),
+		distanceKm: trip.distance_km,
+		avgSpeedKmh: trip.avg_speed_kmh,
+		avgConsumptionKwh100km: trip.avg_consumption_kwh_100km,
+		odometerKm: trip.odometer_km,
 		startLocation: trip.start_location,
 		endLocation: trip.end_location
 	}))
@@ -186,12 +105,12 @@ export async function homeHandler(c: Context<Env>) {
 		vehicle: vehicle ? { id: vehicle.id, description: vehicle.description } : null,
 		monthLabel,
 		stats: {
-			avgConsumption: asNumber(currentAggResult[0]?.avg_consumption),
-			avgDuration: asNumber(currentAggResult[0]?.avg_duration),
-			totalDistance: asNumber(currentAggResult[0]?.total_distance),
-			prevAvgConsumption: asNumber(prevAggResult[0]?.avg_consumption),
-			prevAvgDuration: asNumber(prevAggResult[0]?.avg_duration),
-			prevTotalDistance: asNumber(prevAggResult[0]?.total_distance)
+			avgConsumption: currentStats.avgConsumption,
+			avgDuration: currentStats.avgDuration,
+			totalDistance: currentStats.totalDistance,
+			prevAvgConsumption: prevStats.avgConsumption,
+			prevAvgDuration: prevStats.avgDuration,
+			prevTotalDistance: prevStats.totalDistance
 		},
 		trips,
 		hasTrips
@@ -199,10 +118,6 @@ export async function homeHandler(c: Context<Env>) {
 
 	return c.html(renderHomePage(data))
 }
-
-const asNumber = (dbNumeric: string | null): number | null => typeof dbNumeric === "string" ? parseFloat(dbNumeric) : null
-
-
 
 function renderHomePage(data: HomeData): string {
 	const { vehicle, monthLabel, stats, trips, hasTrips } = data
@@ -430,8 +345,10 @@ function renderHomePage(data: HomeData): string {
 }
 
 function renderTripRow(trip: HomeData["trips"][0]): string {
-	const dateStr = trip.endTime.toFormat("ccc, MMM d")
-	const timeStr = `${trip.startTime.toFormat("HH:mm")} – ${trip.endTime.toFormat("HH:mm")}`
+	const dateStr = trip.endTime
+		.setZone(process.env.DISPLAY_TZ || "Europe/Copenhagen")
+		.toFormat("ccc, MMM d")
+	const timeStr = `${trip.startTime.setZone(process.env.DISPLAY_TZ || "Europe/Copenhagen").toFormat("HH:mm")} – ${trip.endTime.setZone(process.env.DISPLAY_TZ || "Europe/Copenhagen").toFormat("HH:mm")}`
 
 	const daypartClass = trip.daypart === "morning" ? "morning" : "afternoon"
 	const daypartIcon = trip.daypart === "morning" ? "☀" : "🌙"

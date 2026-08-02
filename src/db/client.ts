@@ -1,4 +1,4 @@
-import postgres from "postgres"
+import { SQL } from "bun"
 import { rootLogger } from "../utils/logger"
 
 const DATABASE_URL = process.env.DATABASE_URL
@@ -6,8 +6,8 @@ const DATABASE_URL = process.env.DATABASE_URL
 if (!DATABASE_URL) {
 	throw new Error("DATABASE_URL environment variable is not set")
 }
-console.log(DATABASE_URL)
-export const db = postgres(DATABASE_URL)
+
+export const db = new SQL(DATABASE_URL)
 
 // Test connection
 export async function testConnection() {

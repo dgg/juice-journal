@@ -4,7 +4,9 @@ import { validator } from "hono/validator"
 import { ProblemDetailsError } from "hono-problem-details"
 import { zodProblemHook } from "hono-problem-details/zod"
 
-import { db } from "../db/client"
+import { vehiclesQueries } from "../db/queries/vehicles"
+import { locationsQueries } from "../db/queries/locations"
+import { tripsQueries } from "../db/queries/trips"
 
 import { tripInputSchema, type TripInput } from "./types"
 import { problems } from "./problems"
@@ -13,21 +15,17 @@ export const creationValidator = zValidator("json", tripInputSchema, zodProblemH
 
 export const vehicleValidator = validator("json", async (req: TripInput) => {
 	try {
-		const existing = await db`
-				SELECT id FROM vehicles WHERE id = ${req.vehicle_id as string}
-			`
-		if (existing.length === 0) {
+		const exists = await vehiclesQueries.vehicleExists(req.vehicle_id)
+		if (!exists) {
 			throw problems.create("FOREIGN_KEY_VIOLATION", {
 				detail: `Vehicle '${req.vehicle_id}' does not exist`,
 				extensions: {
 					errors: [{ field: "vehicle_id", message: "vehicle does not exist" }]
 				}
 			})
-		} else {
-			return req
 		}
+		return req
 	} catch (error) {
-		// pass-through not-found errors from the same validator
 		if (error instanceof ProblemDetailsError) {
 			throw error
 		}
@@ -45,10 +43,8 @@ export const startLocationValidator = validator("json", async (req: TripInput) =
 		return req
 	}
 	try {
-		const existing = await db`
-				SELECT id FROM locations WHERE id = ${req.start_location_id as string}
-			`
-		if (existing.length === 0) {
+		const exists = await locationsQueries.locationExists(req.start_location_id)
+		if (!exists) {
 			throw problems.create("FOREIGN_KEY_VIOLATION", {
 				detail: `Start location '${req.start_location_id}' does not exist`,
 				extensions: {
@@ -60,11 +56,9 @@ export const startLocationValidator = validator("json", async (req: TripInput) =
 					]
 				}
 			})
-		} else {
-			return req
 		}
+		return req
 	} catch (error) {
-		// pass-through not-found errors from the same validator
 		if (error instanceof ProblemDetailsError) {
 			throw error
 		}
@@ -82,10 +76,8 @@ export const endLocationValidator = validator("json", async (req: TripInput) => 
 		return req
 	}
 	try {
-		const existing = await db`
-				SELECT id FROM locations WHERE id = ${req.end_location_id as string}
-			`
-		if (existing.length === 0) {
+		const exists = await locationsQueries.locationExists(req.end_location_id)
+		if (!exists) {
 			throw problems.create("FOREIGN_KEY_VIOLATION", {
 				detail: `End location '${req.end_location_id}' does not exist`,
 				extensions: {
@@ -97,11 +89,9 @@ export const endLocationValidator = validator("json", async (req: TripInput) => 
 					]
 				}
 			})
-		} else {
-			return req
 		}
+		return req
 	} catch (error) {
-		// pass-through not-found errors from the same validator
 		if (error instanceof ProblemDetailsError) {
 			throw error
 		}
@@ -116,19 +106,18 @@ export const endLocationValidator = validator("json", async (req: TripInput) => 
 
 export const tripConflictValidator = validator("json", async (req: TripInput) => {
 	try {
-		const existing = await db`
-				SELECT 1 FROM trips WHERE vehicle_id = ${req.vehicle_id as string} AND end_time = ${req.end_time as string}
-			`
-		if (existing.length > 0) {
+		const exists = await tripsQueries.existsTripByVehicleAndEndTime({
+			vehicleId: req.vehicle_id,
+			endTime: req.end_time
+		})
+		if (exists) {
 			throw problems.create("TRIP_CONFLICT", {
 				detail: `A trip with this vehicle_id and end_time already exists`,
 				extensions: { vehicle_id: req.vehicle_id, end_time: req.end_time }
 			})
-		} else {
-			return req
 		}
+		return req
 	} catch (error) {
-		// pass-through conflict errors from the same validator
 		if (error instanceof ProblemDetailsError) {
 			throw error
 		}

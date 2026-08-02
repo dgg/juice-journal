@@ -65,7 +65,7 @@ The DB-concern conversion helpers move to `src/db/convert.ts` (not `src/utils/`)
 
 ### 4. Validators consume existence query objects
 
-`validators.ts` keeps its `hono/validator` wrappers and problem-details error shape, but replaces inline `db\`SELECT id …\`` calls with `vehicles.vehicleExists(id)`, `locations.locationExists(id)`, `trips.existsTripByVehicleAndEndTime(…)`. The validators stay responsible for translating "not found" → `ProblemDetailsError`; the query objects just return boolean/row and never throw business errors.
+`validators.ts` keeps its `hono/validator` wrappers and problem-details error shape, but replaces inline `db\`SELECT id …\``calls with`vehicles.vehicleExists(id)`, `locations.locationExists(id)`, `trips.existsTripByVehicleAndEndTime(…)`. The validators stay responsible for translating "not found" → `ProblemDetailsError`; the query objects just return boolean/row and never throw business errors.
 
 ### 5. Dependency removal
 

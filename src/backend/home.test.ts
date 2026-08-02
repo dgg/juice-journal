@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "bun:test"
 import { db } from "../db/client"
-import {sql, SQL} from "bun"
+import { sql, SQL } from "bun"
 import { homeHandler } from "./home"
 import { DateTime } from "luxon"
 
