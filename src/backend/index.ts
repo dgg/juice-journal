@@ -4,7 +4,13 @@ import { structuredLogger } from "@hono/structured-logger"
 import { problemDetailsHandler } from "hono-problem-details"
 import { rootLogger, type Env } from "../utils/logger"
 import { creationHandler, getTrips } from "./handlers"
-import { homeHandler } from "./home"
+import { homeHandler } from "./home.tsx"
+import {
+	getTripFormPage,
+	getPartialTrips,
+	getPartialStats,
+	htmlCreationHandler
+} from "./html-handlers.tsx"
 import {
 	endLocationValidator,
 	creationValidator,
@@ -32,8 +38,18 @@ app.onError(
 	})
 )
 
+app.get("/static/*", async (c) => {
+	const path = c.req.path.replace(/^\/static\//, "")
+	const file = Bun.file(`./public/${path}`)
+	if (!(await file.exists())) return c.notFound()
+	return new Response(file)
+})
+
 app.get("/api/health", (c) => c.json({ status: "ok" }))
 	.get("/", homeHandler)
+	.get("/trips/new", getTripFormPage)
+	.get("/partials/trips", getPartialTrips)
+	.get("/partials/stats", getPartialStats)
 	// Trips routes
 	.post(
 		"/api/trips",
@@ -44,6 +60,7 @@ app.get("/api/health", (c) => c.json({ status: "ok" }))
 		tripConflictValidator,
 		creationHandler
 	)
+	.post("/trips", htmlCreationHandler)
 	.get("/api/trips", getTrips)
 
 rootLogger.info({ port: PORT }, "Server listening on port")

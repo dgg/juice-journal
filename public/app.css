@@ -1,0 +1,48 @@
+:root {
+	--daypart-morning: #f59e0b;
+	--daypart-afternoon: #6366f1;
+}
+
+.sticky-cta {
+	position: sticky;
+	bottom: 0;
+	background: var(--pico-background-color);
+	padding: 1rem 0;
+	border-top: 1px solid var(--pico-muted-border-color);
+	z-index: 10;
+}
+
+.sticky-cta button {
+	width: 100%;
+	font-size: 1.1rem;
+	padding: 0.75rem;
+}
+
+.delta.positive {
+	color: var(--pico-color-red-500);
+}
+
+.delta.negative {
+	color: var(--pico-color-green-500);
+}
+
+.daypart-indicator {
+	width: 2rem;
+	height: 2rem;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1rem;
+	flex-shrink: 0;
+}
+
+.daypart-indicator.morning {
+	background: #fef3c7;
+	color: var(--daypart-morning);
+}
+
+.daypart-indicator.afternoon {
+	background: #e0e7ff;
+	color: var(--daypart-afternoon);
+}

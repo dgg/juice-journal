@@ -1,16 +1,19 @@
-import { describe, it, expect, beforeAll, afterAll } from "bun:test"
+import { describe, it, expect, beforeAll, afterAll, afterEach } from "bun:test"
 import { db } from "../db/client"
 import { sql, SQL } from "bun"
-import { homeHandler } from "./home"
+import { homeHandler } from "./home.tsx"
+import { getPartialTrips, getPartialStats, htmlCreationHandler } from "./html-handlers.tsx"
+import { getTripFormPage } from "./html-handlers.tsx"
 import { DateTime } from "luxon"
 
-const TEST_VEHICLE_ID = "TestVehicleHomeHandler"
-const TEST_LOCATION_ID = "TestLocationHomeHandler"
-const TEST_VEHICLE_ID_2 = "TestVehicleHomeHandler2"
+const TEST_VEHICLE_ID = "TestVehicleHomeH"
+const TEST_LOCATION_ID = "TestLocationHome"
+const TEST_VEHICLE_ID_2 = "SecondVehicleHom"
 
 const createMockContext = () => ({
 	req: {
-		valid: (type: string) => ({})
+		valid: (type: string) => ({}),
+		parseBody: async () => ({})
 	},
 	var: {
 		logger: {
@@ -19,7 +22,14 @@ const createMockContext = () => ({
 			error: (...args: any[]) => {}
 		}
 	},
-	html: (data: string, status = 200) => ({ data, status })
+	html: (data: any, status = 200) => {
+		const body = typeof data === "string" ? data : data.toString()
+		return {
+			status,
+			text: () => Promise.resolve(body),
+			json: () => Promise.resolve(JSON.parse(body))
+		} as Response
+	}
 })
 
 beforeAll(async () => {
@@ -45,9 +55,14 @@ afterAll(async () => {
 	} catch {}
 })
 
-describe.skip("homeHandler", () => {
+afterEach(async () => {
+	try {
+		await db`DELETE FROM trips WHERE vehicle_id IN (${TEST_VEHICLE_ID}, ${TEST_VEHICLE_ID_2})`
+	} catch {}
+})
+
+describe("homeHandler", () => {
 	it("returns HTML with populated month stats and trip list", async () => {
-		// Insert trips in current month
 		const now = DateTime.now()
 		const startOfMonth = now.startOf("month")
 		const tripDate = startOfMonth.plus({ days: 5 })
@@ -69,21 +84,22 @@ describe.skip("homeHandler", () => {
 
 		const mockCtx = createMockContext()
 		const result = await homeHandler(mockCtx as any)
+		const html = await result.text()
 
 		expect(result.status).toBe(200)
-		expect(typeof result.data).toBe("string")
-		expect(result.data).toContain("Avg consumption")
-		expect(result.data).toContain("18.5")
-		expect(result.data).toContain("Test Vehicle")
-		expect(result.data).toContain("Trips")
+		expect(html).toContain("Avg consumption")
+		expect(html).toContain("18.5")
+		expect(html).toContain("Test Vehicle")
+		expect(html).toContain("Trips")
 	})
 
 	it("shows empty state when no trips exist", async () => {
 		const mockCtx = createMockContext()
 		const result = await homeHandler(mockCtx as any)
+		const html = await result.text()
 
 		expect(result.status).toBe(200)
-		expect(result.data).toContain("No trips yet")
+		expect(html).toContain("No trips yet")
 	})
 
 	it("handles NULL consumption gracefully", async () => {
@@ -103,9 +119,10 @@ describe.skip("homeHandler", () => {
 
 		const mockCtx = createMockContext()
 		const result = await homeHandler(mockCtx as any)
+		const html = await result.text()
 
 		expect(result.status).toBe(200)
-		expect(result.data).toContain("--")
+		expect(html).toContain("--")
 	})
 
 	it("shows prev-month delta when data exists", async () => {
@@ -141,15 +158,15 @@ describe.skip("homeHandler", () => {
 
 		const mockCtx = createMockContext()
 		const result = await homeHandler(mockCtx as any)
+		const html = await result.text()
 
 		expect(result.status).toBe(200)
-		expect(result.data).toContain("vs last month")
+		expect(html).toContain("vs last month")
 	})
 
 	it("selects vehicle from most recent trip", async () => {
 		const now = DateTime.now()
 
-		// Insert trip for vehicle 2 (more recent)
 		await db`
 			INSERT INTO trips (
 				vehicle_id, start_time, end_time, daypart, duration_min, distance_km
@@ -161,7 +178,6 @@ describe.skip("homeHandler", () => {
 			)
 		`
 
-		// Insert older trip for vehicle 1
 		await db`
 			INSERT INTO trips (
 				vehicle_id, start_time, end_time, daypart, duration_min, distance_km
@@ -175,8 +191,125 @@ describe.skip("homeHandler", () => {
 
 		const mockCtx = createMockContext()
 		const result = await homeHandler(mockCtx as any)
+		const html = await result.text()
 
 		expect(result.status).toBe(200)
-		expect(result.data).toContain("Second Vehicle")
+		expect(html).toContain("Second Vehicle")
+	})
+})
+
+describe("GET /partials/trips", () => {
+	it("returns trip list fragment", async () => {
+		const now = DateTime.now()
+		const tripDate = now.startOf("month").plus({ days: 2 })
+
+		await db`
+			INSERT INTO trips (
+				vehicle_id, start_time, end_time, daypart, duration_min, distance_km,
+				avg_consumption_kwh_100km
+			) VALUES (
+				${TEST_VEHICLE_ID},
+				${tripDate.toUTC().toISO()},
+				${tripDate.plus({ minutes: 30 }).toUTC().toISO()},
+				'morning', 30, 12.0,
+				18.5
+			)
+		`
+
+		const mockCtx = createMockContext()
+		const result = await getPartialTrips(mockCtx as any)
+		const html = await result.text()
+
+		expect(result.status).toBe(200)
+		expect(html).toContain("18.5")
+	})
+
+	it("returns empty state when no trips", async () => {
+		const mockCtx = createMockContext()
+		const result = await getPartialTrips(mockCtx as any)
+		const html = await result.text()
+
+		expect(result.status).toBe(200)
+		expect(html).toContain("No trips yet")
+	})
+})
+
+describe("GET /partials/stats", () => {
+	it("returns stats fragment", async () => {
+		const mockCtx = createMockContext()
+		const result = await getPartialStats(mockCtx as any)
+		const html = await result.text()
+
+		expect(result.status).toBe(200)
+		expect(html).toContain("Avg consumption")
+	})
+})
+
+describe("GET /trips/new", () => {
+	it("renders trip form page", async () => {
+		const mockCtx = createMockContext()
+		const result = await getTripFormPage(mockCtx as any)
+		const html = await result.text()
+
+		expect(result.status).toBe(200)
+		expect(html).toContain('action="/trips"')
+		expect(html).toContain('hx-post="/trips"')
+	})
+})
+
+describe("POST /trips", () => {
+	it("returns TripRow + OOB stats on success", async () => {
+		const now = DateTime.now()
+		const startOfMonth = now.startOf("month")
+		const tripDate = startOfMonth.plus({ days: 3 })
+
+		await db`
+			INSERT INTO trips (
+				vehicle_id, start_time, end_time, daypart, duration_min, distance_km,
+				avg_consumption_kwh_100km
+			) VALUES (
+				${TEST_VEHICLE_ID},
+				${tripDate.toUTC().toISO()},
+				${tripDate.plus({ minutes: 30 }).toUTC().toISO()},
+				'afternoon', 30, 12.0,
+				18.5
+			)
+		`
+
+		const mockCtx = createMockContext()
+		mockCtx.req.parseBody = async () => ({
+			vehicle_id: TEST_VEHICLE_ID,
+			start_time: tripDate.plus({ days: 1 }).toUTC().toISO(),
+			end_time: tripDate.plus({ days: 1, minutes: 30 }).toUTC().toISO(),
+			daypart: "morning",
+			duration_min: "45",
+			distance_km: "15.0",
+			avg_consumption_kwh_100km: "20.0"
+		})
+
+		const result = await htmlCreationHandler(mockCtx as any)
+		const html = await result.text()
+
+		expect(result.status).toBe(200)
+		expect(html).toContain("hx-swap-oob")
+	})
+
+	it("returns problem details on validation failure", async () => {
+		const mockCtx = createMockContext()
+		mockCtx.req.parseBody = async () => ({
+			vehicle_id: "invalid",
+			start_time: "bad",
+			end_time: "bad",
+			daypart: "morning",
+			duration_min: "0",
+			distance_km: "0"
+		})
+
+		try {
+			await htmlCreationHandler(mockCtx as any)
+			expect(false).toBe(true)
+		} catch (error) {
+			expect(error).toBeDefined()
+		}
 	})
 })

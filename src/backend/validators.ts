@@ -13,7 +13,7 @@ import { problems } from "./problems"
 
 export const creationValidator = zValidator("json", tripInputSchema, zodProblemHook({}))
 
-export const vehicleValidator = validator("json", async (req: TripInput) => {
+export async function validateVehicle(req: TripInput): Promise<TripInput> {
 	try {
 		const exists = await vehiclesQueries.vehicleExists(req.vehicle_id)
 		if (!exists) {
@@ -36,9 +36,9 @@ export const vehicleValidator = validator("json", async (req: TripInput) => {
 			}
 		})
 	}
-})
+}
 
-export const startLocationValidator = validator("json", async (req: TripInput) => {
+export async function validateStartLocation(req: TripInput): Promise<TripInput> {
 	if (!req.start_location_id) {
 		return req
 	}
@@ -69,9 +69,9 @@ export const startLocationValidator = validator("json", async (req: TripInput) =
 			}
 		})
 	}
-})
+}
 
-export const endLocationValidator = validator("json", async (req: TripInput) => {
+export async function validateEndLocation(req: TripInput): Promise<TripInput> {
 	if (!req.end_location_id) {
 		return req
 	}
@@ -102,9 +102,9 @@ export const endLocationValidator = validator("json", async (req: TripInput) => 
 			}
 		})
 	}
-})
+}
 
-export const tripConflictValidator = validator("json", async (req: TripInput) => {
+export async function validateTripConflict(req: TripInput): Promise<TripInput> {
 	try {
 		const exists = await tripsQueries.existsTripByVehicleAndEndTime({
 			vehicleId: req.vehicle_id,
@@ -126,4 +126,20 @@ export const tripConflictValidator = validator("json", async (req: TripInput) =>
 			extensions: { vehicle_id: req.vehicle_id, end_time: req.end_time }
 		})
 	}
+}
+
+export const vehicleValidator = validator("json", async (req: TripInput) => {
+	return validateVehicle(req)
+})
+
+export const startLocationValidator = validator("json", async (req: TripInput) => {
+	return validateStartLocation(req)
+})
+
+export const endLocationValidator = validator("json", async (req: TripInput) => {
+	return validateEndLocation(req)
+})
+
+export const tripConflictValidator = validator("json", async (req: TripInput) => {
+	return validateTripConflict(req)
 })
