@@ -15,62 +15,18 @@ export const StatCard: FC<{ stat: Stat; hero?: boolean }> = ({
 	hero
 }) => {
 	const hasValue = stat.value !== null
-	if (hero) {
-		return (
-			<article
-				style={{
-					background: "var(--pico-card-background-color)",
-					padding: "1.5rem",
-					borderRadius: "var(--pico-border-radius)",
-					textAlign: "center"
-				}}
-			>
-				<div
-					style={{
-						fontSize: "2rem",
-						fontWeight: 700,
-						color: hasValue ? "var(--pico-primary)" : "var(--pico-muted-color)"
-					}}
-				>
-					{hasValue ? formatNumber(stat.value, 1) : "--"}{" "}
-					<small style={{ fontSize: "1rem", fontWeight: 400 }}>{stat.unit}</small>
-				</div>
-				<div
-					style={{
-						fontSize: "0.875rem",
-						color: "var(--pico-muted-color)",
-						marginTop: "0.25rem"
-					}}
-				>
-					{stat.label}
-				</div>
-				{stat.delta !== undefined && (
-					<Delta value={stat.delta} unit={stat.deltaUnit || stat.unit} />
-				)}
-			</article>
-		)
-	}
+	const formatted = hasValue ? formatNumber(stat.value, hero ? 1 : 0) : "--"
+
 	return (
 		<article
-			style={{
-				background: "var(--pico-card-background-color)",
-				padding: "1rem",
-				borderRadius: "var(--pico-border-radius)",
-				textAlign: "center"
-			}}
+			class={`stat-card${hero ? " stat-card--hero" : ""}`}
+			{...(hero && !hasValue ? { "data-empty": "" } : {})}
 		>
-			<div style={{ fontSize: "1.25rem", fontWeight: 600 }}>
-				{hasValue ? formatNumber(stat.value, 0) : "--"}{" "}
-				<small style={{ fontSize: "0.875rem", fontWeight: 400 }}>{stat.unit}</small>
-			</div>
-			<div
-				style={{
-					fontSize: "0.75rem",
-					color: "var(--pico-muted-color)"
-				}}
-			>
-				{stat.label}
-			</div>
+			<p class="stat-card__value">
+				<data value={stat.value ?? ""}>{formatted}</data>{" "}
+				<small>{stat.unit}</small>
+			</p>
+			<small class="stat-card__label">{stat.label}</small>
 			{stat.delta !== undefined && (
 				<Delta value={stat.delta} unit={stat.deltaUnit || stat.unit} />
 			)}
@@ -98,14 +54,7 @@ export const StatsGrid: FC<{
 			: null
 
 	return (
-		<div
-			style={{
-				display: "grid",
-				gridTemplateColumns: "1fr",
-				gap: "1rem",
-				marginBottom: "1.5rem"
-			}}
-		>
+		<div class="stats-grid">
 			<StatCard
 				stat={{
 					label: "Avg consumption",
@@ -116,13 +65,7 @@ export const StatsGrid: FC<{
 				}}
 				hero
 			/>
-			<div
-				style={{
-					display: "grid",
-					gridTemplateColumns: "1fr 1fr",
-					gap: "1rem"
-				}}
-			>
+			<div class="stats-grid__row">
 				<StatCard
 					stat={{
 						label: "Avg duration",

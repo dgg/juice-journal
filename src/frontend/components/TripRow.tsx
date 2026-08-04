@@ -47,89 +47,50 @@ export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
 
 	return (
 		<details class="trip-row">
-			<summary
-				style={{
-					padding: "1rem",
-					display: "flex",
-					alignItems: "center",
-					gap: "0.75rem",
-					cursor: "pointer",
-					listStyle: "none"
-				}}
-			>
-				<div class={`daypart-indicator ${daypartClass}`}>{daypartIcon}</div>
-				<div style={{ flex: 1, minWidth: 0 }}>
-					<div style={{ fontWeight: 600, fontSize: "0.9375rem" }}>{dateStr}</div>
-					<div style={{ fontSize: "0.875rem", color: "var(--pico-muted-color)" }}>
+			<summary class="trip-row__summary">
+				<span class={`daypart-indicator ${daypartClass}`}>{daypartIcon}</span>
+				<div class="trip-row__title">
+					<h3>{dateStr}</h3>
+					<time
+						class="trip-row__time"
+						datetime={new Date(trip.startTime).toISOString()}
+					>
 						{timeStr}
-					</div>
+					</time>
 				</div>
-				<div
-					style={{
-						fontWeight: 600,
-						color: "var(--pico-primary)",
-						whiteSpace: "nowrap"
-					}}
+				<data
+					class="trip-row__consumption"
+					value={trip.avgConsumptionKwh100km ?? ""}
 				>
 					{consumptionStr}
-				</div>
+				</data>
 			</summary>
-			<div
-				style={{
-					padding: "0 1rem 1rem 1rem",
-					borderTop: "1px solid var(--pico-muted-border-color)"
-				}}
-			>
-				<dl
-					style={{
-						display: "grid",
-						gridTemplateColumns: "auto 1fr",
-						gap: "0.25rem 1rem",
-						margin: "0.75rem 0 0 0"
-					}}
-				>
-					<dt style={{ color: "var(--pico-muted-color)" }}>
-						<small>Distance</small>
-					</dt>
-					<dd style={{ margin: 0, fontWeight: 500 }}>
-						{formatNumber(trip.distanceKm, 1)} km
-					</dd>
-					<dt style={{ color: "var(--pico-muted-color)" }}>
-						<small>Duration</small>
-					</dt>
-					<dd style={{ margin: 0, fontWeight: 500 }}>
-						{trip.durationMin} min
-					</dd>
-					<dt style={{ color: "var(--pico-muted-color)" }}>
-						<small>Avg speed</small>
-					</dt>
-					<dd style={{ margin: 0, fontWeight: 500 }}>
+			<div class="trip-row__body">
+				<dl class="trip-snapshot">
+					<dt>Distance</dt>
+					<dd>{formatNumber(trip.distanceKm, 1)} km</dd>
+					<dt>Duration</dt>
+					<dd>{trip.durationMin} min</dd>
+					<dt>Avg speed</dt>
+					<dd>
 						{trip.avgSpeedKmh !== null ? formatNumber(trip.avgSpeedKmh, 0) : "--"} km/h
 					</dd>
 					{trip.odometerKm !== null && (
 						<>
-							<dt style={{ color: "var(--pico-muted-color)" }}>
-								<small>Odometer</small>
-							</dt>
-							<dd style={{ margin: 0, fontWeight: 500 }}>
-								{formatNumber(trip.odometerKm, 1)} km
-							</dd>
+							<dt>Odometer</dt>
+							<dd>{formatNumber(trip.odometerKm, 1)} km</dd>
 						</>
 					)}
 					{trip.startLocation && (
 						<>
-							<dt style={{ color: "var(--pico-muted-color)" }}>
-								<small>From</small>
-							</dt>
-							<dd style={{ margin: 0, fontWeight: 500 }}>{trip.startLocation}</dd>
+							<dt>From</dt>
+							<dd>{trip.startLocation}</dd>
 						</>
 					)}
 					{trip.endLocation && (
 						<>
-							<dt style={{ color: "var(--pico-muted-color)" }}>
-								<small>To</small>
-							</dt>
-							<dd style={{ margin: 0, fontWeight: 500 }}>{trip.endLocation}</dd>
+							<dt>To</dt>
+							<dd>{trip.endLocation}</dd>
 						</>
 					)}
 				</dl>
