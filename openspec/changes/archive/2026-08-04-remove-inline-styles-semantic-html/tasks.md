@@ -38,4 +38,4 @@
 
 - [x] 6.1 Ran `bun test` — 3 pre-existing DB-state failures unrelated to changes, user confirmed to ignore
 - [x] 6.2 Zero inline `style` attributes confirmed via grep
-- [ ] 6.3 Visual review with the user element-by-element
+- [x] 6.3 Visual review with the user element-by-element — user reviewed, only issue was consumption whitespace (fixed with `trip-row__title { flex: 1 }`)
