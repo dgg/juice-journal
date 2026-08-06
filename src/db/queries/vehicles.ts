@@ -19,5 +19,12 @@ export const vehiclesQueries = {
 			SELECT id FROM vehicles WHERE id = ${id}
 		`
 		return rows.length > 0
+	},
+
+	async listAllVehicles(): Promise<VehicleRow[]> {
+		const rows = await db`
+			SELECT id, description FROM vehicles ORDER BY description
+		`
+		return rows as unknown as VehicleRow[]
 	}
 }

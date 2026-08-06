@@ -279,10 +279,10 @@ describe("POST /trips", () => {
 		const mockCtx = createMockContext()
 		mockCtx.req.parseBody = async () => ({
 			vehicle_id: TEST_VEHICLE_ID,
-			start_time: tripDate.plus({ days: 1 }).toUTC().toISO(),
-			end_time: tripDate.plus({ days: 1, minutes: 30 }).toUTC().toISO(),
+			trip_date: tripDate.plus({ days: 1 }).toFormat("yyyy-MM-dd"),
+			start_time: "08:00",
+			end_time: "08:45",
 			daypart: "morning",
-			duration_min: "45",
 			distance_km: "15.0",
 			avg_consumption_kwh_100km: "20.0"
 		})
@@ -298,10 +298,10 @@ describe("POST /trips", () => {
 		const mockCtx = createMockContext()
 		mockCtx.req.parseBody = async () => ({
 			vehicle_id: "invalid",
+			trip_date: "2026-08-06",
 			start_time: "bad",
 			end_time: "bad",
 			daypart: "morning",
-			duration_min: "0",
 			distance_km: "0"
 		})
 

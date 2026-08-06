@@ -171,6 +171,18 @@ export const tripsQueries = {
 		return (rows[0] as unknown as Record<string, unknown>).vehicle_id as string
 	},
 
+	async findLatestOdometerForVehicle(vehicleId: string): Promise<number | null> {
+		const rows = await db`
+			SELECT odometer_km FROM trips
+			WHERE vehicle_id = ${vehicleId}
+				AND odometer_km IS NOT NULL
+			ORDER BY end_time DESC
+			LIMIT 1
+		`
+		if (rows.length === 0) return null
+		return toNumber((rows[0] as unknown as Record<string, unknown>).odometer_km as string | null)
+	},
+
 	async findTripsWithLocations(params: {
 		startUtc: string
 		endUtc: string
