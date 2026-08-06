@@ -54,4 +54,4 @@
 
 - [x] 8.1 Run `bun test` — 67/74 pass, 3 pre-existing failures (test DB has real data — empty-state and assertion tests find real trips), 4 skipped
 - [x] 8.2 Run `docker build .` — Docker build succeeds
-- [ ] 8.3 Manually test the form on a mobile viewport: fill from car screen data, verify duration auto-calc, verify daypart preset, verify location preset, submit successfully
+- [x] 8.3 Manually test the form on a mobile viewport: fill from car screen data, verify duration auto-calc, verify daypart preset, verify location preset, submit successfully — user confirmed sunny path works
