@@ -128,6 +128,34 @@ export async function validateTripConflict(req: TripInput): Promise<TripInput> {
 	}
 }
 
+export async function validateOdometer(req: TripInput): Promise<TripInput> {
+	if (req.odometer_km === undefined) {
+		return req
+	}
+	try {
+		const latest = await tripsQueries.findLatestOdometerForVehicle(req.vehicle_id)
+		if (latest !== null && req.odometer_km < latest) {
+			throw problems.create("FOREIGN_KEY_VIOLATION", {
+				detail: `Odometer reading ${req.odometer_km} is lower than the previous reading ${latest}`,
+				extensions: {
+					errors: [{ field: "odometer_km", message: "odometer reading cannot be lower than the previous reading" }]
+				}
+			})
+		}
+		return req
+	} catch (error) {
+		if (error instanceof ProblemDetailsError) {
+			throw error
+		}
+		throw problems.create("FOREIGN_KEY_VIOLATION", {
+			detail: `Could not verify odometer reading for vehicle '${req.vehicle_id}'`,
+			extensions: {
+				errors: [{ field: "odometer_km", message: "verification failed" }]
+			}
+		})
+	}
+}
+
 export const vehicleValidator = validator("json", async (req: TripInput) => {
 	return validateVehicle(req)
 })

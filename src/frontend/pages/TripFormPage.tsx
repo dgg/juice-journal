@@ -3,7 +3,37 @@ import { Layout } from "../Layout"
 import { Header } from "../components/Header"
 import { StickyCta } from "../components/StickyCta"
 
-export const TripFormPage: FC = () => {
+interface LocationOption {
+	id: string
+	label: string
+}
+
+interface VehicleOption {
+	id: string
+	description: string
+}
+
+interface TripFormPageProps {
+	nowDate: string
+	nowTime: string
+	defaultDaypart: "morning" | "afternoon"
+	startLocationId: string | null
+	endLocationId: string | null
+	locations: LocationOption[]
+	vehicles: VehicleOption[]
+	defaultVehicleId: string | null
+}
+
+export const TripFormPage: FC<TripFormPageProps> = ({
+	nowDate,
+	nowTime,
+	defaultDaypart,
+	startLocationId,
+	endLocationId,
+	locations,
+	vehicles,
+	defaultVehicleId
+}) => {
 	return (
 		<Layout title="Log trip — Juice Journal">
 			<main class="container">
@@ -15,68 +45,146 @@ export const TripFormPage: FC = () => {
 					hx-target="#trip-list"
 					hx-swap="beforeend"
 				>
-					<fieldset>
+					<div class="grid">
 						<label>
-							Vehicle ID
+							Date
 							<input
-								name="vehicle_id"
-								type="text"
+								name="trip_date"
+								type="date"
+								value={nowDate}
 								required
-								pattern="[A-Za-z0-9_-]{16}"
-								maxLength={16}
 							/>
 						</label>
-						<div class="grid">
-							<label>
-								Start location
-								<input name="start_location_id" type="text" />
-							</label>
-							<label>
-								End location
-								<input name="end_location_id" type="text" />
-							</label>
-						</div>
-						<div class="grid">
-							<label>
-								Start time
-								<input
-									name="start_time"
-									type="datetime-local"
-									required
-								/>
-							</label>
-							<label>
-								End time
-								<input
-									name="end_time"
-									type="datetime-local"
-									required
-								/>
-							</label>
-						</div>
-						<div class="grid">
-							<label>
-								Odometer (km)
-								<input
-									name="odometer_km"
-									type="number"
-									step="0.1"
-								/>
-							</label>
-							<label>
-								Consumption (kWh/100km)
-								<input
-									name="avg_consumption_kwh_100km"
-									type="number"
-									step="0.1"
-								/>
-							</label>
-						</div>
-						<input type="hidden" name="daypart" value="morning" />
-						<input type="hidden" name="duration_min" value="0" />
-						<input type="hidden" name="distance_km" value="0" />
-						<button type="submit" class="contrast">Save trip</button>
+					</div>
+					<div class="grid">
+						<label>
+							Start time
+							<input
+								name="start_time"
+								type="time"
+								required
+							/>
+						</label>
+						<label>
+							End time
+							<input
+								name="end_time"
+								type="time"
+								value={nowTime}
+								required
+							/>
+						</label>
+						<label>
+							Duration
+							<output name="duration_min">—</output>
+						</label>
+					</div>
+					<div class="grid">
+						<label>
+							Distance (km)
+							<input
+								name="distance_km"
+								type="number"
+								step="0.1"
+								required
+							/>
+						</label>
+						<label>
+							Avg speed (km/h)
+							<input
+								name="avg_speed_kmh"
+								type="number"
+								step="1"
+							/>
+						</label>
+					</div>
+					<div class="grid">
+						<label>
+							Consumption (kWh/100km)
+							<input
+								name="avg_consumption_kwh_100km"
+								type="number"
+								step="0.1"
+							/>
+						</label>
+						<label>
+							Odometer (km)
+							<input
+								name="odometer_km"
+								type="number"
+								step="0.1"
+							/>
+						</label>
+					</div>
+					<fieldset class="daypart-selector">
+						<legend>Time of day</legend>
+						<label>
+							<input
+								type="radio"
+								name="daypart"
+								value="morning"
+								checked={defaultDaypart === "morning"}
+							/>
+							<span>☀ Morning</span>
+						</label>
+						<label>
+							<input
+								type="radio"
+								name="daypart"
+								value="afternoon"
+								checked={defaultDaypart === "afternoon"}
+							/>
+							<span>☾ Afternoon</span>
+						</label>
 					</fieldset>
+					<div class="grid">
+						<label>
+							Start location
+							<select name="start_location_id">
+								<option value="">—</option>
+								{locations.map((loc) => (
+									<option
+										value={loc.id}
+										selected={loc.id === startLocationId}
+									>
+										{loc.label}
+									</option>
+								))}
+							</select>
+						</label>
+						<label>
+							End location
+							<select name="end_location_id">
+								<option value="">—</option>
+								{locations.map((loc) => (
+									<option
+										value={loc.id}
+										selected={loc.id === endLocationId}
+									>
+										{loc.label}
+									</option>
+								))}
+							</select>
+						</label>
+					</div>
+					<label>
+						Vehicle
+						<select name="vehicle_id" required>
+							{vehicles.length === 0 && (
+								<option value="">No vehicles — add one first</option>
+							)}
+							{vehicles.map((v) => (
+								<option
+									value={v.id}
+									selected={v.id === defaultVehicleId}
+								>
+									{v.description}
+								</option>
+							))}
+						</select>
+					</label>
+					<button type="submit" class="contrast">Save trip</button>
+					<input type="hidden" name="duration_min" value="" />
 				</form>
 				<StickyCta href="/" label="Back to home" />
 			</main>
