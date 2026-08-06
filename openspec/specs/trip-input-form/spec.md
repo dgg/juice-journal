@@ -1,0 +1,179 @@
+# trip-input-form
+
+## Purpose
+
+Defines the mobile-first trip entry form: field set, defaults, server-side derivation of duration and daypart, location presets, vehicle and location dropdowns, and odometer monotonicity validation.
+
+## Requirements
+
+### Requirement: Form field ordering prioritizes manual data entry
+
+The trip input form SHALL order fields so that values the user reads from the car screen appear first, followed by derived values, followed by low-priority selections. The ordering SHALL be: date, start time, end time, duration (read-only), distance, average speed, consumption, odometer, daypart, start location, end location, vehicle.
+
+#### Scenario: User enters car-screen data first
+
+- **GIVEN** the user opens the trip form on a mobile device
+- **WHEN** the form renders
+- **THEN** date, start time, end time, distance, average speed, consumption, and odometer fields SHALL appear before daypart, locations, and vehicle
+
+#### Scenario: Duration is read-only
+
+- **GIVEN** the form is rendered with start time and end time filled
+- **WHEN** the user views the duration field
+- **THEN** the duration SHALL be displayed as a read-only value computed as the difference between end time and start time, and SHALL NOT be an editable input
+
+### Requirement: End time defaults to current local time at render
+
+The form SHALL pre-populate the end time field with the current local time (resolved via `DISPLAY_TZ`, default `Europe/Copenhagen`) at the moment the form is rendered. The time SHALL be a snapshot taken server-side; it SHALL NOT update after the page loads. The date field SHALL default to the same snapshot's calendar date.
+
+#### Scenario: Form opened in the afternoon
+
+- **GIVEN** the current local time is 16:35 in `Europe/Copenhagen`
+- **WHEN** the user opens the trip form
+- **THEN** the end time field SHALL be pre-filled with 16:35 and the date field SHALL be pre-filled with today's date
+
+#### Scenario: User edits the pre-filled end time
+
+- **GIVEN** the form is rendered with end time pre-filled to 16:35
+- **WHEN** the user changes the end time to 16:40
+- **THEN** the duration field SHALL remain read-only and reflect the new difference between the edited end time and the start time upon submission
+
+### Requirement: Separate date and time inputs
+
+The form SHALL present date and time as separate inputs. A single shared date input SHALL apply to both start and end times, assuming same-day trips. No overnight trip handling SHALL be provided.
+
+#### Scenario: Single date field for both times
+
+- **GIVEN** the user is filling the trip form
+- **WHEN** the form renders
+- **THEN** there SHALL be one date input, one start time input, and one end time input — not two datetime-local inputs
+
+### Requirement: Duration derived server-side from end time minus start time
+
+The HTML form handler SHALL derive `duration_min` as the difference between `end_time` and `start_time` (in whole minutes) before schema validation and trip insertion. The form SHALL NOT send `duration_min` as a form field. The `tripInputSchema` SHALL remain unchanged (still requires `duration_min`); the handler SHALL inject the derived value before calling `.parse()`.
+
+#### Scenario: Duration calculated from entered times
+
+- **GIVEN** the user enters date 2026-08-06, start time 08:12, end time 08:47 (DK local)
+- **WHEN** the form is submitted
+- **THEN** the handler SHALL compute `duration_min` = 35 and pass it to `tripInputSchema.parse()` along with the assembled ISO datetimes
+
+#### Scenario: Duration not sent from the form
+
+- **GIVEN** the form's HTML is inspected
+- **WHEN** the field list is examined
+- **THEN** there SHALL be no `duration_min` input — visible or hidden — in the form markup
+
+### Requirement: Daypart auto-derived from start time with override
+
+The form SHALL auto-derive the daypart from the start time using a threshold of 13:00 local time: start time before 13:00 SHALL select "morning"; start time at or after 13:00 SHALL select "afternoon." The daypart SHALL be presented as a segmented control with two radio options (☀ Morning, ☾ Afternoon) that the user can override. The auto-derivation SHALL happen at render time only (based on the pre-filled or entered start time); subsequent edits to start time SHALL NOT automatically re-swap the daypart.
+
+#### Scenario: Morning start time defaults to morning
+
+- **GIVEN** the start time entered is 08:12 local
+- **WHEN** the form renders the daypart control
+- **THEN** the "Morning" option SHALL be selected
+
+#### Scenario: Afternoon start time defaults to afternoon
+
+- **GIVEN** the start time entered is 16:35 local
+- **WHEN** the form renders the daypart control
+- **THEN** the "Afternoon" option SHALL be selected
+
+#### Scenario: User overrides auto-derived daypart
+
+- **GIVEN** the start time is 08:12 (auto-derived as "morning") and the user is returning from work early
+- **WHEN** the user selects the "Afternoon" option
+- **THEN** the form SHALL submit `daypart=afternoon` regardless of the start time
+
+### Requirement: Location presets from daypart at render
+
+The form SHALL pre-select start and end locations based on the auto-derived daypart: morning SHALL preset start location to the location labeled "home" and end location to the location labeled "work"; afternoon SHALL swap them (start "work", end "home"). The preset SHALL happen at render time only; the user can override either location freely via a dropdown. If a labeled location does not exist, the corresponding dropdown SHALL default to empty.
+
+#### Scenario: Morning commute presets home to work
+
+- **GIVEN** the auto-derived daypart is "morning" and locations labeled "home" and "work" exist
+- **WHEN** the form renders
+- **THEN** the start location dropdown SHALL be pre-selected to "home" and the end location dropdown SHALL be pre-selected to "work"
+
+#### Scenario: Afternoon commute swaps locations
+
+- **GIVEN** the auto-derived daypart is "afternoon" and locations labeled "home" and "work" exist
+- **WHEN** the form renders
+- **THEN** the start location dropdown SHALL be pre-selected to "work" and the end location dropdown SHALL be pre-selected to "home"
+
+#### Scenario: User overrides a preset location
+
+- **GIVEN** the start location is pre-selected to "home"
+- **WHEN** the user selects a different location from the dropdown
+- **THEN** the form SHALL submit the user-selected location, not the preset
+
+#### Scenario: Labeled location does not exist
+
+- **GIVEN** no location with label "home" exists in the database
+- **WHEN** the form renders
+- **THEN** the start location dropdown SHALL default to empty (no pre-selection)
+
+### Requirement: Vehicle dropdown defaulting to last-used vehicle
+
+The form SHALL present vehicle selection as a dropdown listing all vehicles, using each vehicle's `description` as the display label. The default selection SHALL be the vehicle from the most recent trip (by `end_time`); if no trips exist, the default SHALL be the first vehicle (or only vehicle). If no vehicles exist, the dropdown SHALL be empty.
+
+#### Scenario: Default to last trip's vehicle
+
+- **GIVEN** a trip exists with `vehicle_id` V and `end_time` is the most recent, and vehicle V has description "Tesla M3"
+- **WHEN** the form renders
+- **THEN** the vehicle dropdown SHALL default to "Tesla M3"
+
+#### Scenario: No trips exist defaults to first vehicle
+
+- **GIVEN** no trips exist and two vehicles exist with descriptions "Car A" and "Car B"
+- **WHEN** the form renders
+- **THEN** the vehicle dropdown SHALL default to the first vehicle returned by the query
+
+### Requirement: Location selection via dropdown
+
+The form SHALL present start and end location selection as dropdowns listing all locations, using each location's `label` as the display text. Free-text entry of location IDs SHALL NOT be available.
+
+#### Scenario: User selects from known locations
+
+- **GIVEN** three locations exist with labels "home", "work", "gym"
+- **WHEN** the user opens the start location dropdown
+- **THEN** the dropdown SHALL list "home", "work", and "gym" as selectable options, with no free-text input
+
+### Requirement: Odometer monotonicity validation
+
+The system SHALL validate that a submitted odometer reading is greater than or equal to the last recorded odometer reading for the selected vehicle. The check SHALL query the most recent trip for the vehicle and compare the submitted `odometer_km` against the stored value. If the submitted value is lower, the system SHALL reject the submission with a `422` `application/problem+json` response identifying the `odometer_km` field. If no prior trip exists for the vehicle, any non-negative odometer value SHALL be accepted.
+
+#### Scenario: Odometer reading higher than last
+
+- **GIVEN** the last trip for vehicle V has `odometer_km=5200`
+- **WHEN** the user submits a new trip for vehicle V with `odometer_km=5231`
+- **THEN** the system SHALL accept the submission
+
+#### Scenario: Odometer reading lower than last
+
+- **GIVEN** the last trip for vehicle V has `odometer_km=5231`
+- **WHEN** the user submits a new trip for vehicle V with `odometer_km=5200`
+- **THEN** the system SHALL reject the submission with `422` and a `detail` indicating the odometer reading cannot be lower than the previous reading
+
+#### Scenario: No prior trip for vehicle
+
+- **GIVEN** no trips exist for vehicle V
+- **WHEN** the user submits a trip for vehicle V with `odometer_km=100`
+- **THEN** the system SHALL accept the submission
+
+#### Scenario: Odometer field omitted
+
+- **GIVEN** the user submits a trip without an odometer reading
+- **WHEN** the handler processes the form
+- **THEN** the system SHALL skip the monotonicity check and accept the submission (odometer is nullable)
+
+### Requirement: Date and time assembled into ISO datetimes server-side
+
+The HTML form handler SHALL combine the shared date input with the start time and end time inputs into ISO 8601 datetime strings in the display timezone, then convert to UTC before passing to `tripInputSchema.parse()`. The conversion SHALL use Luxon with the `DISPLAY_TZ` (default `Europe/Copenhagen`) as the zone.
+
+#### Scenario: Date and time combined to UTC
+
+- **GIVEN** the form submits date=2026-08-06, start_time=08:12, end_time=08:47
+- **WHEN** the handler assembles the datetimes
+- **THEN** it SHALL produce `start_time` and `end_time` as ISO 8601 UTC strings representing 08:12 and 08:47 Copenhagen local on 2026-08-06
