@@ -13,7 +13,8 @@ const TEST_VEHICLE_ID_2 = "SecondVehicleHom"
 const createMockContext = () => ({
 	req: {
 		valid: (type: string) => ({}),
-		parseBody: async () => ({})
+		parseBody: async () => ({}),
+		header: (name: string) => undefined
 	},
 	var: {
 		logger: {
@@ -22,12 +23,30 @@ const createMockContext = () => ({
 			error: (...args: any[]) => {}
 		}
 	},
+	_header: (name: string, value: string) => {},
 	html: (data: any, status = 200) => {
 		const body = typeof data === "string" ? data : data.toString()
 		return {
 			status,
+			headers: new Headers(),
 			text: () => Promise.resolve(body),
 			json: () => Promise.resolve(JSON.parse(body))
+		} as Response
+	},
+	redirect: (path: string) => {
+		return {
+			status: 302,
+			headers: new Map([["location", path]]) as any,
+			text: () => Promise.resolve(""),
+			json: () => Promise.resolve({})
+		} as Response
+	},
+	text: (data: any, status = 200) => {
+		return {
+			status,
+			headers: new Headers(),
+			text: () => Promise.resolve(data),
+			json: () => Promise.resolve({})
 		} as Response
 	}
 })
@@ -258,7 +277,7 @@ describe("GET /trips/new", () => {
 })
 
 describe("POST /trips", () => {
-	it("returns TripRow + OOB stats on success", async () => {
+	it("redirects to home on success", async () => {
 		const now = DateTime.now()
 		const startOfMonth = now.startOf("month")
 		const tripDate = startOfMonth.plus({ days: 3 })
@@ -288,10 +307,9 @@ describe("POST /trips", () => {
 		})
 
 		const result = await htmlCreationHandler(mockCtx as any)
-		const html = await result.text()
 
-		expect(result.status).toBe(200)
-		expect(html).toContain("hx-swap-oob")
+		expect(result.status).toBe(302)
+		expect(result.headers.get("location")).toBe("/")
 	})
 
 	it("returns problem details on validation failure", async () => {

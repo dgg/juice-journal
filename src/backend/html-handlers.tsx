@@ -17,7 +17,6 @@ import {
 import { TripFormPage } from "../frontend/pages/TripFormPage"
 import { TripListFragment } from "../frontend/fragments/TripListFragment"
 import { StatsFragment } from "../frontend/fragments/StatsFragment"
-import { TripCreatedResponse } from "../frontend/fragments/TripCreatedResponse"
 
 export async function getTripFormPage(c: Context<Env>) {
 	const displayTz = resolveDisplayTz(
@@ -193,56 +192,12 @@ export async function htmlCreationHandler(c: Context<Env>) {
 	await validateTripConflict(parsed)
 	await validateOdometer(parsed)
 
-	const trip = await tripsQueries.createTrip(parsed)
+	await tripsQueries.createTrip(parsed)
 
-	const displayTz = resolveDisplayTz(
-		undefined,
-		undefined,
-		process.env.DISPLAY_TZ || "Europe/Copenhagen"
-	)
-	const now = DateTime.now()
-	const { startUtc, endUtc } = currentMonthBoundsUtc(displayTz, now)
-	const { startUtc: prevStartUtc, endUtc: prevEndUtc } = prevMonthBoundsUtc(
-		displayTz,
-		now
-	)
-
-	const currentStats = await statsQueries.monthlyAggregates({
-		startUtc,
-		endUtc,
-		vehicleId: trip.vehicle_id
-	})
-	const prevStats = await statsQueries.monthlyAggregates({
-		startUtc: prevStartUtc,
-		endUtc: prevEndUtc,
-		vehicleId: trip.vehicle_id
-	})
-
-	const tripRow = {
-		id: trip.id,
-		startTime: new Date(trip.start_time.toISO() as string),
-		endTime: new Date(trip.end_time.toISO() as string),
-		daypart: trip.daypart,
-		durationMin: trip.duration_min,
-		distanceKm: trip.distance_km,
-		avgSpeedKmh: trip.avg_speed_kmh,
-		avgConsumptionKwh100km: trip.avg_consumption_kwh_100km,
-		odometerKm: trip.odometer_km,
-		startLocation: null,
-		endLocation: null
+	if (c.req.header("HX-Request")) {
+		c.header("HX-Redirect", "/")
+		return c.text("", 200)
 	}
 
-	return c.html(
-		<TripCreatedResponse
-			trip={tripRow}
-			stats={{
-				avgConsumption: currentStats.avgConsumption,
-				avgDuration: currentStats.avgDuration,
-				totalDistance: currentStats.totalDistance,
-				prevAvgConsumption: prevStats.avgConsumption,
-				prevAvgDuration: prevStats.avgDuration,
-				prevTotalDistance: prevStats.totalDistance
-			}}
-		/>
-	)
+	return c.redirect("/")
 }
