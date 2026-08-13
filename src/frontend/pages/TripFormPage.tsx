@@ -42,8 +42,6 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 					action="/trips"
 					method="post"
 					hx-post="/trips"
-					hx-target="#trip-list"
-					hx-swap="beforeend"
 				>
 					{/* Row 1: date + daypart */}
 					<div class="grid">

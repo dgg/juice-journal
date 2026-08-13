@@ -2,6 +2,7 @@ import type { FC } from "hono/jsx"
 import { raw } from "hono/html"
 import { Layout } from "../Layout"
 import { StatsChartsFragment } from "../fragments/StatsChartsFragment"
+import { StickyCta } from "../components/StickyCta"
 
 interface StatWithDelta {
 	value: number | null
@@ -46,6 +47,7 @@ export const StatsPage: FC<{ data: StatsView }> = ({ data }) => {
 		<Layout title="Stats — Juice Journal">
 			<main class="container">
 				<StatsChartsFragment data={data} />
+				<StickyCta actions={[{ href: "/", label: "Back to home" }]} />
 			</main>
 			<Scripts />
 		</Layout>
