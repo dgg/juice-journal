@@ -5,6 +5,7 @@ import { problemDetailsHandler } from "hono-problem-details"
 import { rootLogger, type Env } from "../utils/logger"
 import { creationHandler, getTrips } from "./handlers"
 import { homeHandler } from "./home.tsx"
+import { statsHandler, getPartialTripStats } from "./stats.tsx"
 import {
 	getTripFormPage,
 	getPartialTrips,
@@ -50,6 +51,8 @@ app.get("/api/health", (c) => c.json({ status: "ok" }))
 	.get("/trips/new", getTripFormPage)
 	.get("/partials/trips", getPartialTrips)
 	.get("/partials/stats", getPartialStats)
+	.get("/partials/trip-stats", getPartialTripStats)
+	.get("/stats", statsHandler)
 	// Trips routes
 	.post(
 		"/api/trips",

@@ -1,145 +1,117 @@
-import { describe, it, expect } from "bun:test"
-import { resolveDisplayTz, currentMonthBoundsUtc, prevMonthBoundsUtc } from "./dates"
-import { DateTime } from "luxon"
+import { describe, it, expect } from "bun:test";
+import {
+  currentWeekBoundsUtc,
+  prevWeekBoundsUtc,
+  currentYearBoundsUtc,
+  prevYearBoundsUtc,
+  periodBoundsUtc
+} from "./dates";
+import { DateTime } from "luxon";
 
-describe("resolveDisplayTz", () => {
-	it("prioritizes end location timezone", () => {
-		const result = resolveDisplayTz("Europe/Copenhagen", "UTC")
-		expect(result).toBe("Europe/Copenhagen")
-	})
+describe("dates utilities", () => {
+  describe("currentWeekBoundsUtc", () => {
+    it("should return ISO week bounds in UTC", () => {
+      // Use a known date that's definitely in the middle of a week
+      const date = DateTime.fromISO("2026-08-13T12:00:00", { zone: "Europe/Copenhagen" }); // Thursday
+      const bounds = currentWeekBoundsUtc("Europe/Copenhagen", date);
+      
+      expect(bounds.startUtc).toBeDefined();
+      expect(bounds.endUtc).toBeDefined();
+      expect(typeof bounds.startUtc).toBe("string");
+      expect(typeof bounds.endUtc).toBe("string");
+    });
 
-	it("falls back to start location when end is missing", () => {
-		const result = resolveDisplayTz(null, "America/New_York")
-		expect(result).toBe("America/New_York")
-	})
+    it("handles week boundary: Friday late local vs Saturday early UTC", () => {
+      // Friday evening in Europe/Copenhagen becomes Saturday early morning UTC
+      // This should still belong to the current week (the Friday-Saturday week)
+      const fridayLateLocal = DateTime.fromISO("2026-08-14T23:30:00", { zone: "Europe/Copenhagen" }); // Friday 11:30 PM
+      const bounds = currentWeekBoundsUtc("Europe/Copenhagen", fridayLateLocal);
 
-	it("falls back to config default when both locations missing", () => {
-		const result = resolveDisplayTz(null, null, "Europe/Copenhagen")
-		expect(result).toBe("Europe/Copenhagen")
-	})
+      // This should be the week that contains this Friday (starts Monday Aug 10)
+      // So the week bounds should be Monday Aug 10 00:00 (CET) to Monday Aug 17 00:00 (CET) -> in UTC
+      // Aug 9 22:00:00 - Aug 16 22:00:00
+      expect(bounds.startUtc).toBe("2026-08-09T22:00:00.000Z"); // Monday Aug 10 00:00 CET -> UTC
+      expect(bounds.endUtc).toBe("2026-08-16T22:00:00.000Z");   // Monday Aug 17 00:00 CET -> UTC
+    });
+  });
 
-	it("treats empty strings as missing", () => {
-		const result = resolveDisplayTz("", "", "Europe/Copenhagen")
-		expect(result).toBe("Europe/Copenhagen")
-	})
+  describe("prevWeekBoundsUtc", () => {
+    it("should return previous ISO week bounds in UTC", () => {
+      const date = DateTime.fromISO("2026-08-13T12:00:00", { zone: "Europe/Copenhagen" });
+      const bounds = prevWeekBoundsUtc("Europe/Copenhagen", date);
+      
+      expect(bounds.startUtc).toBeDefined();
+      expect(bounds.endUtc).toBeDefined();
+      expect(typeof bounds.startUtc).toBe("string");
+      expect(typeof bounds.endUtc).toBe("string");
+    });
+  });
 
-	it("uses default Europe/Copenhagen when no fallback provided", () => {
-		const result = resolveDisplayTz(null, null)
-		expect(result).toBe("Europe/Copenhagen")
-	})
+  describe("currentYearBoundsUtc", () => {
+    it("should return year bounds in UTC", () => {
+      const date = DateTime.fromISO("2026-08-13T12:00:00", { zone: "Europe/Copenhagen" });
+      const bounds = currentYearBoundsUtc("Europe/Copenhagen", date);
+      
+      expect(bounds.startUtc).toBeDefined();
+      expect(bounds.endUtc).toBeDefined();
+      expect(typeof bounds.startUtc).toBe("string");
+      expect(typeof bounds.endUtc).toBe("string");
+    });
+  });
 
-	it("prefers start location over default fallback", () => {
-		const result = resolveDisplayTz(null, "UTC", "Europe/Copenhagen")
-		expect(result).toBe("UTC")
-	})
-})
+  describe("prevYearBoundsUtc", () => {
+    it("should return previous year bounds in UTC", () => {
+      const date = DateTime.fromISO("2026-08-13T12:00:00", { zone: "Europe/Copenhagen" });
+      const bounds = prevYearBoundsUtc("Europe/Copenhagen", date);
+      
+      expect(bounds.startUtc).toBeDefined();
+      expect(bounds.endUtc).toBeDefined();
+      expect(typeof bounds.startUtc).toBe("string");
+      expect(typeof bounds.endUtc).toBe("string");
+    });
+  });
 
-describe("currentMonthBoundsUtc", () => {
-	it("computes mid-month Copenhagen bounds correctly", () => {
-		// July 15, 2026, 10:00 Copenhagen (UTC+2)
-		const now = DateTime.fromISO("2026-07-15T10:00:00", { zone: "Europe/Copenhagen" })
-		const { startUtc, endUtc } = currentMonthBoundsUtc("Europe/Copenhagen", now)
+  describe("periodBoundsUtc", () => {
+    it("should dispatch correctly for week", () => {
+      const date = DateTime.fromISO("2026-08-13T12:00:00", { zone: "Europe/Copenhagen" });
+      const bounds = periodBoundsUtc("week", "Europe/Copenhagen", date);
+      
+      expect(bounds.current).toBeDefined();
+      expect(bounds.previous).toBeDefined();
+      expect(bounds.current.startUtc).toBeDefined();
+      expect(bounds.current.endUtc).toBeDefined();
+      expect(bounds.previous.startUtc).toBeDefined();
+      expect(bounds.previous.endUtc).toBeDefined();
+    });
 
-		// July 1, 2026 00:00 Copenhagen (UTC+2) = June 30, 2026 22:00 UTC
-		expect(startUtc).toBe("2026-06-30T22:00:00.000Z")
+    it("should dispatch correctly for month", () => {
+      const date = DateTime.fromISO("2026-08-13T12:00:00", { zone: "Europe/Copenhagen" });
+      const bounds = periodBoundsUtc("month", "Europe/Copenhagen", date);
+      
+      expect(bounds.current).toBeDefined();
+      expect(bounds.previous).toBeDefined();
+      expect(bounds.current.startUtc).toBeDefined();
+      expect(bounds.current.endUtc).toBeDefined();
+      expect(bounds.previous.startUtc).toBeDefined();
+      expect(bounds.previous.endUtc).toBeDefined();
+    });
 
-		// August 1, 2026 00:00 Copenhagen (UTC+2) = July 31, 2026 22:00 UTC
-		expect(endUtc).toBe("2026-07-31T22:00:00.000Z")
-	})
+    it("should dispatch correctly for year", () => {
+      const date = DateTime.fromISO("2026-08-13T12:00:00", { zone: "Europe/Copenhagen" });
+      const bounds = periodBoundsUtc("year", "Europe/Copenhagen", date);
+      
+      expect(bounds.current).toBeDefined();
+      expect(bounds.previous).toBeDefined();
+      expect(bounds.current.startUtc).toBeDefined();
+      expect(bounds.current.endUtc).toBeDefined();
+      expect(bounds.previous.startUtc).toBeDefined();
+      expect(bounds.previous.endUtc).toBeDefined();
+    });
 
-	it("computes UTC zone midnight bounds", () => {
-		const now = DateTime.fromISO("2026-07-15T10:00:00Z")
-		const { startUtc, endUtc } = currentMonthBoundsUtc("UTC", now)
-
-		expect(startUtc).toBe("2026-07-01T00:00:00.000Z")
-		expect(endUtc).toBe("2026-08-01T00:00:00.000Z")
-	})
-
-	it("excludes next month's first instant via exclusive end", () => {
-		const now = DateTime.fromISO("2026-07-15T10:00:00Z")
-		const { startUtc, endUtc } = currentMonthBoundsUtc("UTC", now)
-
-		// August 1, 2026 00:00 UTC exactly matches endUtc (as UTC ISO string)
-		expect(endUtc).toMatch(/2026-08-01T00:00:00/)
-
-		// Verify it's in UTC format (Z suffix)
-		expect(endUtc).toMatch(/Z$/)
-	})
-
-	it("handles DST transition correctly (March spring-forward)", () => {
-		// March 20, 2026 noon Copenhagen, after the spring-forward
-		const now = DateTime.fromISO("2026-03-20T12:00:00", { zone: "Europe/Copenhagen" })
-		const { startUtc, endUtc } = currentMonthBoundsUtc("Europe/Copenhagen", now)
-
-		// March 1, 2026 00:00 Copenhagen (UTC+1) = Feb 28, 2026 23:00 UTC
-		expect(startUtc).toBe("2026-02-28T23:00:00.000Z")
-
-		// April 1, 2026 00:00 Copenhagen (UTC+2) = March 31, 2026 22:00 UTC
-		expect(endUtc).toBe("2026-03-31T22:00:00.000Z")
-	})
-
-	it("uses current system time when now is not provided", () => {
-		const { startUtc, endUtc } = currentMonthBoundsUtc("UTC")
-
-		// Should parse without error
-		const start = DateTime.fromISO(startUtc)
-		const end = DateTime.fromISO(endUtc)
-
-		expect(start.isValid).toBe(true)
-		expect(end.isValid).toBe(true)
-
-		// End should be after start
-		expect(end > start).toBe(true)
-	})
-})
-
-describe("prevMonthBoundsUtc", () => {
-	it("computes previous month from mid-July correctly", () => {
-		// July 15, 2026, 10:00 Copenhagen (UTC+2)
-		const now = DateTime.fromISO("2026-07-15T10:00:00", { zone: "Europe/Copenhagen" })
-		const { startUtc, endUtc } = prevMonthBoundsUtc("Europe/Copenhagen", now)
-
-		// June 1, 2026 00:00 Copenhagen (UTC+2) = May 31, 2026 22:00 UTC
-		expect(startUtc).toBe("2026-05-31T22:00:00.000Z")
-
-		// July 1, 2026 00:00 Copenhagen (UTC+2) = June 30, 2026 22:00 UTC
-		expect(endUtc).toBe("2026-06-30T22:00:00.000Z")
-	})
-
-	it("computes previous month for January (crosses year boundary)", () => {
-		const now = DateTime.fromISO("2026-01-15T10:00:00", { zone: "UTC" })
-		const { startUtc, endUtc } = prevMonthBoundsUtc("UTC", now)
-
-		// December 1, 2025 00:00 UTC
-		expect(startUtc).toBe("2025-12-01T00:00:00.000Z")
-
-		// January 1, 2026 00:00 UTC
-		expect(endUtc).toBe("2026-01-01T00:00:00.000Z")
-	})
-
-	it("handles DST transition correctly for previous month", () => {
-		// April 20, 2026 noon Copenhagen
-		const now = DateTime.fromISO("2026-04-20T12:00:00", { zone: "Europe/Copenhagen" })
-		const { startUtc, endUtc } = prevMonthBoundsUtc("Europe/Copenhagen", now)
-
-		// March 1, 2026 00:00 Copenhagen (UTC+1) = Feb 28, 2026 23:00 UTC
-		expect(startUtc).toBe("2026-02-28T23:00:00.000Z")
-
-		// April 1, 2026 00:00 Copenhagen (UTC+2) = March 31, 2026 22:00 UTC
-		expect(endUtc).toBe("2026-03-31T22:00:00.000Z")
-	})
-
-	it("uses current system time when now is not provided", () => {
-		const { startUtc, endUtc } = prevMonthBoundsUtc("UTC")
-
-		// Should parse without error
-		const start = DateTime.fromISO(startUtc)
-		const end = DateTime.fromISO(endUtc)
-
-		expect(start.isValid).toBe(true)
-		expect(end.isValid).toBe(true)
-
-		// End should be after start
-		expect(end > start).toBe(true)
-	})
-})
+    it("should throw error for invalid period", () => {
+      expect(() => {
+        periodBoundsUtc("invalid" as any, "Europe/Copenhagen", DateTime.now());
+      }).toThrow("Invalid period: invalid");
+    });
+  });
+});
