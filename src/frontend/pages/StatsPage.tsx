@@ -41,7 +41,9 @@ const Scripts = () => (
 export const StatsPage: FC<{ data: StatsView }> = ({ data }) => {
 	return (
 		<Layout title="Stats — Juice Journal">
-			<StatsChartsFragment data={data} />
+			<main class="container">
+				<StatsChartsFragment data={data} />
+			</main>
 			<Scripts />
 		</Layout>
 	)
