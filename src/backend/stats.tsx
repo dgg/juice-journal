@@ -116,8 +116,8 @@ async function computeStatsView(params: {
 	}
 
 	if (hasTrips) {
-		// Determine bucket: trip for week/month, yearGranularity for year
-		const bucket = period === "year" ? yearGranularity : "trip"
+		// Determine bucket: trip for week, day for month, yearGranularity for year
+		const bucket = period === "year" ? yearGranularity : period === "month" ? "day" : "trip"
 
 		const rows = await statsQueries.periodSeries({
 			startUtc: bounds.current.startUtc,
