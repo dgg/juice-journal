@@ -70,5 +70,6 @@ rootLogger.info({ port: PORT }, "Server listening on port")
 
 export default {
 	port: PORT,
+	hostname: "0.0.0.0",
 	fetch: app.fetch
 }
