@@ -291,3 +291,54 @@ small.badge {
 	padding: 0.7rem;
 	margin: 0;
 }
+
+/* ── Stats page: period switcher, charts, responsive ── */
+
+.period-switcher,
+.year-granularity {
+	display: flex;
+	gap: 0;
+	margin-bottom: 0.75rem;
+}
+
+.period-switcher button,
+.year-granularity button {
+	flex: 1;
+	border-radius: 0;
+}
+
+.period-switcher button:first-child,
+.year-granularity button:first-child {
+	border-radius: var(--pico-border-radius) 0 0 var(--pico-border-radius);
+}
+
+.period-switcher button:last-child,
+.year-granularity button:last-child {
+	border-radius: 0 var(--pico-border-radius) var(--pico-border-radius) 0;
+}
+
+.stats-period-label {
+	margin-bottom: 1rem;
+	color: var(--pico-muted-color);
+}
+
+.chart-row {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
+.chart-container {
+	min-height: 250px;
+}
+
+.chart-container canvas {
+	max-height: 300px;
+	max-width: 100%;
+}
+
+@media (max-width: 768px) {
+	#stats-charts {
+		display: none;
+	}
+}

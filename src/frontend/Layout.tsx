@@ -19,8 +19,8 @@ export const Layout: FC<{ title: string; children?: any }> = ({ title, children 
 					/>
 					<link rel="stylesheet" href="/static/app.css" />
 					<script
-						src="https://unpkg.com/htmx.org@2.0.4"
-						integrity="sha384-HGfztofotfshCVFfy9nW8c7mN4J2a7g8HcL	ncc+Gvztu0+IGYjbfI4b+L8gA1Bz"
+						src="https://unpkg.com/htmx.org@2.0.10"
+						integrity="sha384-H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V"
 						crossorigin="anonymous"
 					/>
 				</head>
