@@ -15,17 +15,6 @@ export const StickyCta: FC<StickyCtaProps> = (props) => {
 		? props.actions
 		: [{ href: props.href, label: props.label }]
 
-	if (actions.length === 1) {
-		const [a] = actions
-		return (
-			<div class="sticky-cta">
-				<a href={a!.href} role="button" class={a!.variant || "contrast"}>
-					{a!.label}
-				</a>
-			</div>
-		)
-	}
-
 	return (
 		<div class="sticky-cta">
 			<div class="grid">
