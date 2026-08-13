@@ -73,7 +73,10 @@ export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
 					<dd>{trip.durationMin} min</dd>
 					<dt>Avg speed</dt>
 					<dd>
-						{trip.avgSpeedKmh !== null ? formatNumber(trip.avgSpeedKmh, 0) : "--"} km/h
+						{trip.avgSpeedKmh !== null
+							? formatNumber(trip.avgSpeedKmh, 0)
+							: "--"}{" "}
+						km/h
 					</dd>
 					{trip.odometerKm !== null && (
 						<>

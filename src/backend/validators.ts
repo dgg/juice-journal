@@ -138,7 +138,13 @@ export async function validateOdometer(req: TripInput): Promise<TripInput> {
 			throw problems.create("FOREIGN_KEY_VIOLATION", {
 				detail: `Odometer reading ${req.odometer_km} is lower than the previous reading ${latest}`,
 				extensions: {
-					errors: [{ field: "odometer_km", message: "odometer reading cannot be lower than the previous reading" }]
+					errors: [
+						{
+							field: "odometer_km",
+							message:
+								"odometer reading cannot be lower than the previous reading"
+						}
+					]
 				}
 			})
 		}

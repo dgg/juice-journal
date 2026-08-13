@@ -2,7 +2,11 @@ import { tripsQueries } from "../db/queries/trips"
 import { vehiclesQueries } from "../db/queries/vehicles"
 import { locationsQueries } from "../db/queries/locations"
 import { statsQueries } from "../db/queries/stats"
-import { resolveDisplayTz, currentMonthBoundsUtc, prevMonthBoundsUtc } from "../utils/dates"
+import {
+	resolveDisplayTz,
+	currentMonthBoundsUtc,
+	prevMonthBoundsUtc
+} from "../utils/dates"
 import type { Context } from "hono"
 import type { Env } from "../utils/logger"
 import { DateTime } from "luxon"
@@ -182,7 +186,7 @@ function parseFormTripInput(body: FormBody): TripInput {
 }
 
 export async function htmlCreationHandler(c: Context<Env>) {
-	const body = await c.req.parseBody() as Record<string, string>
+	const body = (await c.req.parseBody()) as Record<string, string>
 	const input = parseFormTripInput(body as unknown as FormBody)
 
 	const parsed = tripInputSchema.parse(input)

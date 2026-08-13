@@ -5,12 +5,14 @@ The trip form (`src/frontend/pages/TripFormPage.tsx`) currently renders as ~7 se
 ## Goals / Non-Goals
 
 **Goals:**
+
 - All seven car-screen fields visible above the fold on a 390px-wide phone viewport.
 - Sticky Save + Back bar visible at all scroll positions.
 - Preserve the existing server-side duration derivation; remove the form-side duration artifacts.
 - Stay within Pico CSS + `public/app.css` (no new dependencies, no client JS).
 
 **Non-Goals:**
+
 - Changing the server-side trip input schema or handler logic.
 - Adding client-side duration display (deferred — see Open Questions).
 - Redesigning other pages (home, trip list) — this change is scoped to the trip form.
@@ -23,6 +25,7 @@ The trip form (`src/frontend/pages/TripFormPage.tsx`) currently renders as ~7 se
 Pico's `.grid` uses `grid-template-columns: repeat(auto-fit, minmax(0%, 1fr))` above 768px and collapses to one column below. To force two columns on phones, override `grid-template-columns: 1fr 1fr` on `.trip-form .grid` in `public/app.css`. A `.grid--full` modifier exempts full-width rows (date is NOT exempt — date shares with daypart; only vehicle is exempt).
 
 **Alternatives considered:**
+
 - Pico's `role="group"` (doesn't collapse on mobile, but is intended for button/input groups, not full form rows; lacks grid gap semantics).
 - Inline `style` attributes (rejected — AGENTS.md forbids inline styles).
 - A new CSS framework (rejected — dependency rules).
@@ -32,6 +35,7 @@ Pico's `.grid` uses `grid-template-columns: repeat(auto-fit, minmax(0%, 1fr))` a
 The daypart segmented control pairs semantically with the date ("when"). Measured on a 390px viewport: date input ~173px wide, daypart segmented control ~173px wide with each pill ~86px — "☀ Morning" and "☾ Afternoon" render complete without truncation. Pill height (~61px) is taller than the date input (~39px) due to padding, making row 1 ~89px tall — acceptable, slightly taller than other rows.
 
 **Alternatives considered:**
+
 - Daypart as own full-width row (cleaner pill sizing, costs one extra row; rejected to save vertical space).
 - Daypart as icon-only 3rd cell in the time row (loses labels, accessibility cost; rejected).
 
@@ -42,6 +46,7 @@ Consolidate the existing `StickyCta` (back link, placed after the form) and the 
 The `StickyCta` component is not deleted (other pages may use it); the trip form simply stops using it and uses the new sticky bar markup inline.
 
 **Alternatives considered:**
+
 - Keep `StickyCta` separate, make only Save sticky (two sticky elements can fight for the bottom; rejected).
 - Make the whole form sticky-positioned (overkill, breaks scrolling).
 
@@ -50,6 +55,7 @@ The `StickyCta` component is not deleted (other pages may use it); the trip form
 Wrap unit suffixes in `<small>` inside `<label>`: e.g. `Distance <small>(km)</small>`. CSS `.trip-form label small { font-size: 0.7rem; color: var(--pico-muted-color); }` shrinks units to ~11.2px vs 16px label text. Measured: "Consumption (kWh/100km)" fits in 173px without wrapping. All labels stay 173×83 uniform — no alignment break. This is styling ladder option 2 (Pico variable + element selector), no new class needed on each label.
 
 **Alternatives considered:**
+
 - Abbreviate units (`kWh/100` → loses clarity).
 - Drop units entirely (loses information).
 

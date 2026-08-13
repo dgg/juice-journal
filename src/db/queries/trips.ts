@@ -180,7 +180,9 @@ export const tripsQueries = {
 			LIMIT 1
 		`
 		if (rows.length === 0) return null
-		return toNumber((rows[0] as unknown as Record<string, unknown>).odometer_km as string | null)
+		return toNumber(
+			(rows[0] as unknown as Record<string, unknown>).odometer_km as string | null
+		)
 	},
 
 	async findTripsWithLocations(params: {

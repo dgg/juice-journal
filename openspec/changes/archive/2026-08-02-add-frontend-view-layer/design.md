@@ -5,6 +5,7 @@ See `proposal.md` for motivation. Current state: `src/backend/home.ts` (403 line
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Sole HTML source = typed `hono/jsx` components under `src/frontend/`.
 - HTMX-native interaction: boosted nav + region fragment routes + OOB swaps — no client JS authored.
 - Pure CSS `public/app.css`, Pico-grounded, served statically; inline `<style>` eliminated.
@@ -12,6 +13,7 @@ See `proposal.md` for motivation. Current state: `src/backend/home.ts` (403 line
 - Reversibility: the HTMX layer is removable; components remain load-bearing for full-page rendering.
 
 **Non-Goals:**
+
 - Extended stats / Chart.js pages (future change).
 - `GET /api/trips` JSON behavior or shape (unchanged).
 - Database schema or trip data-structure changes.
@@ -25,6 +27,7 @@ See `proposal.md` for motivation. Current state: `src/backend/home.ts` (403 line
 HTML is produced by `.tsx` components compiled to function calls and stringified at request time. Nothing ships to the browser beyond HTML + HTMX + Pico/Chart.js assets.
 
 **Why over alternatives:**
+
 - Template-literal view modules (option A): HTML stays a string — rejected by the user; same string-escape foot-guns (`escapeHtml`), no editor/lint support.
 - Static `.html` files with token fills (option B): reinvents a templating engine for no gain; no typing or composition.
 - `hono/jsx` ships with installed Hono; Bun renders `.tsx` natively. Auto-escaping removes `escapeHtml`. Components compose via props/children. Type-checked props. Editor jump-to-def/autocomplete.
@@ -78,7 +81,7 @@ src/frontend/
 A single route serves files from `public/`:
 
 ```ts
-app.use("/static/*", serveStatic({ root: "./" }))   // hono/bun
+app.use("/static/*", serveStatic({ root: "./" })) // hono/bun
 // or Bun-native: new Response(Bun.file(`./public${path.slice(7)}`))
 ```
 

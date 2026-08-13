@@ -20,9 +20,5 @@ export const TripListFragment: FC<{ trips: Trip[]; hasTrips: boolean }> = ({
 	trips,
 	hasTrips
 }) => {
-	return (
-		<>
-			{hasTrips ? trips.map((trip) => <TripRow trip={trip} />) : <EmptyState />}
-		</>
-	)
+	return <>{hasTrips ? trips.map((trip) => <TripRow trip={trip} />) : <EmptyState />}</>
 }

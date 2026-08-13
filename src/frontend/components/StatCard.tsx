@@ -10,10 +10,7 @@ interface Stat {
 	deltaUnit?: string
 }
 
-export const StatCard: FC<{ stat: Stat; hero?: boolean }> = ({
-	stat,
-	hero
-}) => {
+export const StatCard: FC<{ stat: Stat; hero?: boolean }> = ({ stat, hero }) => {
 	const hasValue = stat.value !== null
 	const formatted = hasValue ? formatNumber(stat.value, hero ? 1 : 0) : "--"
 

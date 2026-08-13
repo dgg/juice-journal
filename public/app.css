@@ -211,7 +211,9 @@ small.badge {
 	border: 1px solid var(--pico-muted-border-color);
 	background: var(--pico-background-color);
 	color: var(--pico-muted-color);
-	transition: background 0.15s, color 0.15s;
+	transition:
+		background 0.15s,
+		color 0.15s;
 }
 
 .daypart-selector label:first-child span {
@@ -232,4 +234,60 @@ small.badge {
 	text-align: center;
 	padding: 3rem 1rem;
 	color: var(--pico-muted-color);
+}
+
+/* ── Trip form: phone-first 2-column layout ── */
+
+.trip-form {
+	padding-bottom: 90px;
+	--pico-form-element-spacing-vertical: 0.4rem;
+	--pico-form-element-spacing-horizontal: 0.6rem;
+}
+
+.trip-form .grid {
+	grid-template-columns: 1fr 1fr;
+	margin-bottom: 0.75rem;
+	align-items: flex-end;
+}
+
+.trip-form .grid--full {
+	grid-template-columns: 1fr;
+}
+
+.trip-form label small {
+	font-size: 0.7rem;
+	font-weight: 400;
+	color: var(--pico-muted-color);
+}
+
+.trip-form label {
+	margin-bottom: 0;
+}
+
+.trip-form .daypart-selector span {
+	padding: var(--pico-form-element-spacing-vertical) 0.5rem;
+}
+
+.sticky-submit {
+	position: sticky;
+	bottom: 0;
+	background: var(--pico-background-color);
+	padding: 0.75rem 0;
+	border-top: 1px solid var(--pico-muted-border-color);
+	z-index: 10;
+	margin: 0;
+}
+
+.sticky-submit .grid {
+	grid-template-columns: 1fr 1fr;
+	margin: 0;
+	gap: 0.5rem;
+}
+
+.sticky-submit button,
+.sticky-submit a[role="button"] {
+	width: 100%;
+	font-size: 1.05rem;
+	padding: 0.7rem;
+	margin: 0;
 }

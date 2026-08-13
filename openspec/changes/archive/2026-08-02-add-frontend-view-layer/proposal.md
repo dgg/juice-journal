@@ -16,9 +16,11 @@ The home page (`src/backend/home.ts`) fuses data fetching, view rendering, and ~
 ## Capabilities
 
 ### New Capabilities
+
 - `frontend-views`: Conventions for server-rendered view components (`hono/jsx`), component/page/fragment layering, `Layout` composition, and the static `app.css` stylesheet contract.
 
 ### Modified Capabilities
+
 - `home-page-ssr`: View rendering moves from inline template strings in a backend handler to typed JSX components under `src/frontend/`; same user-facing behavior (stats, trip list, expand, CTA, deltas, empty state, responsive). Adds `GET /partials/trips` and `GET /partials/stats` fragment routes and `POST /trips` HTML endpoint for HTMX-driven region updates.
 
 ## Impact

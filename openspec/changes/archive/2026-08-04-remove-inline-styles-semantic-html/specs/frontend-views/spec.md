@@ -2,7 +2,7 @@
 
 ### Requirement: Application stylesheet contract
 
-The system SHALL maintain a single pure-CSS file at `public/app.css` served statically. All custom CSS SHALL live in this file; inline `<style>` blocks and inline `style` attributes (`style={{...}}` in JSX or `style="..."` in static markup) SHALL NOT appear in any view component. CSS SHALL be applied in order of preference: (1) native Pico styling or semantic HTML, (2) overriding `--pico-*` custom properties or extending Pico classes, (3) custom rules in `app.css` scoped under domain-semantic class names that describe what an element *is* in the product domain (e.g. `trip-snapshot`, `stat-card`, `badge`), never utility names that describe how it looks (e.g. `.flex-1`, `.text-center`, `.mb-4`).
+The system SHALL maintain a single pure-CSS file at `public/app.css` served statically. All custom CSS SHALL live in this file; inline `<style>` blocks and inline `style` attributes (`style={{...}}` in JSX or `style="..."` in static markup) SHALL NOT appear in any view component. CSS SHALL be applied in order of preference: (1) native Pico styling or semantic HTML, (2) overriding `--pico-*` custom properties or extending Pico classes, (3) custom rules in `app.css` scoped under domain-semantic class names that describe what an element _is_ in the product domain (e.g. `trip-snapshot`, `stat-card`, `badge`), never utility names that describe how it looks (e.g. `.flex-1`, `.text-center`, `.mb-4`).
 
 #### Scenario: No inline styles in components
 

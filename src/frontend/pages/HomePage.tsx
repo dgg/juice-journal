@@ -46,9 +46,11 @@ export const HomePage: FC<{ data: HomePageData }> = ({ data }) => {
 				<StatsGrid stats={data.stats} />
 				<section id="trip-list" aria-label="Trip list">
 					<h2>Trips</h2>
-					{data.hasTrips
-						? data.trips.map((trip) => <TripRow trip={trip} />)
-						: <EmptyState />}
+					{data.hasTrips ? (
+						data.trips.map((trip) => <TripRow trip={trip} />)
+					) : (
+						<EmptyState />
+					)}
 				</section>
 				<StickyCta href="/trips/new" label="Log new trip" />
 			</main>
