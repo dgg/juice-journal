@@ -1,7 +1,6 @@
 import type { FC } from "hono/jsx"
 import { Layout } from "../Layout"
 import { Header } from "../components/Header"
-import { StickyCta } from "../components/StickyCta"
 
 interface LocationOption {
 	id: string
@@ -39,12 +38,14 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 			<main class="container">
 				<Header month="Log new trip" vehicle={null} />
 				<form
+					class="trip-form"
 					action="/trips"
 					method="post"
 					hx-post="/trips"
 					hx-target="#trip-list"
 					hx-swap="beforeend"
 				>
+					{/* Row 1: date + daypart */}
 					<div class="grid">
 						<label>
 							Date
@@ -55,88 +56,70 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 								required
 							/>
 						</label>
+						<fieldset class="daypart-selector">
+							<legend>Time of day</legend>
+							<label>
+								<input
+									type="radio"
+									name="daypart"
+									value="morning"
+									checked={defaultDaypart === "morning"}
+								/>
+								<span>☀</span>
+							</label>
+							<label>
+								<input
+									type="radio"
+									name="daypart"
+									value="afternoon"
+									checked={defaultDaypart === "afternoon"}
+								/>
+								<span>☾</span>
+							</label>
+						</fieldset>
 					</div>
+
+					{/* Row 2: start + end time */}
 					<div class="grid">
 						<label>
 							Start time
-							<input
-								name="start_time"
-								type="time"
-								required
-							/>
+							<input name="start_time" type="time" required />
 						</label>
 						<label>
 							End time
-							<input
-								name="end_time"
-								type="time"
-								value={nowTime}
-								required
-							/>
-						</label>
-						<label>
-							Duration
-							<output name="duration_min">—</output>
+							<input name="end_time" type="time" value={nowTime} required />
 						</label>
 					</div>
+
+					{/* Row 3: distance + odometer */}
 					<div class="grid">
 						<label>
-							Distance (km)
-							<input
-								name="distance_km"
-								type="number"
-								step="0.1"
-								required
-							/>
+							Distance <small>(km)</small>
+							<input name="distance_km" type="number" step="0.1" required />
 						</label>
 						<label>
-							Avg speed (km/h)
-							<input
-								name="avg_speed_kmh"
-								type="number"
-								step="1"
-							/>
+							Odometer <small>(km)</small>
+							<input name="odometer_km" type="number" step="0.1" />
 						</label>
 					</div>
+
+					{/* Row 4: speed + consumption */}
 					<div class="grid">
 						<label>
-							Consumption (kWh/100km)
+							Avg speed <small>(km/h)</small>
+							<input name="avg_speed_kmh" type="number" step="1" />
+						</label>
+						<label>
+							Consumption <small>(kWh/100km)</small>
 							<input
 								name="avg_consumption_kwh_100km"
 								type="number"
 								step="0.1"
 							/>
 						</label>
-						<label>
-							Odometer (km)
-							<input
-								name="odometer_km"
-								type="number"
-								step="0.1"
-							/>
-						</label>
 					</div>
-					<fieldset class="daypart-selector">
-						<legend>Time of day</legend>
-						<label>
-							<input
-								type="radio"
-								name="daypart"
-								value="morning"
-								checked={defaultDaypart === "morning"}
-							/>
-							<span>☀ Morning</span>
-						</label>
-						<label>
-							<input
-								type="radio"
-								name="daypart"
-								value="afternoon"
-								checked={defaultDaypart === "afternoon"}
-							/>
-							<span>☾ Afternoon</span>
-						</label>
-					</fieldset>
+
+					{/* Row 5: locations */}
 					<div class="grid">
 						<label>
 							Start location
@@ -167,26 +150,39 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 							</select>
 						</label>
 					</div>
-					<label>
-						Vehicle
-						<select name="vehicle_id" required>
-							{vehicles.length === 0 && (
-								<option value="">No vehicles — add one first</option>
-							)}
-							{vehicles.map((v) => (
-								<option
-									value={v.id}
-									selected={v.id === defaultVehicleId}
-								>
-									{v.description}
-								</option>
-							))}
-						</select>
-					</label>
-					<button type="submit" class="contrast">Save trip</button>
-					<input type="hidden" name="duration_min" value="" />
+
+					{/* Row 6: vehicle — full width */}
+					<div class="grid grid--full">
+						<label>
+							Vehicle
+							<select name="vehicle_id" required>
+								{vehicles.length === 0 && (
+									<option value="">No vehicles — add one first</option>
+								)}
+								{vehicles.map((v) => (
+									<option
+										value={v.id}
+										selected={v.id === defaultVehicleId}
+									>
+										{v.description}
+									</option>
+								))}
+							</select>
+						</label>
+					</div>
+
+					{/* Sticky submit bar: Back + Save */}
+					<div class="sticky-submit">
+						<div class="grid">
+							<a href="/" role="button" class="secondary">
+								Back
+							</a>
+							<button type="submit" class="contrast">
+								Save trip
+							</button>
+						</div>
+					</div>
 				</form>
-				<StickyCta href="/" label="Back to home" />
 			</main>
 		</Layout>
 	)

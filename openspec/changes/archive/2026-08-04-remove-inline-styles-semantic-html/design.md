@@ -5,11 +5,13 @@ Five view components (`Header`, `StatCard`, `TripRow`, `Delta`, `EmptyState`) ca
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Eliminate every inline `style` attribute from the five components.
 - Replace generic `<div>` markup with the correct semantic element per the `frontend-views` delta spec.
 - Extend `public/app.css` with domain-named classes that absorb the displaced layout rules.
 
 **Non-Goals:**
+
 - Redesigning the visual appearance — output should be visually equivalent; only the markup/CSS sourcing changes.
 - Touching `Layout.tsx`, `StickyCta.tsx`, `pages/*`, or `fragments/*` (they are already clean).
 - Changing any backend route, handler, or data shape.
@@ -19,17 +21,17 @@ Five view components (`Header`, `StatCard`, `TripRow`, `Delta`, `EmptyState`) ca
 
 ### Decision 1: Class names are domain-semantic, scoped to the component's role
 
-Class names describe *what the element is in the product domain*, never how it looks. Selected names:
+Class names describe _what the element is in the product domain_, never how it looks. Selected names:
 
-| Class          | Scopes                  | Replaces (inline)                              |
-|----------------|-------------------------|------------------------------------------------|
-| `trip-snapshot`| `<dl>` in `TripRow`     | grid layout, gap, margin on dl/dt/dd           |
-| `stat-card`    | `<article>` in `StatCard` | padding, text-align; `stat-card--hero` variant |
-| `stat-card__value` | `<data>` wrapper    | font-size/weight delegation to Pico `<strong>` inside |
-| `badge`        | `<small>` in `Header`   | pill background, radius, padding               |
-| `trip-row__summary` | `<summary>`       | flex layout, gap, list-style reset             |
-| `trip-row__body`    | expanded `<div>`  | padding, border-top                            |
-| `empty-state`  | `<p>` / container       | centering, padding, muted color                |
+| Class               | Scopes                    | Replaces (inline)                                     |
+| ------------------- | ------------------------- | ----------------------------------------------------- |
+| `trip-snapshot`     | `<dl>` in `TripRow`       | grid layout, gap, margin on dl/dt/dd                  |
+| `stat-card`         | `<article>` in `StatCard` | padding, text-align; `stat-card--hero` variant        |
+| `stat-card__value`  | `<data>` wrapper          | font-size/weight delegation to Pico `<strong>` inside |
+| `badge`             | `<small>` in `Header`     | pill background, radius, padding                      |
+| `trip-row__summary` | `<summary>`               | flex layout, gap, list-style reset                    |
+| `trip-row__body`    | expanded `<div>`          | padding, border-top                                   |
+| `empty-state`       | `<p>` / container         | centering, padding, muted color                       |
 
 **Alternatives considered:** BEM full naming (`trip-row__summary--daypart`) — rejected as over-engineered for a 5-file refactor; the simpler `trip-row__summary` + state classes (`morning`/`afternoon` already in `app.css`) suffices. Utility classes (`.flex`, `.gap-2`) — explicitly rejected per the spec; they describe appearance, not domain.
 

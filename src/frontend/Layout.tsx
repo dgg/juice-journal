@@ -1,10 +1,7 @@
 import type { FC } from "hono/jsx"
 import { raw } from "hono/html"
 
-export const Layout: FC<{ title: string; children?: any }> = ({
-	title,
-	children
-}) => {
+export const Layout: FC<{ title: string; children?: any }> = ({ title, children }) => {
 	return (
 		<>
 			{raw("<!DOCTYPE html>\n")}
@@ -27,9 +24,7 @@ export const Layout: FC<{ title: string; children?: any }> = ({
 						crossorigin="anonymous"
 					/>
 				</head>
-				<body hx-boost="true">
-					{children}
-				</body>
+				<body hx-boost="true">{children}</body>
 			</html>
 		</>
 	)

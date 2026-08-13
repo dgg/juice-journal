@@ -7,12 +7,14 @@ Existing queries to reuse: `findLatestTripVehicleId()` (already used by the home
 ## Goals / Non-Goals
 
 **Goals:**
+
 - A mobile-first form that can be filled in under 30 seconds at the end of a commute
 - Server-side derivation of duration and daypart so the form sends minimal raw data
 - Vehicle and location selection via dropdowns, never free-text IDs
 - Odometer data integrity via monotonicity validation
 
 **Non-Goals:**
+
 - Changing the `tripInputSchema` or the JSON API (`POST /api/trips`) — those remain as-is
 - Creating new vehicles or locations from the form — dropdown selection only
 - Overnight trip support — same-day assumption via shared date field
