@@ -1,5 +1,6 @@
 import { db } from "../client"
 import { toNumber } from "../convert"
+import { DateTime } from "luxon"
 
 export interface PeriodAggregates {
 	avgConsumption: number | null
@@ -81,7 +82,7 @@ export const statsQueries = {
 		startUtc: string
 		endUtc: string
 		vehicleId?: string
-		bucket: "trip" | "week" | "month"
+		bucket: "trip" | "day" | "week" | "month"
 		displayTz?: string
 	}): Promise<PeriodSeriesRow[]> {
 		const { startUtc, endUtc, vehicleId, bucket } = params
@@ -91,7 +92,8 @@ export const statsQueries = {
 			const rows = vehicleId
 				? await db`
 					SELECT
-						CAST(trips.end_time AS TEXT) as label,
+						trips.end_time,
+						trips.daypart,
 						distance_km,
 						duration_min,
 						avg_speed_kmh,
@@ -104,7 +106,8 @@ export const statsQueries = {
 				`
 				: await db`
 					SELECT
-						CAST(trips.end_time AS TEXT) as label,
+						trips.end_time,
+						trips.daypart,
 						distance_km,
 						duration_min,
 						avg_speed_kmh,
@@ -115,33 +118,37 @@ export const statsQueries = {
 					ORDER BY end_time ASC
 				`
 
-			return rows.map((row: Record<string, unknown>) => ({
-				label: row.label as string,
-				distance_km: Number(row.distance_km) || 0,
-				duration_min: Number(row.duration_min) || 0,
-				avg_speed_kmh:
-					row.avg_speed_kmh !== null ? Number(row.avg_speed_kmh) : null,
-				avg_consumption_kwh_100km:
-					row.avg_consumption_kwh_100km !== null
-						? Number(row.avg_consumption_kwh_100km)
-						: null
-			}))
-		} else if (bucket === "week" || bucket === "month") {
-			const truncField = bucket === "week" ? "week" : "month"
-			const formatStr = bucket === "week" ? "IW" : "Mon"
-
+			return rows.map((row: Record<string, unknown>) => {
+				const endTime =
+					row.end_time instanceof Date
+						? DateTime.fromJSDate(row.end_time as Date).setZone(tz)
+						: DateTime.fromISO(row.end_time as string).setZone(tz)
+				const icon = row.daypart === "afternoon" ? "🌙" : "☀"
+				return {
+					label: endTime.toFormat("dd MMM") + " " + icon,
+					distance_km: Number(row.distance_km) || 0,
+					duration_min: Number(row.duration_min) || 0,
+					avg_speed_kmh:
+						row.avg_speed_kmh !== null ? Number(row.avg_speed_kmh) : null,
+					avg_consumption_kwh_100km:
+						row.avg_consumption_kwh_100km !== null
+							? Number(row.avg_consumption_kwh_100km)
+							: null
+				}
+			})
+		} else if (bucket === "day" || bucket === "week" || bucket === "month") {
 			const sql = `
 				SELECT
-					TO_CHAR(date_trunc('${truncField}', timezone('${tz}', trips.end_time))::timestamp, '${formatStr}') as label,
+					date_trunc('${bucket}', timezone('${tz}', trips.end_time)) as bucket_start,
 					SUM(distance_km) as distance_km,
 					SUM(duration_min) as duration_min,
 					AVG(avg_speed_kmh) as avg_speed_kmh,
 					AVG(avg_consumption_kwh_100km) as avg_consumption_kwh_100km
 				FROM trips
-				WHERE end_time >= \$1 AND end_time < \$2
-				${vehicleId ? "AND vehicle_id = \$3" : ""}
-				GROUP BY date_trunc('${truncField}', timezone('${tz}', trips.end_time))
-				ORDER BY date_trunc('${truncField}', timezone('${tz}', trips.end_time)) ASC
+				WHERE end_time >= $1 AND end_time < $2
+				${vehicleId ? "AND vehicle_id = $3" : ""}
+				GROUP BY date_trunc('${bucket}', timezone('${tz}', trips.end_time))
+				ORDER BY date_trunc('${bucket}', timezone('${tz}', trips.end_time)) ASC
 			`.trim()
 
 			const queryParams = vehicleId
@@ -149,17 +156,31 @@ export const statsQueries = {
 				: [startUtc, endUtc]
 			const rows = await db.unsafe(sql, queryParams)
 
-			return rows.map((row: Record<string, unknown>) => ({
-				label: row.label as string,
-				distance_km: Number(row.distance_km) || 0,
-				duration_min: Number(row.duration_min) || 0,
-				avg_speed_kmh:
-					row.avg_speed_kmh !== null ? Number(row.avg_speed_kmh) : null,
-				avg_consumption_kwh_100km:
-					row.avg_consumption_kwh_100km !== null
-						? Number(row.avg_consumption_kwh_100km)
-						: null
-			}))
+			return rows.map((row: Record<string, unknown>) => {
+				const bucketStart =
+					row.bucket_start instanceof Date
+						? DateTime.fromJSDate(row.bucket_start as Date).setZone(tz)
+						: DateTime.fromISO(row.bucket_start as string).setZone(tz)
+				let label: string
+				if (bucket === "day") {
+					label = bucketStart.toFormat("dd MMM")
+				} else if (bucket === "week") {
+					label = bucketStart.toFormat("'W'WW")
+				} else {
+					label = bucketStart.toFormat("MMM")
+				}
+				return {
+					label,
+					distance_km: Number(row.distance_km) || 0,
+					duration_min: Number(row.duration_min) || 0,
+					avg_speed_kmh:
+						row.avg_speed_kmh !== null ? Number(row.avg_speed_kmh) : null,
+					avg_consumption_kwh_100km:
+						row.avg_consumption_kwh_100km !== null
+							? Number(row.avg_consumption_kwh_100km)
+							: null
+				}
+			})
 		} else {
 			throw new Error("Invalid bucket type: " + bucket)
 		}
