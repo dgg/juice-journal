@@ -46,4 +46,4 @@
 - [x] 7.1 `bun test` — all existing tests pass plus new stats/date tests (stats/dates tests pass; pre-existing handler test failures unrelated)
 - [x] 7.2 `prettier --check .` and `tsc --noEmit` clean (new files pass; pre-existing errors unchanged)
 - [x] 7.3 `docker build .` succeeds
-- [ ] 7.4 Manual smoke: `/stats` renders; period switcher swaps via HTMX; year Month/Week toggle swaps; empty period shows empty state; home `/` unchanged and does not load Chart.js; phone-width viewport hides charts, keeps stats
+- [x] 7.4 Manual smoke: `/stats` renders; period switcher swaps via HTMX; year Month/Week toggle swaps; empty period shows empty state; home `/` unchanged and does not load Chart.js; phone-width viewport hides charts, keeps stats
