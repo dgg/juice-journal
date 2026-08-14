@@ -180,7 +180,21 @@ async function computeStatsView(params: {
 		})
 
 		series = {
-			labels: rows.map((r) => r.label),
+			labels: rows.map((r) => {
+				let label: string
+				if (bucket === "trip" || bucket === "day") {
+					label = r.time.toFormat("dd MMM")
+				} else if (bucket === "week") {
+					label = r.time.toFormat("'W'WW")
+				} else {
+					label = r.time.toFormat("MMM")
+				}
+				if (r.daypart) {
+					const icon = r.daypart === "afternoon" ? "🌙" : "☀"
+					label += " " + icon
+				}
+				return label
+			}),
 			distance: rows.map((r) => r.distance_km),
 			duration: rows.map((r) => r.duration_min),
 			speed: rows.map((r) => r.avg_speed_kmh),

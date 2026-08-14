@@ -11,7 +11,8 @@ export interface PeriodAggregates {
 }
 
 export interface PeriodSeriesRow {
-	label: string
+	time: DateTime
+	daypart: string | null
 	distance_km: number
 	duration_min: number
 	avg_speed_kmh: number | null
@@ -123,9 +124,9 @@ export const statsQueries = {
 					row.end_time instanceof Date
 						? DateTime.fromJSDate(row.end_time as Date).setZone(tz)
 						: DateTime.fromISO(row.end_time as string).setZone(tz)
-				const icon = row.daypart === "afternoon" ? "🌙" : "☀"
 				return {
-					label: endTime.toFormat("dd MMM") + " " + icon,
+					time: endTime,
+					daypart: row.daypart as string | null,
 					distance_km: Number(row.distance_km) || 0,
 					duration_min: Number(row.duration_min) || 0,
 					avg_speed_kmh:
@@ -161,16 +162,9 @@ export const statsQueries = {
 					row.bucket_start instanceof Date
 						? DateTime.fromJSDate(row.bucket_start as Date).setZone(tz)
 						: DateTime.fromISO(row.bucket_start as string).setZone(tz)
-				let label: string
-				if (bucket === "day") {
-					label = bucketStart.toFormat("dd MMM")
-				} else if (bucket === "week") {
-					label = bucketStart.toFormat("'W'WW")
-				} else {
-					label = bucketStart.toFormat("MMM")
-				}
 				return {
-					label,
+					time: bucketStart,
+					daypart: null,
 					distance_km: Number(row.distance_km) || 0,
 					duration_min: Number(row.duration_min) || 0,
 					avg_speed_kmh:

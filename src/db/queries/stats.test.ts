@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "bun:test"
 import { db } from "../client"
 import { statsQueries } from "./stats"
 import { tripsQueries } from "./trips"
+import { DateTime } from "luxon"
 
 const TEST_VEHICLE_ID = "V1StGXR8_Z5jdHi6"
 const CLEANUP_TRIPS: Array<{ start: string; end: string }> = []
@@ -152,7 +153,8 @@ describe("statsQueries", () => {
 			expect(series.length).toBeGreaterThanOrEqual(2)
 			expect(series[0]!.distance_km).toBeGreaterThan(0)
 			expect(series[0]!.duration_min).toBeGreaterThan(0)
-			expect(typeof series[0]!.label).toBe("string")
+			expect(series[0]!.time).toBeInstanceOf(DateTime)
+			expect(series[0]!.daypart).toBe("morning")
 		})
 
 		it("returns bucketed rows for bucket=month", async () => {
@@ -168,7 +170,8 @@ describe("statsQueries", () => {
 			expect(series[0]!.duration_min).toBe(75)
 			expect(series[0]!.avg_speed_kmh).toBe(30.0)
 			expect(series[0]!.avg_consumption_kwh_100km).toBe(19.0)
-			expect(typeof series[0]!.label).toBe("string")
+			expect(series[0]!.time).toBeInstanceOf(DateTime)
+			expect(series[0]!.daypart).toBeNull()
 		})
 
 		it("returns bucketed rows for bucket=week", async () => {
