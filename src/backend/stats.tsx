@@ -6,19 +6,30 @@ import type { Context } from "hono"
 import type { Env } from "../utils/logger"
 import { DateTime } from "luxon"
 import { StatsPage } from "../frontend/pages/StatsPage"
-import {
-	OffsetPage,
-	RefDatePage,
-	OffsetAndRefPage
-} from "../frontend/pages/StatsPrototypePage"
 import { StatsChartsFragment } from "../frontend/fragments/StatsChartsFragment"
 
 const STATS_PERIODS = ["week", "month", "year"] as const
 const YEAR_GRANULARITY = ["month", "week"] as const
 
-function parseStatsQuery(c: Context<Env>) {
+const WEEK_RE = /^\d{4}-W\d{2}$/
+const MONTH_RE = /^\d{4}-\d{2}$/
+const YEAR_RE = /^\d{4}$/
+
+export function isValidDateFormat(date: string, period: "week" | "month" | "year"): boolean {
+	switch (period) {
+		case "week":
+			return WEEK_RE.test(date)
+		case "month":
+			return MONTH_RE.test(date)
+		case "year":
+			return YEAR_RE.test(date)
+	}
+}
+
+export function parseStatsQuery(c: Context<Env>) {
 	const period = c.req.query("period")
 	const yearGranularity = c.req.query("yearGranularity")
+	const date = c.req.query("date")
 
 	if (period && !STATS_PERIODS.includes(period as any)) {
 		return { error: c.text("Invalid period. Must be week, month, or year.", 400) }
@@ -26,10 +37,49 @@ function parseStatsQuery(c: Context<Env>) {
 	if (yearGranularity && !YEAR_GRANULARITY.includes(yearGranularity as any)) {
 		return { error: c.text("Invalid yearGranularity. Must be month or week.", 400) }
 	}
+	const selectedPeriod = (period || "month") as "week" | "month" | "year"
+	if (date && !isValidDateFormat(date, selectedPeriod)) {
+		return { error: c.text(`Invalid date format for ${selectedPeriod}.`, 400) }
+	}
 
 	return {
-		period: (period || "month") as "week" | "month" | "year",
-		yearGranularity: (yearGranularity || "month") as "month" | "week"
+		period: selectedPeriod,
+		yearGranularity: (yearGranularity || "month") as "month" | "week",
+		date: date || undefined
+	}
+}
+
+export function resolveAnchor(
+	dateParam: string | undefined,
+	period: "week" | "month" | "year",
+	displayTz: string
+): DateTime {
+	if (!dateParam) return DateTime.now()
+
+	switch (period) {
+		case "week": {
+			const dt = DateTime.fromISO(dateParam, { zone: displayTz })
+			return dt.isValid ? dt : DateTime.now()
+		}
+		case "month": {
+			const dt = DateTime.fromISO(dateParam, { zone: displayTz })
+			return dt.isValid ? dt : DateTime.now()
+		}
+		case "year": {
+			const dt = DateTime.fromISO(`${dateParam}-01-01`, { zone: displayTz })
+			return dt.isValid ? dt : DateTime.now()
+		}
+	}
+}
+
+export function formatDateForPeriod(dt: DateTime, period: "week" | "month" | "year"): string {
+	switch (period) {
+		case "week":
+			return dt.toFormat("kkkk-'W'WW")
+		case "month":
+			return dt.toFormat("yyyy-MM")
+		case "year":
+			return dt.toFormat("yyyy")
 	}
 }
 
@@ -59,6 +109,10 @@ interface StatsView {
 		consumption: (number | null)[]
 	}
 	hasTrips: boolean
+	date: string | null
+	prevDate: string | null
+	nextDate: string | null
+	yearOptions: number[]
 }
 
 function formatDurationHm(minutes: number | null): string | null {
@@ -141,6 +195,22 @@ async function computeStatsView(params: {
 		}
 	}
 
+	// Compute prev/next dates
+	const unit = period === "week" ? "weeks" : period === "month" ? "months" : "years"
+	const prevDate = formatDateForPeriod(now.minus({ [unit]: 1 }), period)
+	const nextRaw = now.plus({ [unit]: 1 })
+	const nowStart = DateTime.now().setZone(displayTz).startOf(period)
+	const nextDate = nextRaw.startOf(period) <= nowStart ? formatDateForPeriod(nextRaw, period) : null
+
+	// Year options for year picker
+	let yearOptions: number[] = []
+	if (period === "year") {
+		const earliestYear = await tripsQueries.findEarliestTripYear()
+		const currentYear = DateTime.now().setZone(displayTz).year
+		const startYear = earliestYear ?? currentYear
+		yearOptions = Array.from({ length: currentYear - startYear + 1 }, (_, i) => startYear + i).reverse()
+	}
+
 	return {
 		period,
 		yearGranularity,
@@ -170,7 +240,11 @@ async function computeStatsView(params: {
 			}
 		},
 		series,
-		hasTrips
+		hasTrips,
+		date: formatDateForPeriod(now, period),
+		prevDate,
+		nextDate,
+		yearOptions
 	}
 }
 
@@ -178,13 +252,13 @@ export async function statsHandler(c: Context<Env>) {
 	const parsed = parseStatsQuery(c)
 	if ("error" in parsed) return parsed.error
 
-	const { period, yearGranularity } = parsed
+	const { period, yearGranularity, date } = parsed
 	const displayTz = resolveDisplayTz(
 		undefined,
 		undefined,
 		process.env.DISPLAY_TZ || "Europe/Copenhagen"
 	)
-	const now = DateTime.now()
+	const now = resolveAnchor(date, period, displayTz)
 
 	const view = await computeStatsView({ period, yearGranularity, displayTz, now })
 
@@ -195,69 +269,15 @@ export async function getPartialTripStats(c: Context<Env>) {
 	const parsed = parseStatsQuery(c)
 	if ("error" in parsed) return parsed.error
 
-	const { period, yearGranularity } = parsed
+	const { period, yearGranularity, date } = parsed
 	const displayTz = resolveDisplayTz(
 		undefined,
 		undefined,
 		process.env.DISPLAY_TZ || "Europe/Copenhagen"
 	)
-	const now = DateTime.now()
+	const now = resolveAnchor(date, period, displayTz)
 
 	const view = await computeStatsView({ period, yearGranularity, displayTz, now })
 
 	return c.html(<StatsChartsFragment data={view} />)
-}
-
-export async function offsetStatsHandler(c: Context<Env>) {
-	const parsed = parseStatsQuery(c)
-	if ("error" in parsed) return parsed.error
-	const { period, yearGranularity } = parsed
-	const displayTz = resolveDisplayTz(
-		undefined,
-		undefined,
-		process.env.DISPLAY_TZ || "Europe/Copenhagen"
-	)
-	const view = await computeStatsView({
-		period,
-		yearGranularity,
-		displayTz,
-		now: DateTime.now()
-	})
-	return c.html(<OffsetPage data={view} />)
-}
-
-export async function refDateStatsHandler(c: Context<Env>) {
-	const parsed = parseStatsQuery(c)
-	if ("error" in parsed) return parsed.error
-	const { period, yearGranularity } = parsed
-	const displayTz = resolveDisplayTz(
-		undefined,
-		undefined,
-		process.env.DISPLAY_TZ || "Europe/Copenhagen"
-	)
-	const view = await computeStatsView({
-		period,
-		yearGranularity,
-		displayTz,
-		now: DateTime.now()
-	})
-	return c.html(<RefDatePage data={view} />)
-}
-
-export async function offsetAndRefStatsHandler(c: Context<Env>) {
-	const parsed = parseStatsQuery(c)
-	if ("error" in parsed) return parsed.error
-	const { period, yearGranularity } = parsed
-	const displayTz = resolveDisplayTz(
-		undefined,
-		undefined,
-		process.env.DISPLAY_TZ || "Europe/Copenhagen"
-	)
-	const view = await computeStatsView({
-		period,
-		yearGranularity,
-		displayTz,
-		now: DateTime.now()
-	})
-	return c.html(<OffsetAndRefPage data={view} />)
 }

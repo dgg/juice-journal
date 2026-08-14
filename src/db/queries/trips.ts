@@ -171,6 +171,14 @@ export const tripsQueries = {
 		return (rows[0] as unknown as Record<string, unknown>).vehicle_id as string
 	},
 
+	async findEarliestTripYear(): Promise<number | null> {
+		const rows = await db`
+			SELECT EXTRACT(YEAR FROM MIN(end_time))::int as year FROM trips
+		`
+		if (rows.length === 0) return null
+		return (rows[0] as unknown as Record<string, unknown>).year as number | null
+	},
+
 	async findLatestOdometerForVehicle(vehicleId: string): Promise<number | null> {
 		const rows = await db`
 			SELECT odometer_km FROM trips

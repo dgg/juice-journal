@@ -110,11 +110,15 @@ describe("StatsPage", () => {
 						speed: [],
 						consumption: []
 					},
-					hasTrips: false
+					hasTrips: false,
+					date: "2026-08",
+					prevDate: "2026-07",
+					nextDate: null,
+					yearOptions: []
 				}}
 			/>
 		)
 		expect(html).toContain('href="/"')
-		expect(html).toContain(">Back to home</a>")
+		expect(html).toContain(">Back</a>")
 	})
 })
