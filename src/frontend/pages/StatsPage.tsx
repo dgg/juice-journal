@@ -42,7 +42,7 @@ const Scripts = () => (
 			src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"
 			integrity="sha256-SERKgtTty1vsDxll+qzd4Y2cF9swY9BCq62i9wXJ9Uo="
 			crossorigin="anonymous" />
-		<script src="/static/stats-charts.js" defer />
+		<script src="/static/scripts/stats.mjs" type="module" />
 	</>
 )
 

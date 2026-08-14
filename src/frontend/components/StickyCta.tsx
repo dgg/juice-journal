@@ -19,7 +19,11 @@ export const StickyCta: FC<StickyCtaProps> = (props) => {
 		<div class="sticky-cta">
 			<div class="grid">
 				{actions.map((a) => (
-					<a href={a.href} role="button" class={a.variant || "contrast"}>
+					<a
+						href={a.href}
+						role="button"
+						class={a.variant || "contrast"}
+					>
 						{a.label}
 					</a>
 				))}
