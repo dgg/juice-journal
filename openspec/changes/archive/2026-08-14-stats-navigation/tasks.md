@@ -11,10 +11,10 @@
 
 ## 3. Visual verification
 
-- [ ] 3.1 Load `/` and confirm both Stats and Log new trip anchors render in the sticky CTA row at the bottom
-- [ ] 3.2 Load `/stats` and confirm the Back to home anchor renders in the sticky CTA at the bottom
-- [ ] 3.3 Activate each anchor and confirm navigation occurs via `hx-boost` (no full document reload)
-- [ ] 3.4 Confirm no global top navigation bar appears on any page
+- [x] 3.1 Load `/` and confirm both Stats and Log new trip anchors render in the sticky CTA row at the bottom
+- [x] 3.2 Load `/stats` and confirm the Back to home anchor renders in the sticky CTA at the bottom
+- [x] 3.3 Activate each anchor and confirm navigation occurs via `hx-boost` (no full document reload)
+- [x] 3.4 Confirm no global top navigation bar appears on any page
 
 ## 4. CSS guard (conditional)
 
