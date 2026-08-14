@@ -15,15 +15,8 @@ const WEEK_RE = /^\d{4}-W\d{2}$/
 const MONTH_RE = /^\d{4}-\d{2}$/
 const YEAR_RE = /^\d{4}$/
 
-export function isValidDateFormat(date: string, period: "week" | "month" | "year"): boolean {
-	switch (period) {
-		case "week":
-			return WEEK_RE.test(date)
-		case "month":
-			return MONTH_RE.test(date)
-		case "year":
-			return YEAR_RE.test(date)
-	}
+export function isValidDateFormat(date: string): boolean {
+	return WEEK_RE.test(date) || MONTH_RE.test(date) || YEAR_RE.test(date)
 }
 
 export function parseStatsQuery(c: Context<Env>) {
@@ -38,8 +31,8 @@ export function parseStatsQuery(c: Context<Env>) {
 		return { error: c.text("Invalid yearGranularity. Must be month or week.", 400) }
 	}
 	const selectedPeriod = (period || "month") as "week" | "month" | "year"
-	if (date && !isValidDateFormat(date, selectedPeriod)) {
-		return { error: c.text(`Invalid date format for ${selectedPeriod}.`, 400) }
+	if (date && !isValidDateFormat(date)) {
+		return { error: c.text(`Invalid date parameter: ${date}.`, 400) }
 	}
 
 	return {

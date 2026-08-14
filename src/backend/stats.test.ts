@@ -14,33 +14,24 @@ const createMockContext = (query: Record<string, string>) => ({
 
 describe("isValidDateFormat", () => {
 	it("accepts valid week format", () => {
-		expect(isValidDateFormat("2026-W33", "week")).toBe(true)
-		expect(isValidDateFormat("2026-W01", "week")).toBe(true)
-	})
-
-	it("rejects invalid week format", () => {
-		expect(isValidDateFormat("2026-08", "week")).toBe(false)
-		expect(isValidDateFormat("not-a-week", "week")).toBe(false)
+		expect(isValidDateFormat("2026-W33")).toBe(true)
+		expect(isValidDateFormat("2026-W01")).toBe(true)
 	})
 
 	it("accepts valid month format", () => {
-		expect(isValidDateFormat("2026-08", "month")).toBe(true)
-		expect(isValidDateFormat("2026-01", "month")).toBe(true)
-	})
-
-	it("rejects invalid month format", () => {
-		expect(isValidDateFormat("2026-W33", "month")).toBe(false)
-		expect(isValidDateFormat("not-a-month", "month")).toBe(false)
+		expect(isValidDateFormat("2026-08")).toBe(true)
+		expect(isValidDateFormat("2026-01")).toBe(true)
 	})
 
 	it("accepts valid year format", () => {
-		expect(isValidDateFormat("2026", "year")).toBe(true)
-		expect(isValidDateFormat("1999", "year")).toBe(true)
+		expect(isValidDateFormat("2026")).toBe(true)
+		expect(isValidDateFormat("1999")).toBe(true)
 	})
 
-	it("rejects invalid year format", () => {
-		expect(isValidDateFormat("2026-08", "year")).toBe(false)
-		expect(isValidDateFormat("not-a-year", "year")).toBe(false)
+	it("rejects anything not matching week/month/year", () => {
+		expect(isValidDateFormat("not-a-date")).toBe(false)
+		expect(isValidDateFormat("2026-08-15")).toBe(false)
+		expect(isValidDateFormat("")).toBe(false)
 	})
 })
 
@@ -65,15 +56,20 @@ describe("parseStatsQuery", () => {
 		expect("error" in r3).toBe(false)
 	})
 
-	it("rejects invalid date format with 400", () => {
+	it("accepts any valid date format regardless of period", () => {
 		const r1 = parseStatsQuery(createMockContext({ period: "week", date: "2026-08" }))
+		expect("error" in r1).toBe(false)
+
+		const r2 = parseStatsQuery(createMockContext({ period: "year", date: "2026-01" }))
+		expect("error" in r2).toBe(false)
+	})
+
+	it("rejects malformed date with 400", () => {
+		const r1 = parseStatsQuery(createMockContext({ period: "week", date: "not-a-date" }))
 		expect("error" in r1).toBe(true)
 
-		const r2 = parseStatsQuery(createMockContext({ period: "month", date: "not-a-date" }))
+		const r2 = parseStatsQuery(createMockContext({ period: "month", date: "2026-08-15" }))
 		expect("error" in r2).toBe(true)
-
-		const r3 = parseStatsQuery(createMockContext({ period: "year", date: "2026-01" }))
-		expect("error" in r3).toBe(true)
 	})
 
 	it("accepts empty date as undefined", () => {
