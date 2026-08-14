@@ -6,6 +6,11 @@ import type { Context } from "hono"
 import type { Env } from "../utils/logger"
 import { DateTime } from "luxon"
 import { StatsPage } from "../frontend/pages/StatsPage"
+import {
+	OffsetPage,
+	RefDatePage,
+	OffsetAndRefPage
+} from "../frontend/pages/StatsPrototypePage"
 import { StatsChartsFragment } from "../frontend/fragments/StatsChartsFragment"
 
 const STATS_PERIODS = ["week", "month", "year"] as const
@@ -201,4 +206,58 @@ export async function getPartialTripStats(c: Context<Env>) {
 	const view = await computeStatsView({ period, yearGranularity, displayTz, now })
 
 	return c.html(<StatsChartsFragment data={view} />)
+}
+
+export async function offsetStatsHandler(c: Context<Env>) {
+	const parsed = parseStatsQuery(c)
+	if ("error" in parsed) return parsed.error
+	const { period, yearGranularity } = parsed
+	const displayTz = resolveDisplayTz(
+		undefined,
+		undefined,
+		process.env.DISPLAY_TZ || "Europe/Copenhagen"
+	)
+	const view = await computeStatsView({
+		period,
+		yearGranularity,
+		displayTz,
+		now: DateTime.now()
+	})
+	return c.html(<OffsetPage data={view} />)
+}
+
+export async function refDateStatsHandler(c: Context<Env>) {
+	const parsed = parseStatsQuery(c)
+	if ("error" in parsed) return parsed.error
+	const { period, yearGranularity } = parsed
+	const displayTz = resolveDisplayTz(
+		undefined,
+		undefined,
+		process.env.DISPLAY_TZ || "Europe/Copenhagen"
+	)
+	const view = await computeStatsView({
+		period,
+		yearGranularity,
+		displayTz,
+		now: DateTime.now()
+	})
+	return c.html(<RefDatePage data={view} />)
+}
+
+export async function offsetAndRefStatsHandler(c: Context<Env>) {
+	const parsed = parseStatsQuery(c)
+	if ("error" in parsed) return parsed.error
+	const { period, yearGranularity } = parsed
+	const displayTz = resolveDisplayTz(
+		undefined,
+		undefined,
+		process.env.DISPLAY_TZ || "Europe/Copenhagen"
+	)
+	const view = await computeStatsView({
+		period,
+		yearGranularity,
+		displayTz,
+		now: DateTime.now()
+	})
+	return c.html(<OffsetAndRefPage data={view} />)
 }
