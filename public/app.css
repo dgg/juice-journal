@@ -309,7 +309,7 @@ small.badge {
 	}
 }
 
-/* ── Stats page: period switcher, charts, responsive ── */
+/* ── Stats page: period navigation, charts, responsive ── */
 
 .period-switcher,
 .year-granularity {
@@ -337,6 +337,7 @@ small.badge {
 .stats-period-label {
 	margin-bottom: 1rem;
 	color: var(--pico-muted-color);
+	text-align: center;
 }
 
 .chart-row {
@@ -360,7 +361,7 @@ small.badge {
 	}
 }
 
-/* ── Stats prototypes: period navigation ── */
+/* ── Period navigation: picker flanked by steppers ── */
 
 .period-stepper {
 	display: flex;
@@ -373,12 +374,13 @@ small.badge {
 .period-stepper button {
 	border-radius: var(--pico-border-radius);
 	padding: 0.4rem 0.75rem;
+	font-size: 1rem;
+	white-space: nowrap;
 }
 
-.period-stepper__label {
-	flex: 1;
-	text-align: center;
-	font-size: 1.05rem;
+.period-stepper button:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
 }
 
 .period-stepper--picker {
@@ -387,23 +389,10 @@ small.badge {
 
 .period-stepper--picker input,
 .period-stepper--picker select {
-	flex: 0 1 auto;
-	min-width: 9rem;
+	flex: 1;
+	min-width: 8rem;
+	max-width: 14rem;
+	font-size: 1rem;
+	padding: 0.4rem 0.5rem;
 }
 
-.period-picker {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	margin-bottom: 0.75rem;
-}
-
-.period-picker label {
-	margin: 0;
-}
-
-.period-picker input,
-.period-picker select {
-	flex: 0 1 auto;
-	min-width: 9rem;
-}

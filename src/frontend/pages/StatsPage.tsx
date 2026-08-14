@@ -30,6 +30,10 @@ interface StatsView {
 		consumption: (number | null)[]
 	}
 	hasTrips: boolean
+	date: string | null
+	prevDate: string | null
+	nextDate: string | null
+	yearOptions: number[]
 }
 
 const Scripts = () => (
