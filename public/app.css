@@ -359,3 +359,51 @@ small.badge {
 		display: none;
 	}
 }
+
+/* ── Stats prototypes: period navigation ── */
+
+.period-stepper {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0;
+	margin-bottom: 0.75rem;
+}
+
+.period-stepper button {
+	border-radius: var(--pico-border-radius);
+	padding: 0.4rem 0.75rem;
+}
+
+.period-stepper__label {
+	flex: 1;
+	text-align: center;
+	font-size: 1.05rem;
+}
+
+.period-stepper--picker {
+	gap: 0.5rem;
+}
+
+.period-stepper--picker input,
+.period-stepper--picker select {
+	flex: 0 1 auto;
+	min-width: 9rem;
+}
+
+.period-picker {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-bottom: 0.75rem;
+}
+
+.period-picker label {
+	margin: 0;
+}
+
+.period-picker input,
+.period-picker select {
+	flex: 0 1 auto;
+	min-width: 9rem;
+}
