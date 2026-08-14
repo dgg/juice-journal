@@ -20,6 +20,13 @@ export const Layout: FC<{ title: string; children?: any }> = ({ title, children 
 						crossorigin="anonymous"
 						referrerpolicy="no-referrer"
 					/>
+					<link
+						rel="stylesheet"
+						href="https://cdnjs.cloudflare.com/ajax/libs/picocss/2.1.1/pico.colors.min.css"
+						integrity="sha512-fQonnXDPwZU4XnvoI+WMd8bHsn6aMCK5434kaGYc2o7J2RYOLUU5BFx9X+1nc8Mi4oYiYFoMmQmbLK7EMw39+A=="
+						crossorigin="anonymous"
+						referrerpolicy="no-referrer"
+					/>
 					<link rel="stylesheet" href="/static/app.css" />
 					<script
 						src="https://unpkg.com/htmx.org@2.0.10"

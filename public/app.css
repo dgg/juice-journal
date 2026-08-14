@@ -1,8 +1,3 @@
-:root {
-	--daypart-morning: #f59e0b;
-	--daypart-afternoon: #6366f1;
-}
-
 .sticky-cta {
 	position: sticky;
 	bottom: 0;
@@ -46,13 +41,13 @@
 }
 
 .daypart-indicator.morning {
-	background: #fef3c7;
-	color: var(--daypart-morning);
+	background: var(--pico-color-amber-100);
+	color: var(--pico-color-amber-200);
 }
 
 .daypart-indicator.afternoon {
-	background: #e0e7ff;
-	color: var(--daypart-afternoon);
+	background: var(--pico-color-indigo-100);
+	color: var(--pico-color-indigo-200);
 }
 
 .page-header {
