@@ -28,18 +28,19 @@ export const Layout: FC<{ title: string; children?: any }> = ({ title, children 
 						referrerpolicy="no-referrer"
 					/>
 					<link rel="stylesheet" href="/static/app.css" />
+					<link
+						rel="stylesheet"
+						href="https://unpkg.com/lucide-static@1.31.0/font/lucide.css"
+						integrity="sha256-hjpe3MZ8jfUdYxEU56nZduEXHqSiIJnpoqev6cK35KM="
+						crossorigin="anonymous"
+						referrerpolicy="no-referrer"
+					/>
 					<script
 						src="https://unpkg.com/htmx.org@2.0.10"
 						integrity="sha384-H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V"
 						crossorigin="anonymous"
 						defer
 					/>
-					<script
-						src="https://cdn.jsdelivr.net/npm/lucide@1.31.0/dist/umd/lucide.min.js"
-						integrity="sha256-+WFnu/DnOuEDEygRbMNrpjPHGVPQzM4uS1z8F8Qg+Gk="
-						crossorigin="anonymous"
-						defer
-					></script>
 				</head>
 				<body hx-boost="true">{children}</body>
 			</html>

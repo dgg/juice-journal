@@ -38,7 +38,7 @@ export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
 	const timeStr = `${startTimeStr} \u2013 ${endTimeStr}`
 
 	const daypartClass = trip.daypart === "morning" ? "morning" : "afternoon"
-	const daypartIcon = trip.daypart === "morning" ? "\u2600" : "\u{1F319}"
+	const daypartIcon = trip.daypart === "morning" ? "icon-sun" : "icon-moon"
 
 	const consumptionStr =
 		trip.avgConsumptionKwh100km !== null
@@ -48,7 +48,7 @@ export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
 	return (
 		<details class="trip-row">
 			<summary class="trip-row__summary">
-				<span class={`daypart-indicator ${daypartClass}`}>{daypartIcon}</span>
+				<span class={`daypart-indicator ${daypartClass}`}><span class={daypartIcon} aria-hidden="true"></span></span>
 				<div class="trip-row__title">
 					<h3>{dateStr}</h3>
 					<time

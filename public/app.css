@@ -50,6 +50,16 @@
 	color: var(--pico-color-indigo-200);
 }
 
+.daypart-indicator .icon-sun,
+.daypart-indicator .icon-moon {
+	font-size: 1.25rem;
+}
+
+.daypart-selector .icon-sun,
+.daypart-selector .icon-moon {
+	font-size: 1.25rem;
+}
+
 .page-header {
 	display: flex;
 	justify-content: space-between;
