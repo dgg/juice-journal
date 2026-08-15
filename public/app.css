@@ -312,6 +312,15 @@ small.badge {
 .year-granularity button {
 	flex: 1;
 	border-radius: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.4rem;
+}
+
+.period-switcher button [class^="icon-"],
+.year-granularity button [class^="icon-"] {
+	font-size: 1rem;
 }
 
 .period-switcher button:first-child,
