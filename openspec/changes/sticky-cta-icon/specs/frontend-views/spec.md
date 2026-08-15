@@ -2,7 +2,7 @@
 
 ### Requirement: Cross-page navigation via sticky CTA controls
 
-Each primary page (home, stats) SHALL expose a sticky bottom-anchored navigation control that links to the other primary page. The control SHALL follow the existing sticky CTA visual pattern (Pico `role="button"` anchors inside a `.sticky-cta` container) and SHALL NOT introduce a global top navigation bar. Each action anchor MAY specify an optional icon; when an icon is specified the sticky CTA SHALL render it inline with the action label using the project's existing icon system (a `lucide-static` font icon applied as `<span class="icon-<name>" aria-hidden="true"></span>`). The trip form page is out of scope; its existing `Back` anchor in `.sticky-submit` remains unchanged.
+Each primary page (home, stats) SHALL expose a sticky bottom-anchored navigation control that links to the other primary page. The control SHALL follow the existing sticky CTA visual pattern (Pico `role="button"` anchors inside a `.sticky-cta` container) and SHALL NOT introduce a global top navigation bar. Each action MAY specify an optional icon; when an icon is specified the sticky CTA SHALL render it inline with the action label using the project's existing icon system (a `lucide-static` font icon applied as `<span class="icon-<name>" aria-hidden="true"></span>`). The trip form page SHALL also use the same sticky CTA control for its bottom navigation: a `Back` navigation anchor and a `Save` action that submits the trip form. A sticky CTA action MAY specify `type: "submit"`; such an action SHALL render as a submit button within the enclosing form rather than an anchor.
 
 #### Scenario: Home page links to stats
 
@@ -20,7 +20,7 @@ Each primary page (home, stats) SHALL expose a sticky bottom-anchored navigation
 
 - **GIVEN** the user is viewing the home page
 - **WHEN** the sticky CTA region renders with both a stats link and the existing log-trip link
-- **THEN** both actions SHALL be visible together without one hiding the other, using the Pico grid pattern already established by `.sticky-submit`
+- **THEN** both actions SHALL be visible together without one hiding the other, using the Pico grid pattern established by `.sticky-cta`
 
 #### Scenario: Navigation uses HTMX boost
 
@@ -50,3 +50,21 @@ Each primary page (home, stats) SHALL expose a sticky bottom-anchored navigation
 - **GIVEN** a sticky CTA action is rendered with an icon name specified
 - **WHEN** the action anchor renders
 - **THEN** the icon SHALL be vertically centered with the label text and sized to match the button text, without shifting the label's baseline or breaking the established Pico `role="button"` layout
+
+#### Scenario: Trip form page uses sticky CTA for back navigation
+
+- **GIVEN** the user is viewing the trip form page at `/trips/new`
+- **WHEN** the page renders
+- **THEN** the page SHALL expose a sticky CTA control containing an anchor to `/` with a label identifying the home page (Back)
+
+#### Scenario: Trip form page save action submits the form
+
+- **GIVEN** the user is viewing the trip form page at `/trips/new`
+- **WHEN** the page renders
+- **THEN** the sticky CTA control SHALL contain a `type="submit"` button that submits the trip form when activated
+
+#### Scenario: Submit action renders as a button, not an anchor
+
+- **GIVEN** a sticky CTA action specifies `type: "submit"`
+- **WHEN** the sticky CTA renders
+- **THEN** the action SHALL render as a submit button (not an anchor) carrying the Pico `role="button"` styling, while actions without `type: "submit"` SHALL continue to render as anchors

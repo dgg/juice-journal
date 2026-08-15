@@ -10,7 +10,6 @@ The `StickyCta` component (`src/frontend/components/StickyCta.tsx`) already type
 - Reuse the existing `lucide-static` font-icon pattern and the existing `icon-<name>` class convention — no new dependency.
 
 **Non-Goals:**
-- Adding icons to the trip form page's `.sticky-submit` `Back` anchor.
 - Changing which icons callers pass (callers decide icon names; this change only enables rendering).
 - Validating icon names against the lucide set (an unknown name renders a blank glyph, same as any other lucide font usage in the app).
 
@@ -43,8 +42,27 @@ Add a rule targeting `.sticky-cta a[role="button"]` to lay out icon + label with
 
 Conditional render: `{a.icon && <span ... />}`. Anchors without `icon` render exactly as today, so `HomePage`/`StatsPage` callers passing no icon are unaffected.
 
+### 5. Add `type?: "submit"` to the `Action` type to support form submit buttons
+
+When `action.type === "submit"`, render `<button type="submit" class={...}>` instead of `<a href={...} role="button">`. Both use the same Pico `role="button"` styling via the CSS rule that targets `.sticky-cta a[role="button"], .sticky-cta button[type="submit"]`.
+
+**Alternatives considered:**
+- Programmatic `form.submit()` on an anchor click: fragile, breaks HTMX interaction.
+- Keep separate `.sticky-submit` in TripFormPage: duplicates CSS, inconsistent with the rest of the app.
+
+### 6. Drop `.sticky-submit` CSS and reuse `.sticky-cta` rules
+
+### 6. Drop `.sticky-submit` CSS and reuse `.sticky-cta` rules
+
+The `.sticky-submit` rules in `public/app.css` (`.sticky-submit`, `.sticky-submit .grid`, `.sticky-submit button, .sticky-submit a[role="button"]`, plus the `@media` block) are byte-for-byte the same behavior as `.sticky-cta`. TripFormPage switches to `<StickyCta>` with `Back` (anchor) and `Save trip` (`type: "submit"`), and the `.sticky-submit` rules are removed. This unifies the sticky bottom bar across all pages, so icon sizing/centering applies everywhere.
+
 ## Risks / Trade-offs
 
 - **[Icon name typo renders blank]** → Mitigation: callers own icon names; an unknown lucide name is a no-op glyph, consistent with the rest of the app. No validation added (out of scope).
 - **[Flex on the anchor could alter Pico button internals]** → Mitigation: scope the rule tightly to `.sticky-cta a[role="button"]` and verify the button still fills its grid cell (`width:100%` preserved). Add a visual check to the test.
 - **[Vertical alignment drift across Pico themes]** → Mitigation: use `align-items:center` rather than `vertical-align` so the icon centers regardless of line-box metrics.
+- **[Submit button inside a form with sticky positioning]** → Mitigation: `button[type="submit"]` is already styled by Pico; the CSS rule is extended to include it so it matches anchor styling. Verify the form still submits via HTMX (`hx-post`) after the markup change.
+
+## Migration Plan
+
+Replace the `.sticky-submit` block in `TripFormPage.tsx` with a `<StickyCta>` rendering `Back` (anchor) and `Save trip` (`type: "submit"`), then delete the `.sticky-submit` CSS rules. Rollback is a revert of those two files — no data migration.
