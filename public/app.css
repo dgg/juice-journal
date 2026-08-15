@@ -205,6 +205,13 @@ small.badge {
 .delta {
 	font-size: 0.875rem;
 	margin-top: 0.25rem;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+}
+
+.delta [class^="icon-"] {
+	font-size: 0.875rem;
 }
 
 .trip-form label [class^="icon-"] {

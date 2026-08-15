@@ -138,6 +138,55 @@ describe("StatsChartsFragment period navigation", () => {
 		const html = String(<StatsChartsFragment data={makeData({ vehicle: null })} />)
 		expect(html).not.toContain("icon-car-front")
 	})
+
+	it("renders vs last month suffix for month period delta", () => {
+		const html = String(
+			<StatsChartsFragment data={makeData({ period: "month", hasTrips: true })} />
+		)
+		expect(html).toContain("vs last month")
+	})
+
+	it("renders vs last week suffix for week period delta", () => {
+		const html = String(
+			<StatsChartsFragment data={makeData({ period: "week", hasTrips: true })} />
+		)
+		expect(html).toContain("vs last week")
+	})
+
+	it("renders vs last year suffix for year period delta", () => {
+		const html = String(
+			<StatsChartsFragment
+				data={makeData({
+					period: "year",
+					hasTrips: true,
+					date: "2025",
+					yearGranularity: "month",
+					yearOptions: [2026, 2025]
+				})}
+			/>
+		)
+		expect(html).toContain("vs last year")
+	})
+
+	it("renders trending-up icon for positive delta", () => {
+		const html = String(
+			<StatsChartsFragment
+				data={makeData({
+					period: "month",
+					hasTrips: true,
+					stats: {
+						totalDistance: { value: 200, prev: 150 },
+						avgSpeed: { value: 50, prev: 48 },
+						avgDuration: { value: 30, prev: 28 },
+						avgDurationHm: "30m",
+						avgConsumption: { value: 18.5, prev: 19.0 },
+						tripCount: { value: 10, prev: 8 }
+					}
+				})}
+			/>
+		)
+		expect(html).toContain("icon-trending-up")
+	})
 })
 
 describe("EmptyState", () => {

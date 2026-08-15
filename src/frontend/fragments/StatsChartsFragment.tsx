@@ -46,13 +46,15 @@ function StatCard({
 	value,
 	unit,
 	prev,
-	icon
+	icon,
+	period
 }: {
 	label: string
 	value: number | null
 	unit: string
 	prev: number | null
 	icon?: string
+	period: "week" | "month" | "year"
 }) {
 	const hasValue = value !== null
 	const formatted = hasValue
@@ -75,9 +77,11 @@ function StatCard({
 			<p class="stat-card__value">
 				<data value={value ?? ""}>{formatted}</data> <small>{unit}</small>
 			</p>
-			<small class="stat-card__label">{icon && <span class={`icon-${icon}`} aria-hidden="true"></span>} {label}</small>
+			<small class="stat-card__label">
+				{icon && <span class={`icon-${icon}`} aria-hidden="true"></span>} {label}
+			</small>
 			{delta !== null && formattedDelta !== null ? (
-				<Delta value={delta} unit={unit} />
+				<Delta value={delta} unit={unit} period={period} />
 			) : null}
 		</article>
 	)
@@ -179,6 +183,8 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 	const selectedPeriod = data.period
 	const selectedGranularity = data.yearGranularity
 
+	console.log(data.stats)
+
 	return (
 		<section id="stats-region">
 			<div class="period-switcher" role="group">
@@ -239,39 +245,44 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 			{data.hasTrips ? (
 				<>
 					<div class="stats-grid">
-<StatCard
-						label="Total distance"
-						value={data.stats.totalDistance.value}
-						unit="km"
-						prev={data.stats.totalDistance.prev}
-						icon="route"
-					/>
-					<StatCard
-						label="Avg speed"
-						value={data.stats.avgSpeed.value}
-						unit="km/h"
-						prev={data.stats.avgSpeed.prev}
-						icon="gauge"
-					/>
-					<StatCard
-						label="Avg duration"
-						value={data.stats.avgDuration.value}
-						unit={data.stats.avgDurationHm ?? "min"}
-						prev={data.stats.avgDuration.prev}
-						icon="hourglass"
-					/>
-					<StatCard
-						label="Avg consumption"
-						value={data.stats.avgConsumption.value}
-						unit="kWh/100km"
-						prev={data.stats.avgConsumption.prev}
-						icon="ev-charger"
-					/>
+						<StatCard
+							label="Total distance"
+							value={data.stats.totalDistance.value}
+							unit="km"
+							prev={data.stats.totalDistance.prev}
+							icon="route"
+							period={data.period}
+						/>
+						<StatCard
+							label="Avg speed"
+							value={data.stats.avgSpeed.value}
+							unit="km/h"
+							prev={data.stats.avgSpeed.prev}
+							icon="gauge"
+							period={data.period}
+						/>
+						<StatCard
+							label="Avg duration"
+							value={data.stats.avgDuration.value}
+							unit={data.stats.avgDurationHm ?? "min"}
+							prev={data.stats.avgDuration.prev}
+							icon="hourglass"
+							period={data.period}
+						/>
+						<StatCard
+							label="Avg consumption"
+							value={data.stats.avgConsumption.value}
+							unit="kWh/100km"
+							prev={data.stats.avgConsumption.prev}
+							icon="ev-charger"
+							period={data.period}
+						/>
 						<StatCard
 							label="Trips"
 							value={data.stats.tripCount.value}
 							unit=""
 							prev={data.stats.tripCount.prev}
+							period={data.period}
 						/>
 					</div>
 					<div id="stats-charts">
