@@ -18,4 +18,4 @@
 
 - [x] 4.1 Run `bun test` — full suite green
 - [x] 4.2 Run `prettier --check` on edited files
-- [ ] 4.3 Manually verify the home page header badge shows the `car-front` icon before the vehicle description, and the stats page shows the same icon before the vehicle name
+- [x] 4.3 Manually verify the home page header badge shows the `car-front` icon before the vehicle description, and the stats page shows the same icon before the vehicle name
