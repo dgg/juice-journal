@@ -22,7 +22,7 @@ The system SHALL serve a stats page at `GET /stats` that displays aggregated tri
 
 ### Requirement: Period selection switches week, month, and year
 
-The system SHALL let the user select a period of `week`, `month`, or `year`. The week period SHALL cover an ISO week (Monday 00:00 to next Monday 00:00) in the display timezone; the month period SHALL cover a calendar month; the year period SHALL cover a calendar year. When a `date` query parameter is present, period bounds SHALL be computed relative to the period containing that date; when absent, bounds SHALL default to the current period. All bounds SHALL be computed in the display timezone and applied to `trips.end_time` as UTC. The `date` parameter SHALL accept ISO week format (`YYYY-Www`) for the week period, `YYYY-MM` for the month period, and `YYYY` for the year period.
+The system SHALL let the user select a period of `week`, `month`, or `year`. The week period SHALL cover an ISO week (Monday 00:00 to next Monday 00:00) in the display timezone; the month period SHALL cover a calendar month; the year period SHALL cover a calendar year. When a `date` query parameter is present, period bounds SHALL be computed relative to the period containing that date; when absent, bounds SHALL default to the current period. All bounds SHALL be computed in the display timezone and applied to `trips.end_time` as UTC. The `date` parameter SHALL accept ISO week format (`YYYY-Www`) for the week period, `YYYY-MM` for the month period, and `YYYY` for the year period. The period switcher SHALL render one button per period; each button SHALL display an icon inline before its label using the project's `lucide-static` font-icon system (`<span class="icon-<name>" aria-hidden="true"></span>`): `week` → `calendar-1`, `month` → `calendar-days`, `year` → `calendar`.
 
 #### Scenario: Switching to week
 
@@ -49,6 +49,18 @@ The system SHALL let the user select a period of `week`, `month`, or `year`. The
 
 - **WHEN** the user visits `/stats?period=month&date=not-a-date`
 - **THEN** the system SHALL respond with a 400 error indicating the date parameter is invalid
+
+#### Scenario: Period switcher buttons render a period-specific icon
+
+- **GIVEN** the stats page renders the period switcher
+- **WHEN** each period button renders
+- **THEN** the week button SHALL contain an `icon-calendar-1` element, the month button SHALL contain an `icon-calendar-days` element, and the year button SHALL contain an `icon-calendar` element, each placed inline before the label
+
+#### Scenario: Period icon is sized and aligned with the label
+
+- **GIVEN** a period switcher button renders with its icon
+- **WHEN** the button renders
+- **THEN** the icon SHALL be vertically centered with the label text and sized to match the button text, without shifting the label baseline or breaking the segmented-button layout (flex:1, shared border-radius)
 
 ### Requirement: Period switching uses HTMX partial swap
 
@@ -125,7 +137,7 @@ Both charts SHALL use Chart.js, loaded only on the stats page.
 
 ### Requirement: Year period charts are bucketed with a granularity toggle
 
-For the year period the system SHALL NOT render one bar per trip. It SHALL aggregate the series into buckets controlled by a `yearGranularity` toggle with values `month` (default) and `week`. Each bucket bar SHALL represent the sum of distance and duration (chart 1) and the arithmetic mean of speed and consumption (chart 2) over the trips in that bucket.
+For the year period the system SHALL NOT render one bar per trip. It SHALL aggregate the series into buckets controlled by a `yearGranularity` toggle with values `month` (default) and `week`. Each bucket bar SHALL represent the sum of distance and duration (chart 1) and the arithmetic mean of speed and consumption (chart 2) over the trips in that bucket. The granularity toggle SHALL render one button per value; each button SHALL display an icon inline before its label using the project's `lucide-static` font-icon system, matching the period switcher mapping: `month` → `calendar-days`, `week` → `calendar-1`.
 
 #### Scenario: Year with month granularity (default)
 
@@ -143,6 +155,12 @@ For the year period the system SHALL NOT render one bar per trip. It SHALL aggre
 
 - **WHEN** the user toggles between Month and Week granularity while the period is year
 - **THEN** the system SHALL request `/partials/stats?period=year&yearGranularity=<month|week>` and swap the charts region without a full page reload
+
+#### Scenario: Granularity toggle buttons render a granularity-specific icon
+
+- **GIVEN** the selected period is year and the granularity toggle renders
+- **WHEN** each granularity button renders
+- **THEN** the Month button SHALL contain an `icon-calendar-days` element and the Week button SHALL contain an `icon-calendar-1` element, each placed inline before the label
 
 ### Requirement: Empty period renders an empty chart state
 
