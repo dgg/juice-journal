@@ -87,6 +87,10 @@ small.badge {
 	font-size: 0.875rem;
 }
 
+.badge [class^="icon-"] {
+	font-size: 0.875rem;
+}
+
 .trip-row__summary {
 	padding: 1rem;
 	display: flex;

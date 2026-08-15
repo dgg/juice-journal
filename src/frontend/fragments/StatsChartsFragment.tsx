@@ -226,7 +226,12 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 
 			<div class="stats-period-label">
 				<small>{data.label}</small>
-				{data.vehicle ? <small> — {data.vehicle.description}</small> : null}
+				{data.vehicle ? (
+					<small>
+						<span class="icon-car-front" aria-hidden="true"></span>{" "}
+						{data.vehicle.description}
+					</small>
+				) : null}
 			</div>
 
 			{data.hasTrips ? (

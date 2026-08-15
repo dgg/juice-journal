@@ -1,5 +1,6 @@
 import { describe, it, expect } from "bun:test"
 import { StickyCta } from "../components/StickyCta"
+import { Header } from "../components/Header"
 import { HomePage } from "../pages/HomePage"
 import { StatsPage } from "../pages/StatsPage"
 
@@ -126,6 +127,20 @@ describe("HomePage", () => {
 		)
 		expect(html).toContain('href="/trips/new"')
 		expect(html).toContain(">Log new trip</a>")
+	})
+})
+
+describe("Header", () => {
+	it("renders car-front icon inside badge when vehicle is provided", () => {
+		const html = String(<Header month="August 2026" vehicle="Tesla M3" />)
+		expect(html).toContain('<span class="icon-car-front" aria-hidden="true"></span>')
+		expect(html).toContain("> Tesla M3<")
+	})
+
+	it("renders no badge when vehicle is null", () => {
+		const html = String(<Header month="August 2026" vehicle={null} />)
+		expect(html).not.toContain("badge")
+		expect(html).not.toContain("icon-")
 	})
 })
 
