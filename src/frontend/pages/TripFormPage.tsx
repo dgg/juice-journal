@@ -1,6 +1,7 @@
 import type { FC } from "hono/jsx"
 import { Layout } from "../Layout"
 import { Header } from "../components/Header"
+import { StickyCta } from "../components/StickyCta"
 
 interface LocationOption {
 	id: string
@@ -37,12 +38,7 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 		<Layout title="Log trip — Juice Journal">
 			<main class="container">
 				<Header month="Log new trip" vehicle={null} />
-				<form
-					class="trip-form"
-					action="/trips"
-					method="post"
-					hx-post="/trips"
-				>
+				<form class="trip-form" action="/trips" method="post" hx-post="/trips">
 					{/* Row 1: date + daypart */}
 					<div class="grid">
 						<label>
@@ -171,16 +167,17 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 					</div>
 
 					{/* Sticky submit bar: Back + Save */}
-					<div class="sticky-submit">
-						<div class="grid">
-							<a href="/" role="button" class="secondary">
-								Back
-							</a>
-							<button type="submit" class="contrast">
-								Save trip
-							</button>
-						</div>
-					</div>
+					<StickyCta
+						actions={[
+							{
+								href: "/",
+								label: "Back",
+								variant: "secondary",
+								icon: "home"
+							},
+							{ label: "Save trip", type: "submit", icon: "save-plus" }
+						]}
+					/>
 				</form>
 			</main>
 		</Layout>

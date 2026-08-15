@@ -52,6 +52,33 @@ describe("StickyCta", () => {
 		expect(html).not.toContain("icon-")
 		expect(html).toContain(">Home<")
 	})
+
+	it("renders submit action as a button with type submit", () => {
+		const html = String(
+			<StickyCta
+				actions={[
+					{ href: "/", label: "Back", variant: "secondary" },
+					{ label: "Save trip", type: "submit", icon: "save" }
+				]}
+			/>
+		)
+		expect(html).toContain('<button type="submit" class="contrast">')
+		expect(html).toContain('<span class="icon-save" aria-hidden="true"></span>')
+		expect(html).toContain(">Save trip<")
+	})
+
+	it("renders regular actions as anchors when type is not submit", () => {
+		const html = String(
+			<StickyCta
+				actions={[
+					{ href: "/", label: "Back", variant: "secondary" },
+					{ label: "Save trip", type: "submit" }
+				]}
+			/>
+		)
+		expect(html).toContain('<a href="/" role="button" class="secondary">')
+		expect(html).toContain(">Back<")
+	})
 })
 
 describe("HomePage", () => {
