@@ -101,7 +101,13 @@ View components SHALL use the semantically correct HTML element for each piece o
 
 - **GIVEN** the header displays the vehicle description as a secondary badge
 - **WHEN** the badge is rendered
-- **THEN** it SHALL use a `<small>` element with a `badge` class, styled via `public/app.css`, with no inline `style` attribute
+- **THEN** it SHALL use a `<small>` element with a `badge` class, styled via `public/app.css`, SHALL render a `car-front` `lucide-static` font icon (`<span class="icon-car-front" aria-hidden="true"></span>`) inline before the vehicle description, and SHALL NOT use inline `style` attributes
+
+#### Scenario: Vehicle badge icon is sized and aligned with the text
+
+- **GIVEN** the vehicle badge renders with the `car-front` icon
+- **WHEN** the badge renders
+- **THEN** the icon SHALL be vertically centered with the description text and sized to match the badge text size, without shifting the text baseline
 
 ### Requirement: Automatic HTML escaping
 
