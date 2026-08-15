@@ -67,11 +67,11 @@ export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
 			</summary>
 			<div class="trip-row__body">
 				<dl class="trip-snapshot">
-					<dt>Distance</dt>
+					<dt><span class="icon-route" aria-hidden="true"></span> Distance</dt>
 					<dd>{formatNumber(trip.distanceKm, 1)} km</dd>
-					<dt>Duration</dt>
+					<dt><span class="icon-hourglass" aria-hidden="true"></span> Duration</dt>
 					<dd>{trip.durationMin} min</dd>
-					<dt>Avg speed</dt>
+					<dt><span class="icon-snail" aria-hidden="true"></span> Avg speed</dt>
 					<dd>
 						{trip.avgSpeedKmh !== null
 							? formatNumber(trip.avgSpeedKmh, 0)
@@ -80,19 +80,19 @@ export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
 					</dd>
 					{trip.odometerKm !== null && (
 						<>
-							<dt>Odometer</dt>
+							<dt><span class="icon-circle-gauge" aria-hidden="true"></span> Odometer</dt>
 							<dd>{formatNumber(trip.odometerKm, 1)} km</dd>
 						</>
 					)}
 					{trip.startLocation && (
 						<>
-							<dt>From</dt>
+							<dt><span class="icon-flag" aria-hidden="true"></span> From</dt>
 							<dd>{trip.startLocation}</dd>
 						</>
 					)}
 					{trip.endLocation && (
 						<>
-							<dt>To</dt>
+							<dt><span class="icon-flag-triangle-right" aria-hidden="true"></span> To</dt>
 							<dd>{trip.endLocation}</dd>
 						</>
 					)}
