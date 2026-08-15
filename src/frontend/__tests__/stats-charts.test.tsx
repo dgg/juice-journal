@@ -208,3 +208,66 @@ describe("EmptyState", () => {
 		expect(html).toContain('class="icon-circle-off"')
 	})
 })
+
+describe("Avg duration display", () => {
+	it("renders HM string as value and not raw minutes when avgDurationHm is set", () => {
+		const html = String(
+			<StatsChartsFragment
+				data={makeData({ period: "month", hasTrips: true })}
+			/>
+		)
+		expect(html).toContain(">30m</data>")
+		expect(html).not.toContain(">30</data>")
+	})
+
+	it("renders hours-and-minutes format for longer durations", () => {
+		const html = String(
+			<StatsChartsFragment
+				data={makeData({
+					period: "month",
+					hasTrips: true,
+					stats: {
+						totalDistance: { value: 200, prev: 150 },
+						avgSpeed: { value: 50, prev: 48 },
+						avgDuration: { value: 90, prev: 60 },
+						avgDurationHm: "1h 30m",
+						avgConsumption: { value: 18.5, prev: 19.0 },
+						tripCount: { value: 10, prev: 8 }
+					}
+				})}
+			/>
+		)
+		expect(html).toContain(">1h 30m</data>")
+		expect(html).not.toContain(">90<")
+	})
+
+	it("renders -- with no unit when avg duration is null", () => {
+		const html = String(
+			<StatsChartsFragment
+				data={makeData({
+					period: "month",
+					hasTrips: true,
+					stats: {
+						totalDistance: { value: 200, prev: 150 },
+						avgSpeed: { value: 50, prev: 48 },
+						avgDuration: { value: null, prev: null },
+						avgDurationHm: null,
+						avgConsumption: { value: 18.5, prev: 19.0 },
+						tripCount: { value: 10, prev: 8 }
+					}
+				})}
+			/>
+		)
+		expect(html).toContain(">--</data>")
+		expect(html).not.toContain(">-- <small>")
+	})
+
+	it("renders avg-duration delta with min unit suffix", () => {
+		const html = String(
+			<StatsChartsFragment
+				data={makeData({ period: "month", hasTrips: true })}
+			/>
+		)
+		expect(html).toContain("2.0 min")
+	})
+})

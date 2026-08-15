@@ -47,7 +47,9 @@ function StatCard({
 	unit,
 	prev,
 	icon,
-	period
+	period,
+	displayValue,
+	deltaUnit
 }: {
 	label: string
 	value: number | null
@@ -55,13 +57,17 @@ function StatCard({
 	prev: number | null
 	icon?: string
 	period: "week" | "month" | "year"
+	displayValue?: string | null
+	deltaUnit?: string
 }) {
 	const hasValue = value !== null
-	const formatted = hasValue
-		? value % 1 === 0
-			? value.toString()
-			: value.toFixed(1)
-		: "--"
+	const formatted =
+		displayValue ??
+		(hasValue
+			? value % 1 === 0
+				? value.toString()
+				: value.toFixed(1)
+			: "--")
 
 	const delta = value !== null && prev !== null ? value - prev : null
 	const absDelta = delta !== null ? Math.abs(delta) : null
@@ -75,13 +81,14 @@ function StatCard({
 	return (
 		<article class="stat-card">
 			<p class="stat-card__value">
-				<data value={value ?? ""}>{formatted}</data> <small>{unit}</small>
+				<data value={value ?? ""}>{formatted}</data>{" "}
+				<small>{displayValue ? "" : unit}</small>
 			</p>
 			<small class="stat-card__label">
 				{icon && <span class={`icon-${icon}`} aria-hidden="true"></span>} {label}
 			</small>
 			{delta !== null && formattedDelta !== null ? (
-				<Delta value={delta} unit={unit} period={period} />
+				<Delta value={delta} unit={deltaUnit ?? unit} period={period} />
 			) : null}
 		</article>
 	)
@@ -183,8 +190,6 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 	const selectedPeriod = data.period
 	const selectedGranularity = data.yearGranularity
 
-	console.log(data.stats)
-
 	return (
 		<section id="stats-region">
 			<div class="period-switcher" role="group">
@@ -264,7 +269,9 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 						<StatCard
 							label="Avg duration"
 							value={data.stats.avgDuration.value}
-							unit={data.stats.avgDurationHm ?? "min"}
+							displayValue={data.stats.avgDurationHm}
+							unit=""
+							deltaUnit="min"
 							prev={data.stats.avgDuration.prev}
 							icon="hourglass"
 							period={data.period}
