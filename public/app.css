@@ -207,17 +207,8 @@ small.badge {
 	margin-top: 0.25rem;
 }
 
-.trip-snapshot dt [class^="icon-"] {
-	font-size: 0.875rem;
-}
-
 .trip-form label [class^="icon-"] {
-	font-size: 0.875rem;
-	margin-right: 0.1rem;
-}
-
-.stat-card__label [class^="icon-"] {
-	font-size: 0.75rem;
+	margin-right: 0.25rem;
 }
 
 .daypart-selector {
