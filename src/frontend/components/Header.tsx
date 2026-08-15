@@ -7,7 +7,11 @@ export const Header: FC<{ month: string; vehicle: string | null }> = ({
 	return (
 		<header class="page-header">
 			<h1>{month}</h1>
-			{vehicle && <small class="badge">{vehicle}</small>}
+			{vehicle && (
+				<small class="badge">
+					<span class="icon-car-front" aria-hidden="true"></span> {vehicle}
+				</small>
+			)}
 		</header>
 	)
 }
