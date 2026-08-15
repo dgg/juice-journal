@@ -6,7 +6,7 @@
 ## 2. Styling
 
 - [x] 2.1 In `public/app.css`, add `.badge [class^="icon-"] { font-size: 0.875rem }` so the icon matches the badge text size
-- [ ] 2.2 Verify visually that the icon is vertically centered with the vehicle description text and does not shift the badge baseline
+- [x] 2.2 Verify visually that the icon is vertically centered with the vehicle description text and does not shift the badge baseline
 
 ## 3. Tests
 

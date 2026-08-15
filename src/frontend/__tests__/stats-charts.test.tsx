@@ -121,6 +121,23 @@ describe("StatsChartsFragment period navigation", () => {
 		expect(html).toContain("icon-calendar-days")
 		expect(html).toContain("icon-calendar-1")
 	})
+
+	it("renders car-front icon and vehicle description in stats period label when vehicle is provided", () => {
+		const html = String(
+			<StatsChartsFragment
+				data={makeData({
+					vehicle: { id: "veh_123", description: "Megane E-Tech" }
+				})}
+			/>
+		)
+		expect(html).toContain('<span class="icon-car-front" aria-hidden="true"></span>')
+		expect(html).toContain("Megane E-Tech")
+	})
+
+	it("renders no vehicle info in stats period label when vehicle is null", () => {
+		const html = String(<StatsChartsFragment data={makeData({ vehicle: null })} />)
+		expect(html).not.toContain("icon-car-front")
+	})
 })
 
 describe("EmptyState", () => {
