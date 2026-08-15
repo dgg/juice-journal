@@ -38,7 +38,7 @@ export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
 	const timeStr = `${startTimeStr} \u2013 ${endTimeStr}`
 
 	const daypartClass = trip.daypart === "morning" ? "morning" : "afternoon"
-	const daypartIcon = trip.daypart === "morning" ? "icon-sun" : "icon-moon"
+	const daypartIcon = trip.daypart === "morning" ? "icon-clock-8" : "icon-clock-4"
 
 	const consumptionStr =
 		trip.avgConsumptionKwh100km !== null

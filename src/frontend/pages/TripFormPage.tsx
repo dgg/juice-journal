@@ -63,7 +63,7 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 									value="morning"
 									checked={defaultDaypart === "morning"}
 								/>
-								<span class="icon-sun" aria-hidden="true"></span>
+								<span class="icon-clock-8" aria-hidden="true"></span>
 							</label>
 							<label>
 								<input
@@ -71,8 +71,9 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 									name="daypart"
 									value="afternoon"
 									checked={defaultDaypart === "afternoon"}
+									title="Afternoon"
 								/>
-								<span class="icon-moon" aria-hidden="true"></span>
+								<span class="icon-clock-4" aria-hidden="true"></span>
 							</label>
 						</fieldset>
 					</div>

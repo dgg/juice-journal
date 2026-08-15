@@ -4,26 +4,20 @@ type Action = {
 	href: string
 	label: string
 	variant?: "contrast" | "secondary"
+	icon?: string
 }
 
-type StickyCtaProps =
-	| { actions: Action[] }
-	| { href: string; label: string }
+type StickyCtaProps = { actions: Action[] } | { href: string; label: string }
 
 export const StickyCta: FC<StickyCtaProps> = (props) => {
-	const actions: Action[] = "actions" in props
-		? props.actions
-		: [{ href: props.href, label: props.label }]
+	const actions: Action[] =
+		"actions" in props ? props.actions : [{ href: props.href, label: props.label }]
 
 	return (
 		<div class="sticky-cta">
 			<div class="grid">
 				{actions.map((a) => (
-					<a
-						href={a.href}
-						role="button"
-						class={a.variant || "contrast"}
-					>
+					<a href={a.href} role="button" class={a.variant || "contrast"}>
 						{a.label}
 					</a>
 				))}
