@@ -71,7 +71,7 @@ export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
 					<dd>{formatNumber(trip.distanceKm, 1)} km</dd>
 					<dt><span class="icon-hourglass" aria-hidden="true"></span> Duration</dt>
 					<dd>{trip.durationMin} min</dd>
-					<dt><span class="icon-snail" aria-hidden="true"></span> Avg speed</dt>
+					<dt><span class="icon-gauge" aria-hidden="true"></span> Avg speed</dt>
 					<dd>
 						{trip.avgSpeedKmh !== null
 							? formatNumber(trip.avgSpeedKmh, 0)

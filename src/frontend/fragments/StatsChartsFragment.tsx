@@ -251,7 +251,7 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 						value={data.stats.avgSpeed.value}
 						unit="km/h"
 						prev={data.stats.avgSpeed.prev}
-						icon="snail"
+						icon="gauge"
 					/>
 					<StatCard
 						label="Avg duration"

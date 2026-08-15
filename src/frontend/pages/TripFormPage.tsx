@@ -42,7 +42,8 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 					{/* Row 1: date + daypart */}
 					<div class="grid">
 						<label>
-							<span class="icon-calendar-days" aria-hidden="true"></span> Date
+							<span class="icon-calendar-days" aria-hidden="true"></span>{" "}
+							Date
 							<input
 								name="trip_date"
 								type="date"
@@ -77,11 +78,13 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 					{/* Row 2: start + end time */}
 					<div class="grid">
 						<label>
-							<span class="icon-clock-arrow-up" aria-hidden="true"></span> Start time
+							<span class="icon-clock-arrow-up" aria-hidden="true"></span>{" "}
+							Start time
 							<input name="start_time" type="time" required />
 						</label>
 						<label>
-							<span class="icon-clock-arrow-down" aria-hidden="true"></span> End time
+							<span class="icon-clock-arrow-down" aria-hidden="true"></span>{" "}
+							End time
 							<input name="end_time" type="time" value={nowTime} required />
 						</label>
 					</div>
@@ -89,11 +92,13 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 					{/* Row 3: distance + odometer */}
 					<div class="grid">
 						<label>
-							<span class="icon-route" aria-hidden="true"></span> Distance <small>(km)</small>
+							<span class="icon-route" aria-hidden="true"></span> Distance{" "}
+							<small>(km)</small>
 							<input name="distance_km" type="number" step="0.1" required />
 						</label>
 						<label>
-							<span class="icon-circle-gauge" aria-hidden="true"></span> Odometer <small>(km)</small>
+							<span class="icon-circle-gauge" aria-hidden="true"></span>{" "}
+							Odometer <small>(km)</small>
 							<input name="odometer_km" type="number" step="0.1" />
 						</label>
 					</div>
@@ -101,11 +106,13 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 					{/* Row 4: speed + consumption */}
 					<div class="grid">
 						<label>
-							<span class="icon-snail" aria-hidden="true"></span> Avg speed <small>(km/h)</small>
+							<span class="icon-gauge" aria-hidden="true"></span>
+							Avg speed <small>(km/h)</small>
 							<input name="avg_speed_kmh" type="number" step="1" />
 						</label>
 						<label>
-							<span class="icon-ev-charger" aria-hidden="true"></span> Consumption <small>(kWh/100km)</small>
+							<span class="icon-ev-charger" aria-hidden="true"></span>{" "}
+							Consumption <small>(kWh/100km)</small>
 							<input
 								name="avg_consumption_kwh_100km"
 								type="number"
@@ -117,7 +124,8 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 					{/* Row 5: locations */}
 					<div class="grid">
 						<label>
-							<span class="icon-flag" aria-hidden="true"></span> Start location
+							<span class="icon-flag" aria-hidden="true"></span> Start
+							location
 							<select name="start_location_id">
 								<option value="">—</option>
 								{locations.map((loc) => (
@@ -131,7 +139,11 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 							</select>
 						</label>
 						<label>
-							<span class="icon-flag-triangle-right" aria-hidden="true"></span> End location
+							<span
+								class="icon-flag-triangle-right"
+								aria-hidden="true"
+							></span>{" "}
+							End location
 							<select name="end_location_id">
 								<option value="">—</option>
 								{locations.map((loc) => (
@@ -149,7 +161,8 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 					{/* Row 6: vehicle — full width */}
 					<div class="grid grid--full">
 						<label>
-							<span class="icon-car-front" aria-hidden="true"></span> Vehicle
+							<span class="icon-car-front" aria-hidden="true"></span>{" "}
+							Vehicle
 							<select name="vehicle_id" required>
 								{vehicles.length === 0 && (
 									<option value="">No vehicles — add one first</option>
