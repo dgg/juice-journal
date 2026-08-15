@@ -3,6 +3,12 @@ import { Delta } from "../components/Delta"
 import { EmptyState } from "../components/EmptyState"
 import { raw } from "hono/html"
 
+function periodIcon(value: string): string {
+	if (value === "week") return "calendar-1"
+	if (value === "month") return "calendar-days"
+	return "calendar"
+}
+
 interface StatWithDelta {
 	value: number | null
 	prev: number | null
@@ -186,6 +192,7 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 							date: data.date
 						})}
 					>
+						<span class={`icon-${periodIcon(p)}`} aria-hidden="true"></span>
 						{p === "week" ? "Week" : p === "month" ? "Month" : "Year"}
 					</button>
 				))}
@@ -205,6 +212,10 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 								date: data.date
 							})}
 						>
+							<span
+								class={`icon-${periodIcon(g)}`}
+								aria-hidden="true"
+							></span>
 							{g === "month" ? "Month" : "Week"}
 						</button>
 					))}

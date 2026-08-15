@@ -1,7 +1,9 @@
 import { describe, it, expect } from "bun:test"
 import { StatsChartsFragment } from "../fragments/StatsChartsFragment"
 
-function makeData(overrides: Partial<Parameters<typeof StatsChartsFragment>[0]["data"]> = {}) {
+function makeData(
+	overrides: Partial<Parameters<typeof StatsChartsFragment>[0]["data"]> = {}
+) {
 	return {
 		period: "month" as const,
 		yearGranularity: "month" as const,
@@ -39,7 +41,9 @@ describe("StatsChartsFragment period navigation", () => {
 	})
 
 	it("renders week picker", () => {
-		const html = String(<StatsChartsFragment data={makeData({ period: "week", date: "2026-W33" })} />)
+		const html = String(
+			<StatsChartsFragment data={makeData({ period: "week", date: "2026-W33" })} />
+		)
 		expect(html).toContain('type="week"')
 		expect(html).toContain('value="2026-W33"')
 	})
@@ -57,7 +61,7 @@ describe("StatsChartsFragment period navigation", () => {
 		expect(html).toContain("<select")
 		expect(html).toContain(">2026<")
 		expect(html).toContain(">2025<")
-		expect(html).toContain('selected')
+		expect(html).toContain("selected")
 	})
 
 	it("renders prev/next buttons with correct href values", () => {
@@ -67,9 +71,7 @@ describe("StatsChartsFragment period navigation", () => {
 	})
 
 	it("disables next button when nextDate is null", () => {
-		const html = String(
-			<StatsChartsFragment data={makeData({ nextDate: null })} />
-		)
+		const html = String(<StatsChartsFragment data={makeData({ nextDate: null })} />)
 		expect(html).toContain("disabled")
 	})
 
@@ -89,5 +91,33 @@ describe("StatsChartsFragment period navigation", () => {
 			/>
 		)
 		expect(html).toContain("2025")
+	})
+
+	it("renders calendar-days icon in month period button", () => {
+		const html = String(<StatsChartsFragment data={makeData()} />)
+		expect(html).toContain("icon-calendar-days")
+	})
+
+	it("renders calendar-1 icon in week period button", () => {
+		const html = String(<StatsChartsFragment data={makeData({ period: "week" })} />)
+		expect(html).toContain("icon-calendar-1")
+	})
+
+	it("renders calendar icon in year period button", () => {
+		const html = String(<StatsChartsFragment data={makeData({ period: "year" })} />)
+		expect(html).toContain("icon-calendar")
+	})
+
+	it("renders icons in year-granularity toggle buttons", () => {
+		const html = String(
+			<StatsChartsFragment
+				data={makeData({
+					period: "year",
+					yearOptions: [2025]
+				})}
+			/>
+		)
+		expect(html).toContain("icon-calendar-days")
+		expect(html).toContain("icon-calendar-1")
 	})
 })
