@@ -145,7 +145,7 @@ const PeriodNavigation: FC<{ data: StatsView }> = ({ data }) => {
 				})}
 				aria-label="Previous period"
 			>
-				<span class="icon-chevron-left" aria-hidden="true"></span>
+				<span class="icon-move-left" aria-hidden="true"></span>
 			</button>
 			{picker}
 			<button
@@ -161,7 +161,7 @@ const PeriodNavigation: FC<{ data: StatsView }> = ({ data }) => {
 				disabled={data.nextDate == null}
 				aria-label="Next period"
 			>
-				<span class="icon-chevron-right" aria-hidden="true"></span>
+				<span class="icon-move-right" aria-hidden="true"></span>
 			</button>
 		</div>
 	)
