@@ -33,4 +33,4 @@
 ## 4. Verify
 
 - [x] 4.1 Build passes (`bun x tsc --noEmit` — no new errors)
-- [ ] 4.2 Visual check: icons render in trip detail panel and stat cards (run `bun run serve` and check visually)
+- [x] 4.2 Visual check: icons render in trip detail panel and stat cards ✓

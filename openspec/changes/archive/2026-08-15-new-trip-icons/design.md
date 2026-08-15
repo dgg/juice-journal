@@ -1,0 +1,1 @@
+Skipped — purely visual enhancement, no cross-cutting changes, new dependencies, data model changes, security/performance concerns, or ambiguity. See `proposal.md` for scope.
