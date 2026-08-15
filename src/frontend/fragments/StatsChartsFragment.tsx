@@ -229,59 +229,60 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 				{data.vehicle ? <small> — {data.vehicle.description}</small> : null}
 			</div>
 
-			<div class="stats-grid">
-				<StatCard
-					label="Total distance"
-					value={data.stats.totalDistance.value}
-					unit="km"
-					prev={data.stats.totalDistance.prev}
-				/>
-				<StatCard
-					label="Avg speed"
-					value={data.stats.avgSpeed.value}
-					unit="km/h"
-					prev={data.stats.avgSpeed.prev}
-				/>
-				<StatCard
-					label="Avg duration"
-					value={data.stats.avgDuration.value}
-					unit={data.stats.avgDurationHm ?? "min"}
-					prev={data.stats.avgDuration.prev}
-				/>
-				<StatCard
-					label="Avg consumption"
-					value={data.stats.avgConsumption.value}
-					unit="kWh/100km"
-					prev={data.stats.avgConsumption.prev}
-				/>
-				<StatCard
-					label="Trips"
-					value={data.stats.tripCount.value}
-					unit=""
-					prev={data.stats.tripCount.prev}
-				/>
-			</div>
-
 			{data.hasTrips ? (
-				<div id="stats-charts">
-					<article>
-						<script id="stats-data" type="application/json">
-							{raw(JSON.stringify(data.series))}
-						</script>
-						<div class="chart-row">
-							<div class="chart-container">
-								<h3>Distance & Duration</h3>
-								<canvas id="chart-distance-duration"></canvas>
+				<>
+					<div class="stats-grid">
+						<StatCard
+							label="Total distance"
+							value={data.stats.totalDistance.value}
+							unit="km"
+							prev={data.stats.totalDistance.prev}
+						/>
+						<StatCard
+							label="Avg speed"
+							value={data.stats.avgSpeed.value}
+							unit="km/h"
+							prev={data.stats.avgSpeed.prev}
+						/>
+						<StatCard
+							label="Avg duration"
+							value={data.stats.avgDuration.value}
+							unit={data.stats.avgDurationHm ?? "min"}
+							prev={data.stats.avgDuration.prev}
+						/>
+						<StatCard
+							label="Avg consumption"
+							value={data.stats.avgConsumption.value}
+							unit="kWh/100km"
+							prev={data.stats.avgConsumption.prev}
+						/>
+						<StatCard
+							label="Trips"
+							value={data.stats.tripCount.value}
+							unit=""
+							prev={data.stats.tripCount.prev}
+						/>
+					</div>
+					<div id="stats-charts">
+						<article>
+							<script id="stats-data" type="application/json">
+								{raw(JSON.stringify(data.series))}
+							</script>
+							<div class="chart-row">
+								<div class="chart-container">
+									<h3>Distance & Duration</h3>
+									<canvas id="chart-distance-duration"></canvas>
+								</div>
+								<div class="chart-container">
+									<h3>Avg Speed & Consumption</h3>
+									<canvas id="chart-speed-consumption"></canvas>
+								</div>
 							</div>
-							<div class="chart-container">
-								<h3>Avg Speed & Consumption</h3>
-								<canvas id="chart-speed-consumption"></canvas>
-							</div>
-						</div>
-					</article>
-				</div>
+						</article>
+					</div>
+				</>
 			) : (
-				<EmptyState />
+				<EmptyState message="No stats for this period" />
 			)}
 		</section>
 	)

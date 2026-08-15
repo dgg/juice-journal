@@ -257,6 +257,14 @@ small.badge {
 	text-align: center;
 	padding: 3rem 1rem;
 	color: var(--pico-muted-color);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.4rem;
+}
+
+.empty-state [class^="icon-"] {
+	font-size: 1rem;
 }
 
 /* ── Trip form: phone-first 2-column layout ── */
