@@ -36,6 +36,22 @@ describe("StickyCta", () => {
 		)
 		expect(html).toContain('class="secondary"')
 	})
+
+	it("renders icon span before label when icon is provided", () => {
+		const html = String(
+			<StickyCta
+				actions={[{ href: "/trips/new", label: "Log new trip", icon: "plus" }]}
+			/>
+		)
+		expect(html).toContain('<span class="icon-plus" aria-hidden="true"></span>')
+		expect(html).toContain(">Log new trip<")
+	})
+
+	it("renders no icon span when icon is omitted", () => {
+		const html = String(<StickyCta href="/" label="Home" />)
+		expect(html).not.toContain("icon-")
+		expect(html).toContain(">Home<")
+	})
 })
 
 describe("HomePage", () => {

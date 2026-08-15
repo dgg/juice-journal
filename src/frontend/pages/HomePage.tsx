@@ -52,10 +52,17 @@ export const HomePage: FC<{ data: HomePageData }> = ({ data }) => {
 						<EmptyState />
 					)}
 				</section>
-				<StickyCta actions={[
-					{ href: "/stats", label: "Stats", variant: "secondary" },
-					{ href: "/trips/new", label: "Log new trip" }
-				]} />
+				<StickyCta
+					actions={[
+						{
+							href: "/stats",
+							label: "Stats",
+							variant: "secondary",
+							icon: "chart-no-axes-combined"
+						},
+						{ href: "/trips/new", label: "Log new trip", icon: "circle-plus" }
+					]}
+				/>
 			</main>
 		</Layout>
 	)

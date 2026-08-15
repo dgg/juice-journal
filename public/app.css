@@ -19,6 +19,14 @@
 	font-size: 1.05rem;
 	padding: 0.7rem;
 	margin: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.4rem;
+}
+
+.sticky-cta a[role="button"] [class^="icon-"] {
+	font-size: 1.05rem;
 }
 
 .delta.positive {
@@ -400,4 +408,3 @@ small.badge {
 	font-size: 1rem;
 	padding: 0.4rem 0.5rem;
 }
-
