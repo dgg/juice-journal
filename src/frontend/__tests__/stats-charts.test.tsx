@@ -1,5 +1,6 @@
 import { describe, it, expect } from "bun:test"
 import { StatsChartsFragment } from "../fragments/StatsChartsFragment"
+import { EmptyState } from "../components/EmptyState"
 
 function makeData(
 	overrides: Partial<Parameters<typeof StatsChartsFragment>[0]["data"]> = {}
@@ -119,5 +120,25 @@ describe("StatsChartsFragment period navigation", () => {
 		)
 		expect(html).toContain("icon-calendar-days")
 		expect(html).toContain("icon-calendar-1")
+	})
+})
+
+describe("EmptyState", () => {
+	it("renders circle-off icon and default message", () => {
+		const html = String(<EmptyState />)
+		expect(html).toContain('class="icon-circle-off"')
+		expect(html).toContain("No trips yet — log your first commute")
+	})
+
+	it("renders custom message when provided", () => {
+		const html = String(<EmptyState message="Custom empty message" />)
+		expect(html).toContain(">Custom empty message<")
+		expect(html).toContain('class="icon-circle-off"')
+	})
+
+	it("renders no stats message in StatsChartsFragment empty state", () => {
+		const html = String(<StatsChartsFragment data={makeData()} />)
+		expect(html).toContain("No stats for this period")
+		expect(html).toContain('class="icon-circle-off"')
 	})
 })
