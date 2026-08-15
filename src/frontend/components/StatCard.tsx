@@ -8,6 +8,7 @@ interface Stat {
 	unit: string
 	delta?: number | null
 	deltaUnit?: string
+	icon?: string
 }
 
 export const StatCard: FC<{ stat: Stat; hero?: boolean }> = ({ stat, hero }) => {
@@ -23,7 +24,10 @@ export const StatCard: FC<{ stat: Stat; hero?: boolean }> = ({ stat, hero }) => 
 				<data value={stat.value ?? ""}>{formatted}</data>{" "}
 				<small>{stat.unit}</small>
 			</p>
-			<small class="stat-card__label">{stat.label}</small>
+			<small class="stat-card__label">
+				{stat.icon && <span class={`icon-${stat.icon}`} aria-hidden="true"></span>}
+				{" "}{stat.label}
+			</small>
 			{stat.delta !== undefined && (
 				<Delta value={stat.delta} unit={stat.deltaUnit || stat.unit} />
 			)}
@@ -58,7 +62,8 @@ export const StatsGrid: FC<{
 					value: stats.avgConsumption,
 					unit: "kWh/100km",
 					delta: consumptionDelta,
-					deltaUnit: "kWh/100km"
+					deltaUnit: "kWh/100km",
+					icon: "ev-charger"
 				}}
 				hero
 			/>
@@ -69,14 +74,16 @@ export const StatsGrid: FC<{
 						value: stats.avgDuration,
 						unit: "min",
 						delta: durationDelta,
-						deltaUnit: "min"
+						deltaUnit: "min",
+						icon: "hourglass"
 					}}
 				/>
 				<StatCard
 					stat={{
 						label: "Total distance",
 						value: stats.totalDistance,
-						unit: "km"
+						unit: "km",
+						icon: "route"
 					}}
 				/>
 			</div>
