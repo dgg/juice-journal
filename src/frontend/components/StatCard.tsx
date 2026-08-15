@@ -9,6 +9,7 @@ interface Stat {
 	delta?: number | null
 	deltaUnit?: string
 	icon?: string
+	period?: "week" | "month" | "year"
 }
 
 export const StatCard: FC<{ stat: Stat; hero?: boolean }> = ({ stat, hero }) => {
@@ -25,11 +26,17 @@ export const StatCard: FC<{ stat: Stat; hero?: boolean }> = ({ stat, hero }) => 
 				<small>{stat.unit}</small>
 			</p>
 			<small class="stat-card__label">
-				{stat.icon && <span class={`icon-${stat.icon}`} aria-hidden="true"></span>}
-				{" "}{stat.label}
+				{stat.icon && (
+					<span class={`icon-${stat.icon}`} aria-hidden="true"></span>
+				)}{" "}
+				{stat.label}
 			</small>
 			{stat.delta !== undefined && (
-				<Delta value={stat.delta} unit={stat.deltaUnit || stat.unit} />
+				<Delta
+					value={stat.delta}
+					unit={stat.deltaUnit || stat.unit}
+					period={stat.period}
+				/>
 			)}
 		</article>
 	)
