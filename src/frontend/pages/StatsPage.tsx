@@ -51,7 +51,7 @@ export const StatsPage: FC<{ data: StatsView }> = ({ data }) => {
 		<Layout title="Stats — Juice Journal">
 			<main class="container">
 				<StatsChartsFragment data={data} />
-				<StickyCta actions={[{ href: "/", label: "Back" }]} />
+				<StickyCta actions={[{ href: "/", label: "Back", icon: "home" }]} />
 			</main>
 			<Scripts />
 		</Layout>
