@@ -115,7 +115,6 @@ small.badge {
 }
 
 .trip-row__time {
-	font-size: 0.875rem;
 	color: var(--pico-muted-color);
 }
 

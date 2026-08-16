@@ -42,57 +42,96 @@ export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
 
 	const consumptionStr =
 		trip.avgConsumptionKwh100km !== null
-			? `${formatNumber(trip.avgConsumptionKwh100km, 1)} kWh/100km`
+			? formatNumber(trip.avgConsumptionKwh100km, 1)
 			: "--"
 
 	return (
 		<details class="trip-row">
 			<summary class="trip-row__summary">
-				<span class={`daypart-indicator ${daypartClass}`}><span class={daypartIcon} aria-hidden="true"></span></span>
+				<span class={`daypart-indicator ${daypartClass}`}>
+					<span class={daypartIcon} aria-hidden="true"></span>
+				</span>
 				<div class="trip-row__title">
 					<h3>{dateStr}</h3>
-					<time
-						class="trip-row__time"
-						datetime={new Date(trip.startTime).toISOString()}
-					>
-						{timeStr}
-					</time>
+					<small>
+						<time
+							class="trip-row__time"
+							datetime={new Date(trip.startTime).toISOString()}
+						>
+							{timeStr}
+						</time>
+					</small>
 				</div>
-				<data
-					class="trip-row__consumption"
-					value={trip.avgConsumptionKwh100km ?? ""}
-				>
-					{consumptionStr}
-				</data>
+				<div class="trip-row__consumption">
+					<data value={trip.avgConsumptionKwh100km ?? ""}>
+						{consumptionStr}
+					</data>
+					<small>&nbsp;kWh/100km</small>
+				</div>
 			</summary>
 			<div class="trip-row__body">
 				<dl class="trip-snapshot">
-					<dt><span class="icon-route" aria-hidden="true"></span> Distance</dt>
-					<dd>{formatNumber(trip.distanceKm, 1)} km</dd>
-					<dt><span class="icon-hourglass" aria-hidden="true"></span> Duration</dt>
-					<dd>{trip.durationMin} min</dd>
-					<dt><span class="icon-gauge" aria-hidden="true"></span> Avg speed</dt>
+					<dt>
+						<span class="icon-route" aria-hidden="true"></span> Distance
+					</dt>
 					<dd>
-						{trip.avgSpeedKmh !== null
-							? formatNumber(trip.avgSpeedKmh, 0)
-							: "--"}{" "}
-						km/h
+						<data value={trip.distanceKm}>
+							{formatNumber(trip.distanceKm, 1)}
+						</data>
+						<small>&nbsp;km</small>
 					</dd>
+					<dt>
+						<span class="icon-hourglass" aria-hidden="true"></span> Duration
+					</dt>
+					<dd>
+						<data value={trip.durationMin}>{trip.durationMin}</data>
+						<small>&nbsp;min</small>
+					</dd>
+					{trip.avgSpeedKmh !== null && (
+						<>
+							<dt>
+								<span class="icon-gauge" aria-hidden="true"></span> Avg
+								speed
+							</dt>
+							<dd>
+								<data value={trip.avgSpeedKmh}>
+									{formatNumber(trip.avgSpeedKmh, 0)}
+								</data>
+								<small>&nbsp;km/h</small>
+							</dd>
+						</>
+					)}
 					{trip.odometerKm !== null && (
 						<>
-							<dt><span class="icon-circle-gauge" aria-hidden="true"></span> Odometer</dt>
-							<dd>{formatNumber(trip.odometerKm, 1)} km</dd>
+							<dt>
+								<span class="icon-circle-gauge" aria-hidden="true"></span>{" "}
+								Odometer
+							</dt>
+							<dd>
+								<data value={trip.odometerKm}>
+									{formatNumber(trip.odometerKm, 1)}
+								</data>
+								<small>&nbsp;km</small>
+							</dd>
 						</>
 					)}
 					{trip.startLocation && (
 						<>
-							<dt><span class="icon-flag" aria-hidden="true"></span> From</dt>
+							<dt>
+								<span class="icon-flag" aria-hidden="true"></span> From
+							</dt>
 							<dd>{trip.startLocation}</dd>
 						</>
 					)}
 					{trip.endLocation && (
 						<>
-							<dt><span class="icon-flag-triangle-right" aria-hidden="true"></span> To</dt>
+							<dt>
+								<span
+									class="icon-flag-triangle-right"
+									aria-hidden="true"
+								></span>
+								To
+							</dt>
 							<dd>{trip.endLocation}</dd>
 						</>
 					)}
