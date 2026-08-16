@@ -273,6 +273,18 @@ small.badge {
 	border-color: var(--pico-primary-background);
 }
 
+.daypart-selector input[value="morning"]:checked + span {
+	background: var(--pico-color-amber-100);
+	color: var(--pico-color-amber-200);
+	border-color: var(--pico-color-amber-200);
+}
+
+.daypart-selector input[value="afternoon"]:checked + span {
+	background: var(--pico-color-indigo-100);
+	color: var(--pico-color-indigo-200);
+	border-color: var(--pico-color-indigo-200);
+}
+
 .empty-state {
 	text-align: center;
 	padding: 3rem 1rem;
