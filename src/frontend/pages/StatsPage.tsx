@@ -13,6 +13,7 @@ interface StatsView {
 	period: "week" | "month" | "year"
 	yearGranularity: "month" | "week"
 	label: string
+	weekBoundsLabel: string | null
 	vehicle: { id: string; description: string } | null
 	stats: {
 		totalDistance: StatWithDelta

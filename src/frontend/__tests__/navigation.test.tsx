@@ -152,6 +152,7 @@ describe("StatsPage", () => {
 					period: "month",
 					yearGranularity: "month",
 					label: "August 2026",
+					weekBoundsLabel: null,
 					vehicle: null,
 					stats: {
 						totalDistance: { value: null, prev: null },

@@ -9,6 +9,7 @@ function makeData(
 		period: "month" as const,
 		yearGranularity: "month" as const,
 		label: "August 2026",
+		weekBoundsLabel: null,
 		vehicle: null,
 		stats: {
 			totalDistance: { value: 200, prev: 150 },
@@ -138,6 +139,78 @@ describe("StatsChartsFragment period navigation", () => {
 
 	it("renders no vehicle info in stats period label when vehicle is null", () => {
 		const html = String(<StatsChartsFragment data={makeData({ vehicle: null })} />)
+		expect(html).not.toContain("icon-car-front")
+	})
+
+	it("renders week-bounds label in week mode instead of period label", () => {
+		const html = String(
+			<StatsChartsFragment
+				data={makeData({
+					period: "week",
+					date: "2026-W33",
+					weekBoundsLabel: "10 Aug – 16 Aug"
+				})}
+			/>
+		)
+		expect(html).toContain("10 Aug – 16 Aug")
+		expect(html).not.toContain("W33 2026")
+	})
+
+	it("does not render period label in month mode — only vehicle badge", () => {
+		const html = String(
+			<StatsChartsFragment
+				data={makeData({
+					period: "month",
+					vehicle: { id: "veh_123", description: "Megane E-Tech" },
+					weekBoundsLabel: null
+				})}
+			/>
+		)
+		expect(html).not.toContain("August 2026")
+		expect(html).toContain('<span class="icon-car-front"')
+		expect(html).toContain("Megane E-Tech")
+	})
+
+	it("does not render period label in year mode", () => {
+		const html = String(
+			<StatsChartsFragment
+				data={makeData({
+					period: "year",
+					date: "2025",
+					label: "2025",
+					weekBoundsLabel: null,
+					yearOptions: [2026, 2025]
+				})}
+			/>
+		)
+		expect(html).not.toContain("2025</small>")
+	})
+
+	it("renders updated week-bounds after week navigation", () => {
+		const html = String(
+			<StatsChartsFragment
+				data={makeData({
+					period: "week",
+					date: "2026-W32",
+					weekBoundsLabel: "03 Aug – 09 Aug"
+				})}
+			/>
+		)
+		expect(html).toContain("03 Aug – 09 Aug")
+	})
+
+	it("renders only week-bounds in week mode with no vehicle", () => {
+		const html = String(
+			<StatsChartsFragment
+				data={makeData({
+					period: "week",
+					date: "2026-W33",
+					vehicle: null,
+					weekBoundsLabel: "10 Aug – 16 Aug"
+				})}
+			/>
+		)
+		expect(html).toContain("10 Aug – 16 Aug")
 		expect(html).not.toContain("icon-car-front")
 	})
 

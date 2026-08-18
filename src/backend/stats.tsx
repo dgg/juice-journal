@@ -85,6 +85,7 @@ interface StatsView {
 	period: "week" | "month" | "year"
 	yearGranularity: "month" | "week"
 	label: string
+	weekBoundsLabel: string | null
 	vehicle: { id: string; description: string } | null
 	stats: {
 		totalDistance: StatWithDelta
@@ -159,6 +160,10 @@ async function computeStatsView(params: {
 	])
 
 	const label = periodLabelFn(period, now)
+	const weekBoundsLabel =
+		period === "week"
+			? `${now.setZone(displayTz).startOf("week").toFormat("dd MMM")} – ${now.setZone(displayTz).startOf("week").plus({ days: 6 }).toFormat("dd MMM")}`
+			: null
 	const hasTrips = currentStats.tripCount !== null && currentStats.tripCount > 0
 
 	let series: StatsView["series"] = {
@@ -224,6 +229,7 @@ async function computeStatsView(params: {
 		period,
 		yearGranularity,
 		label,
+		weekBoundsLabel,
 		vehicle: vehicle ? { id: vehicle.id, description: vehicle.description } : null,
 		stats: {
 			totalDistance: {
