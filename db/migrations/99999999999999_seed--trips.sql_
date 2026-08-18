@@ -1,0 +1,113 @@
+-- migrate:up
+DO $$
+DECLARE
+    v_id TEXT;
+    h_id TEXT;
+    w_id TEXT;
+    d DATE;
+    morn_dur INT;
+    aft_dur INT;
+    morn_speed NUMERIC(5,1);
+    aft_speed NUMERIC(5,1);
+    morn_dist NUMERIC(8,2);
+    aft_dist NUMERIC(8,2);
+    morn_start TIMESTAMPTZ;
+    morn_end TIMESTAMPTZ;
+    aft_start TIMESTAMPTZ;
+    aft_end TIMESTAMPTZ;
+    cons NUMERIC(6,2);
+    odo NUMERIC(8,1) := 15000;
+    prev_odo NUMERIC(8,1);
+    use_odo BOOLEAN;
+    trip_count INT := 0;
+    start_date CONSTANT DATE := '2024-08-19';
+    end_date CONSTANT DATE := '2026-08-18';
+BEGIN
+    SELECT id INTO v_id FROM vehicles WHERE description = 'commuter';
+    SELECT id INTO h_id FROM locations WHERE label = 'home';
+    SELECT id INTO w_id FROM locations WHERE label = 'work';
+
+    d := start_date;
+    odo := 15000;
+    prev_odo := 15000;
+
+    WHILE d <= end_date LOOP
+        IF EXTRACT(DOW FROM d) BETWEEN 1 AND 5 THEN
+            -- Tue (2) and Thu (4) are fixed commute days.
+            -- Wed (3) ~40% chance, Fri (5) ~20% chance → avg ~2.6 days/week.
+            IF EXTRACT(DOW FROM d) IN (2, 4)
+               OR (EXTRACT(DOW FROM d) = 3 AND random() < 0.4)
+               OR (EXTRACT(DOW FROM d) = 5 AND random() < 0.2)
+            THEN
+                -- Duration 43-49 min (46 ± 3)
+                morn_dur := 46 + floor(random() * 7)::int - 3;
+                aft_dur := 46 + floor(random() * 7)::int - 3;
+
+                -- Speed 60-75 km/h
+                morn_speed := round((60 + random() * 15)::numeric, 1);
+                aft_speed := round((60 + random() * 15)::numeric, 1);
+
+                -- Morning distance from speed × duration / 60
+                morn_dist := round((morn_speed * morn_dur / 60)::numeric, 2);
+
+                -- Afternoon distance within 0-4 km of morning distance
+                aft_dist := round((morn_dist + (random() * 4 - 2))::numeric, 2);
+                IF aft_dist < 1 THEN aft_dist := 1; END IF;
+
+                -- Recalculate afternoon speed from its actual distance/duration
+                aft_speed := round((aft_dist / (aft_dur::numeric / 60))::numeric, 1);
+
+                -- Morning: arrive ~08:00 (±10 min)
+                morn_end := (d + INTERVAL '8 hours' + (floor(random() * 21 - 10) || ' minutes')::INTERVAL) AT TIME ZONE 'Europe/Copenhagen';
+                morn_start := morn_end - (morn_dur * INTERVAL '1 minute');
+
+                -- Afternoon: depart ~16:00 (±10 min)
+                aft_start := (d + INTERVAL '16 hours' + (floor(random() * 21 - 10) || ' minutes')::INTERVAL) AT TIME ZONE 'Europe/Copenhagen';
+                aft_end := aft_start + (aft_dur * INTERVAL '1 minute');
+
+                -- --- Morning trip ---
+                cons := round((13 + random() * 5)::numeric, 2);
+                use_odo := random() < 0.5;
+                IF use_odo THEN odo := prev_odo + morn_dist; prev_odo := odo; END IF;
+
+                INSERT INTO trips (
+                    vehicle_id, start_time, end_time,
+                    start_location_id, end_location_id,
+                    daypart, duration_min, distance_km,
+                    avg_speed_kmh, avg_consumption_kwh_100km, odometer_km
+                ) VALUES (
+                    v_id, morn_start, morn_end,
+                    h_id, w_id,
+                    'morning', morn_dur, morn_dist,
+                    morn_speed, cons, CASE WHEN use_odo THEN odo ELSE NULL END
+                );
+                trip_count := trip_count + 1;
+
+                -- --- Afternoon trip ---
+                cons := round((13 + random() * 5)::numeric, 2);
+                use_odo := random() < 0.5;
+                IF use_odo THEN odo := prev_odo + aft_dist; prev_odo := odo; END IF;
+
+                INSERT INTO trips (
+                    vehicle_id, start_time, end_time,
+                    start_location_id, end_location_id,
+                    daypart, duration_min, distance_km,
+                    avg_speed_kmh, avg_consumption_kwh_100km, odometer_km
+                ) VALUES (
+                    v_id, aft_start, aft_end,
+                    w_id, h_id,
+                    'afternoon', aft_dur, aft_dist,
+                    aft_speed, cons, CASE WHEN use_odo THEN odo ELSE NULL END
+                );
+                trip_count := trip_count + 1;
+            END IF;
+        END IF;
+        d := d + 1;
+    END LOOP;
+
+    RAISE NOTICE 'Created % trips for vehicle "commuter"', trip_count;
+END $$;
+
+-- migrate:down
+DELETE FROM trips
+WHERE vehicle_id = (SELECT id FROM vehicles WHERE description = 'commuter');
