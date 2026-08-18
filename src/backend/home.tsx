@@ -3,6 +3,7 @@ import {
 	currentMonthBoundsUtc,
 	prevMonthBoundsUtc
 } from "../utils/dates"
+import { formatDurationHm } from "../utils/format"
 import { tripsQueries } from "../db/queries/trips"
 import { vehiclesQueries } from "../db/queries/vehicles"
 import { statsQueries } from "../db/queries/stats"
@@ -18,12 +19,15 @@ interface HomeData {
 	} | null
 	monthLabel: string
 	stats: {
-		avgConsumption: number | null
-		avgDuration: number | null
-		totalDistance: number | null
-		prevAvgConsumption: number | null
-		prevAvgDuration: number | null
-		prevTotalDistance: number | null
+		totalDistance: { value: number | null; prev: number | null }
+		totalTime: { value: number | null; prev: number | null }
+		totalTimeHm: string | null
+		avgSpeed: { value: number | null; prev: number | null }
+		avgDuration: { value: number | null; prev: number | null }
+		avgDurationHm: string | null
+		avgConsumption: { value: number | null; prev: number | null }
+		tripCount: { value: number | null; prev: number | null }
+		period: "month"
 	}
 	trips: Array<{
 		id: string
@@ -64,17 +68,18 @@ export async function homeHandler(c: Context<Env>) {
 		vehicle = await vehiclesQueries.findVehicleById(vehicleId)
 	}
 
-	const currentStats = await statsQueries.monthlyAggregates({
-		startUtc,
-		endUtc,
-		vehicleId: vehicleId ?? undefined
-	})
-
-	const prevStats = await statsQueries.monthlyAggregates({
-		startUtc: prevStartUtc,
-		endUtc: prevEndUtc,
-		vehicleId: vehicleId ?? undefined
-	})
+	const [currentStats, prevStats] = await Promise.all([
+		statsQueries.periodAggregates({
+			startUtc,
+			endUtc,
+			vehicleId: vehicleId ?? undefined
+		}),
+		statsQueries.periodAggregates({
+			startUtc: prevStartUtc,
+			endUtc: prevEndUtc,
+			vehicleId: vehicleId ?? undefined
+		})
+	])
 
 	const tripsResult = await tripsQueries.findTripsWithLocations({
 		startUtc,
@@ -102,12 +107,15 @@ export async function homeHandler(c: Context<Env>) {
 		vehicle: vehicle ? { id: vehicle.id, description: vehicle.description } : null,
 		monthLabel,
 		stats: {
-			avgConsumption: currentStats.avgConsumption,
-			avgDuration: currentStats.avgDuration,
-			totalDistance: currentStats.totalDistance,
-			prevAvgConsumption: prevStats.avgConsumption,
-			prevAvgDuration: prevStats.avgDuration,
-			prevTotalDistance: prevStats.totalDistance
+			totalDistance: { value: currentStats.totalDistance, prev: prevStats.totalDistance },
+			totalTime: { value: currentStats.totalDuration, prev: prevStats.totalDuration },
+			totalTimeHm: formatDurationHm(currentStats.totalDuration),
+			avgSpeed: { value: currentStats.avgSpeed, prev: prevStats.avgSpeed },
+			avgDuration: { value: currentStats.avgDuration, prev: prevStats.avgDuration },
+			avgDurationHm: formatDurationHm(currentStats.avgDuration),
+			avgConsumption: { value: currentStats.avgConsumption, prev: prevStats.avgConsumption },
+			tripCount: { value: currentStats.tripCount, prev: prevStats.tripCount },
+			period: "month"
 		},
 		trips,
 		hasTrips

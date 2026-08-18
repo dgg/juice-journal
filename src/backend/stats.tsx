@@ -2,6 +2,7 @@ import { tripsQueries } from "../db/queries/trips"
 import { statsQueries } from "../db/queries/stats"
 import { vehiclesQueries } from "../db/queries/vehicles"
 import { resolveDisplayTz, periodBoundsUtc } from "../utils/dates"
+import { formatDurationHm } from "../utils/format"
 import type { Context } from "hono"
 import type { Env } from "../utils/logger"
 import { DateTime } from "luxon"
@@ -109,15 +110,6 @@ interface StatsView {
 	prevDate: string | null
 	nextDate: string | null
 	yearOptions: number[]
-}
-
-function formatDurationHm(minutes: number | null): string | null {
-	if (minutes === null) return null
-	const h = Math.floor(minutes / 60)
-	const m = Math.round(minutes % 60)
-	if (h === 0) return `${m}m`
-	if (m === 0) return `${h}h`
-	return `${h}h ${m}m`
 }
 
 function periodLabelFn(period: "week" | "month" | "year", now: DateTime): string {

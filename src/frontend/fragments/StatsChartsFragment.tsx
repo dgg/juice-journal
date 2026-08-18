@@ -1,5 +1,5 @@
 import type { FC } from "hono/jsx"
-import { StatCard } from "../components/StatCard"
+import { StatsSummaryGrid } from "./StatsSummaryGrid"
 import { EmptyState } from "../components/EmptyState"
 import { raw } from "hono/html"
 
@@ -177,100 +177,7 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 
 			{data.hasTrips ? (
 				<>
-					<div class="stats-hero-row">
-						<StatCard
-							stat={{
-								label: "Total distance",
-								value: data.stats.totalDistance.value,
-								unit: "km",
-								delta:
-									data.stats.totalDistance.value !== null &&
-									data.stats.totalDistance.prev !== null
-										? data.stats.totalDistance.value - data.stats.totalDistance.prev
-										: null,
-								icon: "route",
-								period: data.period
-							}}
-							hero
-						/>
-						<StatCard
-							stat={{
-								label: "Total time driven",
-								value: data.stats.totalTime.value,
-								unit: "",
-								displayValue: data.stats.totalTimeHm,
-								delta:
-									data.stats.totalTime.value !== null &&
-									data.stats.totalTime.prev !== null
-										? data.stats.totalTime.value - data.stats.totalTime.prev
-										: null,
-								deltaUnit: "min",
-								icon: "hourglass",
-								period: data.period
-							}}
-							hero
-						/>
-					</div>
-					<div class="stats-grid__row">
-						<StatCard
-							stat={{
-								label: "Avg speed",
-								value: data.stats.avgSpeed.value,
-								unit: "km/h",
-								delta:
-									data.stats.avgSpeed.value !== null &&
-									data.stats.avgSpeed.prev !== null
-										? data.stats.avgSpeed.value - data.stats.avgSpeed.prev
-										: null,
-								icon: "gauge",
-								period: data.period
-							}}
-						/>
-						<StatCard
-							stat={{
-								label: "Avg duration",
-								value: data.stats.avgDuration.value,
-								unit: "",
-								displayValue: data.stats.avgDurationHm,
-								delta:
-									data.stats.avgDuration.value !== null &&
-									data.stats.avgDuration.prev !== null
-										? data.stats.avgDuration.value - data.stats.avgDuration.prev
-										: null,
-								deltaUnit: "min",
-								icon: "hourglass",
-								period: data.period
-							}}
-						/>
-						<StatCard
-							stat={{
-								label: "Avg consumption",
-								value: data.stats.avgConsumption.value,
-								unit: "kWh/100km",
-								delta:
-									data.stats.avgConsumption.value !== null &&
-									data.stats.avgConsumption.prev !== null
-										? data.stats.avgConsumption.value - data.stats.avgConsumption.prev
-										: null,
-								deltaUnit: "kWh/100km",
-								icon: "ev-charger",
-								period: data.period
-							}}
-						/>
-						<StatCard
-							stat={{
-								label: "Trips",
-								value: data.stats.tripCount.value,
-								unit: "",
-								delta:
-									data.stats.tripCount.value !== null &&
-									data.stats.tripCount.prev !== null
-										? data.stats.tripCount.value - data.stats.tripCount.prev
-										: null,
-								period: data.period
-							}}
-						/>
-					</div>
+					<StatsSummaryGrid data={{ ...data.stats, period: data.period }} />
 					{data.period === "year" ? (
 						<div class="year-granularity" role="group">
 							{(["month", "week"] as const).map((g) => (

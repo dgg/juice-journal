@@ -17,6 +17,8 @@ interface StatsView {
 	vehicle: { id: string; description: string } | null
 	stats: {
 		totalDistance: StatWithDelta
+		totalTime: StatWithDelta
+		totalTimeHm: string | null
 		avgSpeed: StatWithDelta
 		avgDuration: StatWithDelta
 		avgDurationHm: string | null
