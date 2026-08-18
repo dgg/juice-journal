@@ -1,26 +1,29 @@
-import { getColorHex, getColorRgba } from "../ui/colors.mjs"
+import { getColorHex } from "../ui/colors.mjs"
 
-const SPEED_BG_COLOR = getColorRgba("cyan", 450, .6)
-const SPEED_BORDER_COLOR = getColorHex("cyan", 350)
+const SPEED_COLOR = getColorHex("amber", 150)
+const CONSUMPTION_COLOR = getColorHex("jade", 500)
 
 const speedDataset = (series) => ({
 	label: "Avg speed (km/h)",
 	data: series.speed,
-	backgroundColor: SPEED_BG_COLOR,
-	borderColor: SPEED_BORDER_COLOR,
-	borderWidth: 1,
+	borderColor: SPEED_COLOR,
+	backgroundColor: "transparent",
+	borderWidth: 2,
+	tension: 0.35,
+	pointRadius: 3,
+	pointHoverRadius: 5,
 	yAxisID: "y"
 })
 
-const CONSUMPTION_BG_COLOR = getColorRgba("purple", 450, .6)
-const CONSUMPTION_BORDER_COLOR = getColorHex("purple", 350)
-
 const consumptionDataset = (series) => ({
-	label: "Avg consumption (kWh/100km)",
+	label: "Avg consumption",
 	data: series.consumption,
-	backgroundColor: CONSUMPTION_BG_COLOR,
-	borderColor: CONSUMPTION_BORDER_COLOR,
-	borderWidth: 1,
+	borderColor: CONSUMPTION_COLOR,
+	backgroundColor: "transparent",
+	borderWidth: 2,
+	tension: 0.35,
+	pointRadius: 3,
+	pointHoverRadius: 5,
 	yAxisID: "y1"
 })
 
@@ -40,7 +43,7 @@ const consumptionAxis = {
 export class SpeedConsumptionChart extends Chart {
 	constructor(canvas, data) {
 		super(canvas, {
-			type: "bar",
+			type: "line",
 			data: {
 				labels: data.labels,
 				datasets: [speedDataset(data), consumptionDataset(data)]
@@ -49,13 +52,23 @@ export class SpeedConsumptionChart extends Chart {
 				responsive: true,
 				maintainAspectRatio: true,
 				plugins: {
-					legend: { position: "top" },
+					legend: {
+						position: "top",
+						labels: {
+							boxWidth: 12,
+							boxHeight: 12,
+							font: { size: 12 }
+						}
+					},
 					tooltip: { mode: "index", intersect: false }
 				},
 				interaction: { mode: "index", intersect: false },
 				scales: {
 					x: { grid: { display: false } },
-					y: speedAxis,
+					y: {
+						...speedAxis,
+						grid: { color: "rgba(127,127,127,0.06)", lineWidth: 1 }
+					},
 					y1: consumptionAxis
 				}
 			}

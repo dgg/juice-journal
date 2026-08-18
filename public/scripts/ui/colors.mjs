@@ -12,7 +12,7 @@ export const getColorRgba = (colorFamily, shade = 500, alpha = 1) => {
 
 	// always starts with #
 	const hex =
-		hexColor.lengh === 4
+		hexColor.length === 4
 			? `${hexColor[1]}${hexColor[1]}${hexColor[2]}${hexColor[2]}${hexColor[3]}${hexColor[3]}`
 			: hexColor.substring(1)
 

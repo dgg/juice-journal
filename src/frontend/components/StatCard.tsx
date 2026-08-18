@@ -37,8 +37,6 @@ export const StatCard: FC<{ stat: Stat; hero?: boolean }> = ({ stat, hero }) => 
 			{stat.delta !== undefined && (
 				<Delta
 					value={stat.delta}
-					unit={stat.deltaUnit || stat.unit}
-					period={stat.period}
 				/>
 			)}
 		</article>

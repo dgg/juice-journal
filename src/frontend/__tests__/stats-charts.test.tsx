@@ -214,35 +214,6 @@ describe("StatsChartsFragment period navigation", () => {
 		expect(html).not.toContain("icon-car-front")
 	})
 
-	it("renders vs last month suffix for month period delta", () => {
-		const html = String(
-			<StatsChartsFragment data={makeData({ period: "month", hasTrips: true })} />
-		)
-		expect(html).toContain("vs last month")
-	})
-
-	it("renders vs last week suffix for week period delta", () => {
-		const html = String(
-			<StatsChartsFragment data={makeData({ period: "week", hasTrips: true })} />
-		)
-		expect(html).toContain("vs last week")
-	})
-
-	it("renders vs last year suffix for year period delta", () => {
-		const html = String(
-			<StatsChartsFragment
-				data={makeData({
-					period: "year",
-					hasTrips: true,
-					date: "2025",
-					yearGranularity: "month",
-					yearOptions: [2026, 2025]
-				})}
-			/>
-		)
-		expect(html).toContain("vs last year")
-	})
-
 	it("renders trending-up icon for positive delta", () => {
 		const html = String(
 			<StatsChartsFragment
@@ -343,12 +314,13 @@ describe("Avg duration display", () => {
 		expect(html).not.toContain(">-- <small>")
 	})
 
-	it("renders avg-duration delta with min unit suffix", () => {
+	it("renders avg-duration delta without unit suffix", () => {
 		const html = String(
 			<StatsChartsFragment
 				data={makeData({ period: "month", hasTrips: true })}
 			/>
 		)
-		expect(html).toContain("2.0 min")
+		expect(html).toContain("2.0")
+		expect(html).not.toContain("2.0 min")
 	})
 })

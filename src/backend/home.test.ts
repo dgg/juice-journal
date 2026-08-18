@@ -203,7 +203,8 @@ describe("homeHandler", () => {
 		const html = await result.text()
 
 		expect(result.status).toBe(200)
-		expect(html).toContain("vs last month")
+		expect(html).toContain("icon-trending-up")
+		expect(html).not.toContain("vs last")
 	})
 
 	it("selects vehicle from most recent trip", async () => {
