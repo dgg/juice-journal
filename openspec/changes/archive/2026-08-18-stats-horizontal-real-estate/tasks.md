@@ -43,7 +43,7 @@
 ## 7. Verification
 
 - [x] 7.1 Run `bun test` — all existing tests pass plus the new `totalDuration` and `totalTime` assertions
-- [ ] 7.2 Run `bun dev` and visit `/stats?period=month`, `/stats?period=week`, `/stats?period=year` on desktop width: confirm two-hero row, four-secondary row, year-granularity toggle sitting above the charts
-- [ ] 7.3 Resize to phone width (≤768px): confirm stacked heroes, 2-col secondary grid, hidden charts, hidden year-granularity toggle, period switcher still stretches (segmented control preserved)
-- [ ] 7.4 Confirm period switcher on desktop does not stretch to container edges — buttons hug content, centered
+- [x] 7.2 Run `bun dev` and visit `/stats?period=month`, `/stats?period=week`, `/stats?period=year` on desktop width: confirm two-hero row, four-secondary row, year-granularity toggle sitting above the charts
+- [x] 7.3 Resize to phone width (≤768px): confirm stacked heroes, 2-col secondary grid, hidden charts, hidden year-granularity toggle, period switcher still stretches (segmented control preserved)
+- [x] 7.4 Confirm period switcher on desktop does not stretch to container edges — buttons hug content, centered
 - [x] 7.5 Run `docker build .` — image builds with no new dependencies
