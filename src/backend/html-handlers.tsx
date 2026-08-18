@@ -20,7 +20,8 @@ import {
 } from "./validators"
 import { TripFormPage } from "../frontend/pages/TripFormPage"
 import { TripListFragment } from "../frontend/fragments/TripListFragment"
-import { StatsFragment } from "../frontend/fragments/StatsFragment"
+import { StatsSummaryGrid } from "../frontend/fragments/StatsSummaryGrid"
+import { formatDurationHm } from "../utils/format"
 
 export async function getTripFormPage(c: Context<Env>) {
 	const displayTz = resolveDisplayTz(
@@ -117,30 +118,33 @@ export async function getPartialStats(c: Context<Env>) {
 
 	const vehicleId = await tripsQueries.findLatestTripVehicleId()
 
-	const currentStats = await statsQueries.monthlyAggregates({
-		startUtc,
-		endUtc,
-		vehicleId: vehicleId ?? undefined
-	})
+const currentStats = await statsQueries.periodAggregates({
+			startUtc,
+			endUtc,
+			vehicleId: vehicleId ?? undefined
+		})
 
-	const prevStats = await statsQueries.monthlyAggregates({
-		startUtc: prevStartUtc,
-		endUtc: prevEndUtc,
-		vehicleId: vehicleId ?? undefined
-	})
+		const prevStats = await statsQueries.periodAggregates({
+			startUtc: prevStartUtc,
+			endUtc: prevEndUtc,
+			vehicleId: vehicleId ?? undefined
+		})
 
-	return c.html(
-		<StatsFragment
-			stats={{
-				avgConsumption: currentStats.avgConsumption,
-				avgDuration: currentStats.avgDuration,
-				totalDistance: currentStats.totalDistance,
-				prevAvgConsumption: prevStats.avgConsumption,
-				prevAvgDuration: prevStats.avgDuration,
-				prevTotalDistance: prevStats.totalDistance
-			}}
-		/>
-	)
+		return c.html(
+			<StatsSummaryGrid
+				data={{
+					totalDistance: { value: currentStats.totalDistance, prev: prevStats.totalDistance },
+					totalTime: { value: currentStats.totalDuration, prev: prevStats.totalDuration },
+					totalTimeHm: formatDurationHm(currentStats.totalDuration),
+					avgSpeed: { value: currentStats.avgSpeed, prev: prevStats.avgSpeed },
+					avgDuration: { value: currentStats.avgDuration, prev: prevStats.avgDuration },
+					avgDurationHm: formatDurationHm(currentStats.avgDuration),
+					avgConsumption: { value: currentStats.avgConsumption, prev: prevStats.avgConsumption },
+					tripCount: { value: currentStats.tripCount, prev: prevStats.tripCount },
+					period: "month" as const
+				}}
+			/>
+		)
 }
 
 interface FormBody {

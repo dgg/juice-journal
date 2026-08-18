@@ -83,20 +83,25 @@ describe("StickyCta", () => {
 })
 
 describe("HomePage", () => {
+	const emptyStats = {
+		totalDistance: { value: null, prev: null },
+		totalTime: { value: null, prev: null },
+		totalTimeHm: null,
+		avgSpeed: { value: null, prev: null },
+		avgDuration: { value: null, prev: null },
+		avgDurationHm: null,
+		avgConsumption: { value: null, prev: null },
+		tripCount: { value: null, prev: null },
+		period: "month" as const
+	}
+
 	it("renders anchor to /stats in sticky CTA", () => {
 		const html = String(
 			<HomePage
 				data={{
 					vehicle: null,
 					monthLabel: "August 2026",
-					stats: {
-						avgConsumption: null,
-						avgDuration: null,
-						totalDistance: null,
-						prevAvgConsumption: null,
-						prevAvgDuration: null,
-						prevTotalDistance: null
-					},
+					stats: emptyStats,
 					trips: [],
 					hasTrips: false
 				}}
@@ -112,14 +117,7 @@ describe("HomePage", () => {
 				data={{
 					vehicle: null,
 					monthLabel: "August 2026",
-					stats: {
-						avgConsumption: null,
-						avgDuration: null,
-						totalDistance: null,
-						prevAvgConsumption: null,
-						prevAvgDuration: null,
-						prevTotalDistance: null
-					},
+					stats: emptyStats,
 					trips: [],
 					hasTrips: false
 				}}
@@ -127,6 +125,40 @@ describe("HomePage", () => {
 		)
 		expect(html).toContain('href="/trips/new"')
 		expect(html).toContain(">Log new trip</a>")
+	})
+
+	it("renders six stat cards", () => {
+		const html = String(
+			<HomePage
+				data={{
+					vehicle: null,
+					monthLabel: "August 2026",
+					stats: {
+						totalDistance: { value: 150, prev: null },
+						totalTime: { value: 300, prev: null },
+						totalTimeHm: "5h",
+						avgSpeed: { value: 50, prev: null },
+						avgDuration: { value: 30, prev: null },
+						avgDurationHm: "30m",
+						avgConsumption: { value: 18.5, prev: null },
+						tripCount: { value: 10, prev: null },
+						period: "month"
+					},
+					trips: [],
+					hasTrips: false
+				}}
+			/>
+		)
+		expect(html).toContain("Total distance")
+		expect(html).toContain("Total time driven")
+		expect(html).toContain("Avg speed")
+		expect(html).toContain("Avg duration")
+		expect(html).toContain("Avg consumption")
+		expect(html).toContain("Trips")
+		expect(html).toContain("5h")
+		expect(html).toContain("30m")
+		expect(html).toContain("150")
+		expect(html).toContain("18.5")
 	})
 })
 
@@ -154,14 +186,16 @@ describe("StatsPage", () => {
 					label: "August 2026",
 					weekBoundsLabel: null,
 					vehicle: null,
-					stats: {
-						totalDistance: { value: null, prev: null },
-						avgSpeed: { value: null, prev: null },
-						avgDuration: { value: null, prev: null },
-						avgDurationHm: null,
-						avgConsumption: { value: null, prev: null },
-						tripCount: { value: null, prev: null }
-					},
+stats: {
+					totalDistance: { value: null, prev: null },
+					totalTime: { value: null, prev: null },
+					totalTimeHm: null,
+					avgSpeed: { value: null, prev: null },
+					avgDuration: { value: null, prev: null },
+					avgDurationHm: null,
+					avgConsumption: { value: null, prev: null },
+					tripCount: { value: null, prev: null }
+				},
 					series: {
 						labels: [],
 						distance: [],

@@ -1,7 +1,7 @@
 import type { FC } from "hono/jsx"
 import { Layout } from "../Layout"
 import { Header } from "../components/Header"
-import { StatsGrid } from "../components/StatCard"
+import { StatsSummaryGrid } from "../fragments/StatsSummaryGrid"
 import { TripRow } from "../components/TripRow"
 import { EmptyState } from "../components/EmptyState"
 import { StickyCta } from "../components/StickyCta"
@@ -24,12 +24,15 @@ interface HomePageData {
 	vehicle: { id: string; description: string } | null
 	monthLabel: string
 	stats: {
-		avgConsumption: number | null
-		avgDuration: number | null
-		totalDistance: number | null
-		prevAvgConsumption: number | null
-		prevAvgDuration: number | null
-		prevTotalDistance: number | null
+		totalDistance: { value: number | null; prev: number | null }
+		totalTime: { value: number | null; prev: number | null }
+		totalTimeHm: string | null
+		avgSpeed: { value: number | null; prev: number | null }
+		avgDuration: { value: number | null; prev: number | null }
+		avgDurationHm: string | null
+		avgConsumption: { value: number | null; prev: number | null }
+		tripCount: { value: number | null; prev: number | null }
+		period: "month"
 	}
 	trips: Trip[]
 	hasTrips: boolean
@@ -43,7 +46,9 @@ export const HomePage: FC<{ data: HomePageData }> = ({ data }) => {
 					month={data.monthLabel}
 					vehicle={data.vehicle?.description ?? null}
 				/>
-				<StatsGrid stats={data.stats} />
+				<section id="stats-region">
+					<StatsSummaryGrid data={data.stats} />
+				</section>
 				<section id="trip-list" aria-label="Trip list">
 					<h2>Trips</h2>
 					{data.hasTrips ? (
