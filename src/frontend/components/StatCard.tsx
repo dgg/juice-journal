@@ -8,13 +8,16 @@ interface Stat {
 	unit: string
 	delta?: number | null
 	deltaUnit?: string
+	displayValue?: string | null
 	icon?: string
 	period?: "week" | "month" | "year"
 }
 
 export const StatCard: FC<{ stat: Stat; hero?: boolean }> = ({ stat, hero }) => {
 	const hasValue = stat.value !== null
-	const formatted = hasValue ? formatNumber(stat.value, hero ? 1 : 0) : "--"
+	const formatted =
+		stat.displayValue ??
+		(hasValue ? formatNumber(stat.value, hero ? 1 : 0) : "--")
 
 	return (
 		<article

@@ -88,6 +88,8 @@ interface StatsView {
 	vehicle: { id: string; description: string } | null
 	stats: {
 		totalDistance: StatWithDelta
+		totalTime: StatWithDelta
+		totalTimeHm: string | null
 		avgSpeed: StatWithDelta
 		avgDuration: StatWithDelta
 		avgDurationHm: string | null
@@ -228,6 +230,11 @@ async function computeStatsView(params: {
 				value: currentStats.totalDistance,
 				prev: prevStats.totalDistance
 			},
+			totalTime: {
+				value: currentStats.totalDuration,
+				prev: prevStats.totalDuration
+			},
+			totalTimeHm: formatDurationHm(currentStats.totalDuration),
 			avgSpeed: {
 				value: currentStats.avgSpeed,
 				prev: prevStats.avgSpeed

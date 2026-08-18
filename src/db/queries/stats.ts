@@ -6,6 +6,7 @@ export interface PeriodAggregates {
 	avgConsumption: number | null
 	avgDuration: number | null
 	totalDistance: number | null
+	totalDuration: number | null
 	avgSpeed: number | null
 	tripCount: number | null
 }
@@ -29,40 +30,46 @@ export const statsQueries = {
 		endUtc: string
 		vehicleId?: string
 	}): Promise<PeriodAggregates> {
-		const rows = params.vehicleId
-			? await db`
-				SELECT
-					AVG(avg_consumption_kwh_100km) as avg_consumption,
-					AVG(duration_min) as avg_duration,
-					SUM(distance_km) as total_distance,
-					AVG(avg_speed_kmh) as avg_speed,
-					COUNT(*) as trip_count
-				FROM trips
-				WHERE end_time >= ${params.startUtc}
-					AND end_time < ${params.endUtc}
-					AND vehicle_id = ${params.vehicleId}
-			`
-			: await db`
-				SELECT
-					AVG(avg_consumption_kwh_100km) as avg_consumption,
-					AVG(duration_min) as avg_duration,
-					SUM(distance_km) as total_distance,
-					AVG(avg_speed_kmh) as avg_speed,
-					COUNT(*) as trip_count
-				FROM trips
-				WHERE end_time >= ${params.startUtc}
-					AND end_time < ${params.endUtc}
-			`
+const rows = params.vehicleId
+				? await db`
+					SELECT
+						AVG(avg_consumption_kwh_100km) as avg_consumption,
+						AVG(duration_min) as avg_duration,
+						SUM(distance_km) as total_distance,
+						SUM(duration_min) as total_duration,
+						AVG(avg_speed_kmh) as avg_speed,
+						COUNT(*) as trip_count
+					FROM trips
+					WHERE end_time >= ${params.startUtc}
+						AND end_time < ${params.endUtc}
+						AND vehicle_id = ${params.vehicleId}
+				`
+				: await db`
+					SELECT
+						AVG(avg_consumption_kwh_100km) as avg_consumption,
+						AVG(duration_min) as avg_duration,
+						SUM(distance_km) as total_distance,
+						SUM(duration_min) as total_duration,
+						AVG(avg_speed_kmh) as avg_speed,
+						COUNT(*) as trip_count
+					FROM trips
+					WHERE end_time >= ${params.startUtc}
+						AND end_time < ${params.endUtc}
+				`
 		const raw = rows[0] as unknown as Record<string, unknown>
 		const totalDistance = toNumber(raw.total_distance as string | null)
-		return {
-			avgConsumption: toNumber(raw.avg_consumption as string | null),
-			avgDuration: toNumber(raw.avg_duration as string | null),
-			totalDistance: totalDistance,
-			avgSpeed: toNumber(raw.avg_speed as string | null),
-			tripCount:
-				totalDistance !== null ? (toNumber(raw.trip_count as string) ?? 0) : null
-		}
+return {
+				avgConsumption: toNumber(raw.avg_consumption as string | null),
+				avgDuration: toNumber(raw.avg_duration as string | null),
+				totalDistance: totalDistance,
+				totalDuration:
+					totalDistance !== null
+						? toNumber(raw.total_duration as string | null)
+						: null,
+				avgSpeed: toNumber(raw.avg_speed as string | null),
+				tripCount:
+					totalDistance !== null ? (toNumber(raw.trip_count as string) ?? 0) : null
+			}
 	},
 
 	// Backwards compatibility alias - keep existing callers working

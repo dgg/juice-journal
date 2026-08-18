@@ -97,7 +97,7 @@ describe("statsQueries", () => {
 	})
 
 	describe("periodAggregates", () => {
-		it("returns nulls when no trips", async () => {
+		it("returns null aggregates when no trips", async () => {
 			const result = await statsQueries.periodAggregates({
 				startUtc: "2025-01-01T00:00:00Z",
 				endUtc: "2025-02-01T00:00:00Z",
@@ -106,6 +106,7 @@ describe("statsQueries", () => {
 			expect(result.avgConsumption).toBeNull()
 			expect(result.avgDuration).toBeNull()
 			expect(result.totalDistance).toBeNull()
+			expect(result.totalDuration).toBeNull()
 			expect(result.avgSpeed).toBeNull()
 			expect(result.tripCount).toBeNull()
 		})
@@ -138,6 +139,7 @@ describe("statsQueries", () => {
 			expect(result.tripCount).toBe(2)
 			expect(result.avgConsumption).toBe(19.0)
 			expect(result.totalDistance).toBe(25.0)
+			expect(result.totalDuration).toBe(75.0)
 		})
 	})
 

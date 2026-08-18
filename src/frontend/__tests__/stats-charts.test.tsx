@@ -12,6 +12,8 @@ function makeData(
 		vehicle: null,
 		stats: {
 			totalDistance: { value: 200, prev: 150 },
+			totalTime: { value: 75, prev: 60 },
+			totalTimeHm: "1h 15m" as string | null,
 			avgSpeed: { value: 50, prev: 48 },
 			avgDuration: { value: 30, prev: 28 },
 			avgDurationHm: "30m" as string | null,
@@ -176,6 +178,8 @@ describe("StatsChartsFragment period navigation", () => {
 					hasTrips: true,
 					stats: {
 						totalDistance: { value: 200, prev: 150 },
+						totalTime: { value: 75, prev: 60 },
+						totalTimeHm: "1h 15m",
 						avgSpeed: { value: 50, prev: 48 },
 						avgDuration: { value: 30, prev: 28 },
 						avgDurationHm: "30m",
@@ -228,6 +232,8 @@ describe("Avg duration display", () => {
 					hasTrips: true,
 					stats: {
 						totalDistance: { value: 200, prev: 150 },
+						totalTime: { value: 75, prev: 60 },
+						totalTimeHm: "1h 15m",
 						avgSpeed: { value: 50, prev: 48 },
 						avgDuration: { value: 90, prev: 60 },
 						avgDurationHm: "1h 30m",
@@ -249,6 +255,8 @@ describe("Avg duration display", () => {
 					hasTrips: true,
 					stats: {
 						totalDistance: { value: 200, prev: 150 },
+						totalTime: { value: null, prev: null },
+						totalTimeHm: null,
 						avgSpeed: { value: 50, prev: 48 },
 						avgDuration: { value: null, prev: null },
 						avgDurationHm: null,
