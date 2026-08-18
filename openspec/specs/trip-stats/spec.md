@@ -38,7 +38,7 @@ The system SHALL let the user select a period of `week`, `month`, or `year`. The
 
 - **GIVEN** the user is viewing the month period and the current month is August 2026
 - **WHEN** the user navigates to `/stats?period=month&date=2026-07`
-- **THEN** the stats and charts SHALL reflect trips whose `end_time` falls within July 2026 in the display timezone, and the period label SHALL display "July 2026"
+- **THEN** the stats and charts SHALL reflect trips whose `end_time` falls within July 2026 in the display timezone
 
 #### Scenario: Defaulting to current period when date is absent
 
@@ -333,3 +333,43 @@ The stats period series query SHALL return raw temporal data (`time` as a DateTi
 - **GIVEN** the stats period series query returned a row with `daypart = null` for the `day` bucket
 - **WHEN** the backend assembles the chart series labels
 - **THEN** the label SHALL be `"14 Aug"` (date formatted as `dd MMM`, no icon appended)
+
+### Requirement: Period label block renders week bounds only in week mode
+
+The stats region SHALL render a period-label block adjacent to the vehicle indicator (the car icon plus vehicle description). The block's content SHALL be period-dependent: in the `week` period it SHALL display a human-readable week-bounds string of the form `dd MMM – dd MMM` (e.g. `18 Aug – 24 Aug`) computed from the ISO week bounds in the display timezone; in the `month` and `year` periods it SHALL NOT render the period label text at all, rendering only the vehicle indicator (car icon and vehicle description) when a vehicle exists. The week-bounds string SHALL use the display timezone, SHALL start at the ISO week's Monday and end at its Sunday (inclusive), and SHALL format both endpoints as `dd MMM` (zero-padded day, abbreviated month name in the display locale). The `data.label` field SHALL remain available on the stats view for non-fragment consumers but SHALL NOT be rendered inside this block in any period.
+
+#### Scenario: Week mode renders week bounds next to the vehicle indicator
+
+- **GIVEN** the selected period is `week` and the anchor ISO week is 18–24 August 2026 in the display timezone
+- **WHEN** the stats region renders
+- **THEN** the period-label block SHALL display `18 Aug – 24 Aug` adjacent to the car icon and vehicle description
+
+#### Scenario: Month mode renders no period label text
+
+- **GIVEN** the selected period is `month` and the anchor month is August 2026
+- **WHEN** the stats region renders
+- **THEN** the period-label block SHALL NOT contain the period label string (e.g. `August 2026`) and SHALL render only the car icon and vehicle description when a vehicle exists
+
+#### Scenario: Year mode renders no period label text
+
+- **GIVEN** the selected period is `year` and the anchor year is 2026
+- **WHEN** the stats region renders
+- **THEN** the period-label block SHALL NOT contain the period label string (e.g. `2026`) and SHALL render only the car icon and vehicle description when a vehicle exists
+
+#### Scenario: Week bounds follow the display timezone
+
+- **GIVEN** the selected period is `week` and the anchor ISO week starts on Monday 18 August 2026 in the configured display timezone
+- **WHEN** the week-bounds string is rendered
+- **THEN** the start endpoint SHALL be `18 Aug` and the end endpoint SHALL be `24 Aug`, both derived from the same ISO-week bounds used to filter trips
+
+#### Scenario: Week bounds update on period navigation
+
+- **GIVEN** the user is viewing the week period for the week of 18–24 August 2026
+- **WHEN** the user navigates to the previous ISO week
+- **THEN** the period-label block SHALL display `11 Aug – 17 Aug`
+
+#### Scenario: No vehicle leaves only the week bounds in week mode
+
+- **GIVEN** the selected period is `week` and no vehicle is associated with the most recent trip
+- **WHEN** the stats region renders
+- **THEN** the period-label block SHALL display only the week-bounds string and SHALL NOT render the car icon or a vehicle description
