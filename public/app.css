@@ -201,6 +201,13 @@ small.badge {
 	gap: 1rem;
 }
 
+.stats-hero-row {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 1rem;
+	margin-bottom: 1.5rem;
+}
+
 .delta {
 	font-size: 0.875rem;
 	margin-top: 0.25rem;
@@ -336,6 +343,24 @@ small.badge {
 		margin-left: auto;
 		margin-right: auto;
 	}
+
+	.stats-hero-row {
+		grid-template-columns: 1fr 1fr;
+	}
+
+	.stats-grid__row {
+		grid-template-columns: repeat(4, 1fr);
+	}
+
+	.period-switcher,
+	.year-granularity {
+		justify-content: center;
+	}
+
+	.period-switcher button,
+	.year-granularity button {
+		flex: none;
+	}
 }
 
 /* ── Stats page: period navigation, charts, responsive ── */
@@ -411,13 +436,17 @@ small.badge {
 	#stats-charts {
 		display: none;
 	}
+
+	.year-granularity {
+		display: none;
+	}
 }
 
 /* ── Period navigation: picker flanked by steppers ── */
 
 .period-stepper {
 	display: flex;
-	align-items: center;
+	align-items: stretch;
 	justify-content: center;
 	gap: 0;
 	margin-bottom: 0.75rem;
@@ -425,9 +454,11 @@ small.badge {
 
 .period-stepper button {
 	border-radius: var(--pico-border-radius);
-	padding: 0.4rem 0.75rem;
-	font-size: 1rem;
+	padding: 0.3rem 0.6rem;
+	font-size: 0.875rem;
 	white-space: nowrap;
+	flex: 0 0 auto;
+	align-self: stretch;
 }
 
 .period-stepper button:disabled {
@@ -442,8 +473,24 @@ small.badge {
 .period-stepper--picker input,
 .period-stepper--picker select {
 	flex: 1;
-	min-width: 8rem;
-	max-width: 14rem;
-	font-size: 1rem;
-	padding: 0.4rem 0.5rem;
+	min-width: 6rem;
+	max-width: 10rem;
+	font-size: 0.875rem;
+	padding: 0.3rem 0.5rem;
+	height: calc(1rem * var(--pico-line-height) + var(--pico-form-element-spacing-vertical) * 2 + var(--pico-border-width) * 2);
+}
+
+@media (max-width: 768px) {
+	.period-stepper button {
+		padding: 0.4rem 0.75rem;
+		font-size: 1rem;
+	}
+
+	.period-stepper--picker input,
+	.period-stepper--picker select {
+		min-width: 8rem;
+		max-width: 14rem;
+		font-size: 1rem;
+		padding: 0.4rem 0.5rem;
+	}
 }

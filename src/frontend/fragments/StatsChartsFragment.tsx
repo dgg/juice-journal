@@ -1,5 +1,5 @@
 import type { FC } from "hono/jsx"
-import { Delta } from "../components/Delta"
+import { StatCard } from "../components/StatCard"
 import { EmptyState } from "../components/EmptyState"
 import { raw } from "hono/html"
 
@@ -19,14 +19,16 @@ interface StatsView {
 	yearGranularity: "month" | "week"
 	label: string
 	vehicle: { id: string; description: string } | null
-	stats: {
-		totalDistance: StatWithDelta
-		avgSpeed: StatWithDelta
-		avgDuration: StatWithDelta
-		avgDurationHm: string | null
-		avgConsumption: StatWithDelta
-		tripCount: StatWithDelta
-	}
+stats: {
+			totalDistance: StatWithDelta
+			totalTime: StatWithDelta
+			totalTimeHm: string | null
+			avgSpeed: StatWithDelta
+			avgDuration: StatWithDelta
+			avgDurationHm: string | null
+			avgConsumption: StatWithDelta
+			tripCount: StatWithDelta
+		}
 	series: {
 		labels: string[]
 		distance: number[]
@@ -39,59 +41,6 @@ interface StatsView {
 	prevDate: string | null
 	nextDate: string | null
 	yearOptions: number[]
-}
-
-function StatCard({
-	label,
-	value,
-	unit,
-	prev,
-	icon,
-	period,
-	displayValue,
-	deltaUnit
-}: {
-	label: string
-	value: number | null
-	unit: string
-	prev: number | null
-	icon?: string
-	period: "week" | "month" | "year"
-	displayValue?: string | null
-	deltaUnit?: string
-}) {
-	const hasValue = value !== null
-	const formatted =
-		displayValue ??
-		(hasValue
-			? value % 1 === 0
-				? value.toString()
-				: value.toFixed(1)
-			: "--")
-
-	const delta = value !== null && prev !== null ? value - prev : null
-	const absDelta = delta !== null ? Math.abs(delta) : null
-	const formattedDelta =
-		absDelta !== null
-			? absDelta % 1 === 0
-				? absDelta.toString()
-				: absDelta.toFixed(1)
-			: null
-
-	return (
-		<article class="stat-card">
-			<p class="stat-card__value">
-				<data value={value ?? ""}>{formatted}</data>{" "}
-				<small>{displayValue ? "" : unit}</small>
-			</p>
-			<small class="stat-card__label">
-				{icon && <span class={`icon-${icon}`} aria-hidden="true"></span>} {label}
-			</small>
-			{delta !== null && formattedDelta !== null ? (
-				<Delta value={delta} unit={deltaUnit ?? unit} period={period} />
-			) : null}
-		</article>
-	)
 }
 
 const PeriodNavigation: FC<{ data: StatsView }> = ({ data }) => {
@@ -211,30 +160,6 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 				))}
 			</div>
 
-			{data.period === "year" ? (
-				<div class="year-granularity" role="group">
-					{(["month", "week"] as const).map((g) => (
-						<button
-							class={g === selectedGranularity ? "secondary" : "outline"}
-							hx-get="/partials/trip-stats"
-							hx-target="#stats-region"
-							hx-swap="outerHTML"
-							hx-vals={JSON.stringify({
-								period: "year",
-								yearGranularity: g,
-								date: data.date
-							})}
-						>
-							<span
-								class={`icon-${periodIcon(g)}`}
-								aria-hidden="true"
-							></span>
-							{g === "month" ? "Month" : "Week"}
-						</button>
-					))}
-				</div>
-			) : null}
-
 			<PeriodNavigation data={data} />
 
 			<div class="stats-period-label">
@@ -249,49 +174,123 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 
 			{data.hasTrips ? (
 				<>
-					<div class="stats-grid">
+					<div class="stats-hero-row">
 						<StatCard
-							label="Total distance"
-							value={data.stats.totalDistance.value}
-							unit="km"
-							prev={data.stats.totalDistance.prev}
-							icon="route"
-							period={data.period}
+							stat={{
+								label: "Total distance",
+								value: data.stats.totalDistance.value,
+								unit: "km",
+								delta:
+									data.stats.totalDistance.value !== null &&
+									data.stats.totalDistance.prev !== null
+										? data.stats.totalDistance.value - data.stats.totalDistance.prev
+										: null,
+								icon: "route",
+								period: data.period
+							}}
+							hero
 						/>
 						<StatCard
-							label="Avg speed"
-							value={data.stats.avgSpeed.value}
-							unit="km/h"
-							prev={data.stats.avgSpeed.prev}
-							icon="gauge"
-							period={data.period}
-						/>
-						<StatCard
-							label="Avg duration"
-							value={data.stats.avgDuration.value}
-							displayValue={data.stats.avgDurationHm}
-							unit=""
-							deltaUnit="min"
-							prev={data.stats.avgDuration.prev}
-							icon="hourglass"
-							period={data.period}
-						/>
-						<StatCard
-							label="Avg consumption"
-							value={data.stats.avgConsumption.value}
-							unit="kWh/100km"
-							prev={data.stats.avgConsumption.prev}
-							icon="ev-charger"
-							period={data.period}
-						/>
-						<StatCard
-							label="Trips"
-							value={data.stats.tripCount.value}
-							unit=""
-							prev={data.stats.tripCount.prev}
-							period={data.period}
+							stat={{
+								label: "Total time driven",
+								value: data.stats.totalTime.value,
+								unit: "",
+								displayValue: data.stats.totalTimeHm,
+								delta:
+									data.stats.totalTime.value !== null &&
+									data.stats.totalTime.prev !== null
+										? data.stats.totalTime.value - data.stats.totalTime.prev
+										: null,
+								deltaUnit: "min",
+								icon: "hourglass",
+								period: data.period
+							}}
+							hero
 						/>
 					</div>
+					<div class="stats-grid__row">
+						<StatCard
+							stat={{
+								label: "Avg speed",
+								value: data.stats.avgSpeed.value,
+								unit: "km/h",
+								delta:
+									data.stats.avgSpeed.value !== null &&
+									data.stats.avgSpeed.prev !== null
+										? data.stats.avgSpeed.value - data.stats.avgSpeed.prev
+										: null,
+								icon: "gauge",
+								period: data.period
+							}}
+						/>
+						<StatCard
+							stat={{
+								label: "Avg duration",
+								value: data.stats.avgDuration.value,
+								unit: "",
+								displayValue: data.stats.avgDurationHm,
+								delta:
+									data.stats.avgDuration.value !== null &&
+									data.stats.avgDuration.prev !== null
+										? data.stats.avgDuration.value - data.stats.avgDuration.prev
+										: null,
+								deltaUnit: "min",
+								icon: "hourglass",
+								period: data.period
+							}}
+						/>
+						<StatCard
+							stat={{
+								label: "Avg consumption",
+								value: data.stats.avgConsumption.value,
+								unit: "kWh/100km",
+								delta:
+									data.stats.avgConsumption.value !== null &&
+									data.stats.avgConsumption.prev !== null
+										? data.stats.avgConsumption.value - data.stats.avgConsumption.prev
+										: null,
+								deltaUnit: "kWh/100km",
+								icon: "ev-charger",
+								period: data.period
+							}}
+						/>
+						<StatCard
+							stat={{
+								label: "Trips",
+								value: data.stats.tripCount.value,
+								unit: "",
+								delta:
+									data.stats.tripCount.value !== null &&
+									data.stats.tripCount.prev !== null
+										? data.stats.tripCount.value - data.stats.tripCount.prev
+										: null,
+								period: data.period
+							}}
+						/>
+					</div>
+					{data.period === "year" ? (
+						<div class="year-granularity" role="group">
+							{(["month", "week"] as const).map((g) => (
+								<button
+									class={g === selectedGranularity ? "secondary" : "outline"}
+									hx-get="/partials/trip-stats"
+									hx-target="#stats-region"
+									hx-swap="outerHTML"
+									hx-vals={JSON.stringify({
+										period: "year",
+										yearGranularity: g,
+										date: data.date
+									})}
+								>
+									<span
+										class={`icon-${periodIcon(g)}`}
+										aria-hidden="true"
+									></span>
+									{g === "month" ? "Month" : "Week"}
+								</button>
+							))}
+						</div>
+					) : null}
 					<div id="stats-charts">
 						<article>
 							<script id="stats-data" type="application/json">
