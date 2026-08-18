@@ -70,71 +70,63 @@ export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
 				</div>
 			</summary>
 			<div class="trip-row__body">
-				<dl class="trip-snapshot">
-					<dt>
-						<span class="icon-route" aria-hidden="true"></span> Distance
-					</dt>
-					<dd>
+				<dl class="trip-detail-pills">
+					<dt class="sr-only">Distance</dt>
+					<dd class="trip-detail-pill">
+						<span class="icon-route" aria-hidden="true"></span>
 						<data value={trip.distanceKm}>
 							{formatNumber(trip.distanceKm, 1)}
 						</data>
-						<small>&nbsp;km</small>
+						<small class="pill__unit">km</small>
 					</dd>
-					<dt>
-						<span class="icon-hourglass" aria-hidden="true"></span> Duration
-					</dt>
-					<dd>
+					<dt class="sr-only">Duration</dt>
+					<dd class="trip-detail-pill">
+						<span class="icon-hourglass" aria-hidden="true"></span>
 						<data value={trip.durationMin}>{trip.durationMin}</data>
-						<small>&nbsp;min</small>
+						<small class="pill__unit">min</small>
 					</dd>
 					{trip.avgSpeedKmh !== null && (
 						<>
-							<dt>
-								<span class="icon-gauge" aria-hidden="true"></span> Avg
-								speed
-							</dt>
-							<dd>
+							<dt class="sr-only">Avg speed</dt>
+							<dd class="trip-detail-pill">
+								<span class="icon-gauge" aria-hidden="true"></span>
 								<data value={trip.avgSpeedKmh}>
 									{formatNumber(trip.avgSpeedKmh, 0)}
 								</data>
-								<small>&nbsp;km/h</small>
+								<small class="pill__unit">km/h</small>
 							</dd>
 						</>
 					)}
 					{trip.odometerKm !== null && (
 						<>
-							<dt>
-								<span class="icon-circle-gauge" aria-hidden="true"></span>{" "}
-								Odometer
-							</dt>
-							<dd>
+							<dt class="sr-only">Odometer</dt>
+							<dd class="trip-detail-pill">
+								<span class="icon-circle-gauge" aria-hidden="true"></span>
 								<data value={trip.odometerKm}>
 									{formatNumber(trip.odometerKm, 1)}
 								</data>
-								<small>&nbsp;km</small>
+								<small class="pill__unit">km</small>
 							</dd>
 						</>
 					)}
-					{trip.startLocation && (
+					{trip.startLocation || trip.endLocation ? (
 						<>
-							<dt>
-								<span class="icon-flag" aria-hidden="true"></span> From
-							</dt>
-							<dd>{trip.startLocation}</dd>
+							<dt class="sr-only">Route</dt>
+							<dd class="trip-detail-pill">
+								{trip.startLocation && (
+									<span class="icon-flag" aria-hidden="true"></span>
+								)}
+								{trip.startLocation}
+								{trip.startLocation && trip.endLocation && (
+									<span class="icon-circle-arrow-right" aria-hidden="true"></span>
+								)}
+								{trip.endLocation && (
+									<span class="icon-flag-triangle-right" aria-hidden="true"></span>
+								)}
+								{trip.endLocation}
+							</dd>
 						</>
-					)}
-					{trip.endLocation && (
-						<>
-							<dt>
-								<span
-									class="icon-flag-triangle-right"
-									aria-hidden="true"
-								></span>
-								To
-							</dt>
-							<dd>{trip.endLocation}</dd>
-						</>
-					)}
+					) : null}
 				</dl>
 			</div>
 		</details>
