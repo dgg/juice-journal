@@ -18,6 +18,7 @@ interface StatsView {
 	period: "week" | "month" | "year"
 	yearGranularity: "month" | "week"
 	label: string
+	weekBoundsLabel: string | null
 	vehicle: { id: string; description: string } | null
 stats: {
 			totalDistance: StatWithDelta
@@ -162,9 +163,11 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 
 			<PeriodNavigation data={data} />
 
-			<div class="stats-period-label">
-				<small>{data.label}</small>
-				{data.vehicle ? (
+<div class="stats-period-label">
+					{data.weekBoundsLabel ? (
+						<small>{data.weekBoundsLabel}</small>
+					) : null}
+					{data.vehicle ? (
 					<small>
 						<span class="icon-car-front" aria-hidden="true"></span>{" "}
 						{data.vehicle.description}
