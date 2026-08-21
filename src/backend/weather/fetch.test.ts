@@ -1,20 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test"
 import { fetchWeather } from "./fetch"
 
-function makeForecastResponse(
-	numLocs: number,
+function makeHourlyBlock(
+	baseHour: number,
 	slots: number,
-	overrides: Partial<{
-		time: string[]
-		temperature_2m: (number | null)[]
-		relative_humidity_2m: (number | null)[]
-		precipitation: (number | null)[]
-		wind_speed_10m: (number | null)[]
-		wind_direction_10m: (number | null)[]
-		weather_code: (number | null)[]
-	}> = {}
+	baseTemp: number,
+	baseWind: number
 ) {
-	const baseHour = Math.floor(Date.now() / (60 * 60 * 1000)) * 60 * 60 * 1000
 	const time: string[] = []
 	const temps: (number | null)[] = []
 	const hums: (number | null)[] = []
@@ -23,40 +15,34 @@ function makeForecastResponse(
 	const wDirs: (number | null)[] = []
 	const codes: (number | null)[] = []
 
+	for (let s = 0; s < slots; s++) {
+		const t = new Date(baseHour + s * 60 * 60 * 1000)
+		time.push(t.toISOString().replace(/\.000Z$/, "Z"))
+		temps.push(baseTemp + s)
+		hums.push(80 + s)
+		precips.push(0.0)
+		wSpeeds.push(baseWind + s)
+		wDirs.push(240)
+		codes.push(0)
+	}
+
+	return { time, temperature_2m: temps, relative_humidity_2m: hums, precipitation: precips, wind_speed_10m: wSpeeds, wind_direction_10m: wDirs, weather_code: codes }
+}
+
+function makeForecastResponse(
+	numLocs: number,
+	slots: number
+): object[] {
+	const baseHour = Math.floor(Date.now() / (60 * 60 * 1000)) * 60 * 60 * 1000
+	const result: object[] = []
+
 	for (let l = 0; l < numLocs; l++) {
-		for (let s = 0; s < slots; s++) {
-			const t = new Date(baseHour + s * 60 * 60 * 1000)
-			time.push(t.toISOString().replace(/\.000Z$/, "Z"))
-			temps.push(l === 0 ? 13.5 + s : 15.0 + s)
-			hums.push(80 + s)
-			precips.push(0.0)
-			wSpeeds.push(l === 0 ? 7.0 + s : 5.0 + s)
-			wDirs.push(240)
-			codes.push(0)
-		}
+		result.push({
+			hourly: makeHourlyBlock(baseHour, slots, l === 0 ? 13.5 : 15.0, l === 0 ? 7.0 : 5.0)
+		})
 	}
 
-	const base = {
-		hourly: {
-			time,
-			temperature_2m: temps,
-			relative_humidity_2m: hums,
-			precipitation: precips,
-			wind_speed_10m: wSpeeds,
-			wind_direction_10m: wDirs,
-			weather_code: codes
-		}
-	}
-
-	if (overrides.time) base.hourly.time = overrides.time
-	if (overrides.temperature_2m) base.hourly.temperature_2m = overrides.temperature_2m
-	if (overrides.relative_humidity_2m) base.hourly.relative_humidity_2m = overrides.relative_humidity_2m
-	if (overrides.precipitation) base.hourly.precipitation = overrides.precipitation
-	if (overrides.wind_speed_10m) base.hourly.wind_speed_10m = overrides.wind_speed_10m
-	if (overrides.wind_direction_10m) base.hourly.wind_direction_10m = overrides.wind_direction_10m
-	if (overrides.weather_code) base.hourly.weather_code = overrides.weather_code
-
-	return base
+	return result
 }
 
 let originalFetch: any
@@ -97,7 +83,7 @@ describe("fetchWeather", () => {
 		expect(result.start!.fetched_at).toBeTruthy()
 	})
 
-	it("returns start and end for one-location trip (same lat/long)", async () => {
+	it("returns start and end from one location when both lat/long are the same", async () => {
 		const now = new Date()
 		const startTime = new Date(now.getTime() - 30 * 60 * 1000).toISOString()
 		const endTime = now.toISOString()

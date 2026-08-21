@@ -68,50 +68,41 @@ function buildParams(
 	return params
 }
 
-interface OpenMeteoHourlyResponse {
-	time: string[]
-	temperature_2m: (number | null)[]
-	relative_humidity_2m: (number | null)[]
-	precipitation: (number | null)[]
-	wind_speed_10m: (number | null)[]
-	wind_direction_10m: (number | null)[]
-	weather_code: (number | null)[]
-}
-
-function extractSlice<T>(arr: T[], numLocations: number, locIndex: number, stride: number): T[] {
-	const start = locIndex * stride
-	return arr.slice(start, start + stride)
+interface OpenMeteoLocationResponse {
+	hourly: {
+		time: string[]
+		temperature_2m: (number | null)[]
+		relative_humidity_2m: (number | null)[]
+		precipitation: (number | null)[]
+		wind_speed_10m: (number | null)[]
+		wind_direction_10m: (number | null)[]
+		weather_code: (number | null)[]
+	}
 }
 
 function buildSnapshot(
-	timeSlice: string[],
-	tempSlice: (number | null)[],
-	humiditySlice: (number | null)[],
-	precipSlice: (number | null)[],
-	windSpeedSlice: (number | null)[],
-	windDirSlice: (number | null)[],
-	weatherCodeSlice: (number | null)[],
+	h: OpenMeteoLocationResponse["hourly"],
 	targetTime: string,
 	source: "forecast" | "historic",
 	fetchedAt: string
 ): WeatherSnapshot | undefined {
-	const idx = nearestBucket(timeSlice, targetTime)
+	const idx = nearestBucket(h.time, targetTime)
 	if (idx < 0) return undefined
 
-	const observed = timeSlice[idx]
+	const observed = h.time[idx]
 	if (!observed) return undefined
 
 	return {
 		source,
 		observed_at: observed + (observed.endsWith("Z") ? "" : "Z"),
 		fetched_at: fetchedAt,
-		weather_code: weatherCodeSlice[idx] ?? 0,
-		temperature: { v: tempSlice[idx] ?? 0, u: QUDT_UNITS.temperature },
-		humidity: { v: humiditySlice[idx] ?? 0, u: QUDT_UNITS.humidity },
-		precipitation: { v: precipSlice[idx] ?? 0, u: QUDT_UNITS.precipitation },
+		weather_code: h.weather_code[idx] ?? 0,
+		temperature: { v: h.temperature_2m[idx] ?? 0, u: QUDT_UNITS.temperature },
+		humidity: { v: h.relative_humidity_2m[idx] ?? 0, u: QUDT_UNITS.humidity },
+		precipitation: { v: h.precipitation[idx] ?? 0, u: QUDT_UNITS.precipitation },
 		wind: {
-			speed: { v: windSpeedSlice[idx] ?? 0, u: QUDT_UNITS.windSpeed },
-			direction: { v: windDirSlice[idx] ?? 0, u: QUDT_UNITS.windDirection }
+			speed: { v: h.wind_speed_10m[idx] ?? 0, u: QUDT_UNITS.windSpeed },
+			direction: { v: h.wind_direction_10m[idx] ?? 0, u: QUDT_UNITS.windDirection }
 		}
 	}
 }
@@ -125,17 +116,20 @@ export async function fetchWeather(params: {
 
 	const locLats: number[] = []
 	const locLongs: number[] = []
-	const isPresent = [false, false]
 
 	if (locations.startLat != null && locations.startLong != null) {
 		locLats.push(locations.startLat)
 		locLongs.push(locations.startLong)
-		isPresent[0] = true
 	}
 	if (locations.endLat != null && locations.endLong != null) {
-		locLats.push(locations.endLat)
-		locLongs.push(locations.endLong)
-		isPresent[1] = true
+		const isSame =
+			locLats.length > 0 &&
+			locations.startLat === locations.endLat &&
+			locations.startLong === locations.endLong
+		if (!isSame) {
+			locLats.push(locations.endLat)
+			locLongs.push(locations.endLong)
+		}
 	}
 
 	if (locLats.length === 0) {
@@ -162,44 +156,29 @@ export async function fetchWeather(params: {
 		)
 	}
 
-	const body = (await response.json()) as {
-		hourly: OpenMeteoHourlyResponse
-	}
-
-	const h = body.hourly
-	if (!h || !h.time || h.time.length === 0) {
+	const body = (await response.json()) as OpenMeteoLocationResponse[]
+	if (!Array.isArray(body) || body.length === 0) {
 		return {}
 	}
 
-	const numTimeSlots = h.time.length
-	const numLocations = locLats.length
-	const stride = numTimeSlots / numLocations
 	const fetchedAt = new Date().toISOString()
-
 	const result: WeatherResult = {}
 
-	for (let locIdx = 0; locIdx < numLocations; locIdx++) {
-		const targetTime = locIdx === 0 ? startTime : endTime
-
-		const snap = buildSnapshot(
-			extractSlice(h.time, numLocations, locIdx, stride),
-			extractSlice(h.temperature_2m, numLocations, locIdx, stride),
-			extractSlice(h.relative_humidity_2m, numLocations, locIdx, stride),
-			extractSlice(h.precipitation, numLocations, locIdx, stride),
-			extractSlice(h.wind_speed_10m, numLocations, locIdx, stride),
-			extractSlice(h.wind_direction_10m, numLocations, locIdx, stride),
-			extractSlice(h.weather_code, numLocations, locIdx, stride),
-			targetTime,
-			source,
-			fetchedAt
-		)
-
-		if (!snap) continue
-
-		if (locIdx === 0) {
-			result.start = snap
-		} else {
-			result.end = snap
+	if (body.length === 1) {
+		const loc = body[0]
+		if (!loc) return {}
+		const h = loc.hourly
+		if (!h?.time?.length) return {}
+		result.start = buildSnapshot(h, startTime, source, fetchedAt)
+		result.end = buildSnapshot(h, endTime, source, fetchedAt)
+	} else {
+		const loc0 = body[0]
+		if (loc0?.hourly?.time?.length) {
+			result.start = buildSnapshot(loc0.hourly, startTime, source, fetchedAt)
+		}
+		const loc1 = body[1]
+		if (loc1?.hourly?.time?.length) {
+			result.end = buildSnapshot(loc1.hourly, endTime, source, fetchedAt)
 		}
 	}
 
