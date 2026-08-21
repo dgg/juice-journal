@@ -33,21 +33,23 @@ afterAll(async () => {
 function makeOkResponse() {
 	const baseHour =
 		Math.floor(Date.now() / (60 * 60 * 1000)) * 60 * 60 * 1000
-	return {
-		hourly: {
-			time: [
-				new Date(baseHour - 3600_000).toISOString().replace(/\.000Z$/, "Z"),
-				new Date(baseHour).toISOString().replace(/\.000Z$/, "Z"),
-				new Date(baseHour + 3600_000).toISOString().replace(/\.000Z$/, "Z")
-			],
-			temperature_2m: [13.0, 13.5, 14.0],
-			relative_humidity_2m: [80, 82, 85],
-			precipitation: [0.0, 0.0, 0.0],
-			wind_speed_10m: [7.0, 6.5, 6.0],
-			wind_direction_10m: [240, 235, 230],
-			weather_code: [0, 0, 0]
+	return [
+		{
+			hourly: {
+				time: [
+					new Date(baseHour - 3600_000).toISOString().replace(/\.000Z$/, "Z"),
+					new Date(baseHour).toISOString().replace(/\.000Z$/, "Z"),
+					new Date(baseHour + 3600_000).toISOString().replace(/\.000Z$/, "Z")
+				],
+				temperature_2m: [13.0, 13.5, 14.0],
+				relative_humidity_2m: [80, 82, 85],
+				precipitation: [0.0, 0.0, 0.0],
+				wind_speed_10m: [7.0, 6.5, 6.0],
+				wind_direction_10m: [240, 235, 230],
+				weather_code: [0, 0, 0]
+			}
 		}
-	}
+	]
 }
 
 let originalFetch: any
@@ -61,7 +63,7 @@ afterEach(() => {
 })
 
 describe("recordWeather", () => {
-	it("updates weather on sync success", async () => {
+	it("updates weather on sync success via createTrip", async () => {
 		const mockFetch = async () =>
 			new Response(JSON.stringify(makeOkResponse()), { status: 200 })
 		globalThis.fetch = mockFetch as any
@@ -72,30 +74,14 @@ describe("recordWeather", () => {
 			end_time: new Date().toISOString(),
 			daypart: "morning",
 			duration_min: 45,
-			distance_km: 15.0
+			distance_km: 15.0,
+			start_location_id: TEST_LOC_ID,
+			end_location_id: TEST_LOC_ID
 		})
 
-		expect(row.weather_start).toBeNull()
-		expect(row.weather_end).toBeNull()
+		expect(row.weather_start).not.toBeNull()
+		expect(row.weather_end).not.toBeNull()
 
-		await recordWeather(row.id, {
-			startLat: 55.73,
-			startLong: 9.62,
-			endLat: 56.07,
-			endLong: 10.01
-		}, row.start_time.toISO()!, row.end_time.toISO()!)
-
-		// Re-fetch the trip to verify weather was updated
-		const trips = await tripsQueries.findTripsByMonth({
-			startUtc: new Date(Date.now() - 24 * 3600_000).toISOString(),
-			endUtc: new Date(Date.now() + 1000).toISOString()
-		})
-		const updated = trips.find((t) => t.id === row.id)
-		expect(updated).toBeDefined()
-		expect(updated!.weather_start).not.toBeNull()
-		expect(updated!.weather_end).not.toBeNull()
-
-		// Cleanup
 		await db`DELETE FROM trips WHERE id = ${row.id}`
 	})
 
@@ -118,17 +104,16 @@ describe("recordWeather", () => {
 			end_time: new Date().toISOString(),
 			daypart: "morning",
 			duration_min: 45,
-			distance_km: 15.0
+			distance_km: 15.0,
+			start_location_id: TEST_LOC_ID,
+			end_location_id: TEST_LOC_ID
 		})
 
-		await recordWeather(row.id, {
-			startLat: 55.73,
-			startLong: 9.62,
-			endLat: 56.07,
-			endLong: 10.01
-		}, row.start_time.toISO()!, row.end_time.toISO()!)
+		// Sync fetch failed, so returned row has null weather
+		expect(row.weather_start).toBeNull()
+		expect(row.weather_end).toBeNull()
 
-		// Run scheduled retries
+		// Run scheduled retries (should be two: 5s and 30s)
 		expect(timeoutCallbacks.length).toBeGreaterThanOrEqual(1)
 		expect(timeoutCallbacks.length).toBeLessThanOrEqual(2)
 
@@ -138,7 +123,6 @@ describe("recordWeather", () => {
 
 		globalThis.setTimeout = originalSetTimeout as any
 
-		// Verify weather is still NULL
 		const trips = await tripsQueries.findTripsByMonth({
 			startUtc: new Date(Date.now() - 24 * 3600_000).toISOString(),
 			endUtc: new Date(Date.now() + 1000).toISOString()
