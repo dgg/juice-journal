@@ -2,6 +2,8 @@ import { DateTime } from "luxon"
 import { db } from "../client"
 import { toNumber, toUtcDateTime } from "../convert"
 import type { TripInput } from "../../backend/types"
+import { locationsQueries } from "./locations"
+import { recordWeather } from "../../backend/weather/recorder"
 
 export interface TripRow {
 	id: string
@@ -83,8 +85,6 @@ function mapTripWithLocationRow(raw: Record<string, unknown>): TripWithLocationR
 
 export const tripsQueries = {
 	async createTrip(input: TripInput): Promise<TripRow> {
-		const weather_start = null
-		const weather_end = null
 		const rows = await db`
 			INSERT INTO trips (
 				vehicle_id,
@@ -112,13 +112,55 @@ export const tripsQueries = {
 				${input.distance_km},
 				${input.avg_speed_kmh ?? null},
 				${input.avg_consumption_kwh_100km ?? null},
-				${weather_start},
-				${weather_end},
+				null,
+				null,
 				${input.odometer_km ?? null}
 			)
 			RETURNING *
 		`
-		return mapTripRow(rows[0] as unknown as Record<string, unknown>)
+		const trip = mapTripRow(rows[0] as unknown as Record<string, unknown>)
+
+		const startLoc = input.start_location_id
+			? await locationsQueries.findLocationById(input.start_location_id)
+			: null
+		const endLoc = input.end_location_id
+			? await locationsQueries.findLocationById(input.end_location_id)
+			: null
+
+		if (startLoc || endLoc) {
+			await recordWeather(
+				trip.id,
+				{
+					startLat: startLoc?.latitude ?? null,
+					startLong: startLoc?.longitude ?? null,
+					endLat: endLoc?.latitude ?? null,
+					endLong: endLoc?.longitude ?? null
+				},
+				input.start_time,
+				input.end_time
+			)
+
+			const updated = await db`SELECT * FROM trips WHERE id = ${trip.id}`
+			if (updated.length > 0) {
+				return mapTripRow(updated[0] as unknown as Record<string, unknown>)
+			}
+		}
+
+		return trip
+	},
+
+	async updateWeather(
+		id: string,
+		weatherStart: object | null,
+		weatherEnd: object | null
+	): Promise<void> {
+		await db`
+			UPDATE trips SET
+				weather_start = ${weatherStart},
+				weather_end = ${weatherEnd},
+				tracking_updated = now()
+			WHERE id = ${id}
+		`
 	},
 
 	async findTripsByMonth(params: {
@@ -131,7 +173,7 @@ export const tripsQueries = {
 				AND end_time < ${params.endUtc}
 			ORDER BY end_time DESC
 		`
-		return rows.map((r) => mapTripRow(r as unknown as Record<string, unknown>))
+		return rows.map((r: unknown) => mapTripRow(r as Record<string, unknown>))
 	},
 
 	async findTripsByMonthForVehicle(params: {
@@ -146,7 +188,7 @@ export const tripsQueries = {
 				AND vehicle_id = ${params.vehicleId}
 			ORDER BY end_time DESC
 		`
-		return rows.map((r) => mapTripRow(r as unknown as Record<string, unknown>))
+		return rows.map((r: unknown) => mapTripRow(r as Record<string, unknown>))
 	},
 
 	async existsTripByVehicleAndEndTime(params: {
@@ -244,8 +286,8 @@ export const tripsQueries = {
 					AND t.end_time < ${params.endUtc}
 				ORDER BY t.end_time DESC
 			`
-		return rows.map((r) =>
-			mapTripWithLocationRow(r as unknown as Record<string, unknown>)
+		return rows.map((r: unknown) =>
+			mapTripWithLocationRow(r as Record<string, unknown>)
 		)
 	}
 }
