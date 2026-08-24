@@ -1,0 +1,20 @@
+{
+	"request": {
+		"method": "GET",
+		"urlPath": "/v1/archive"
+	},
+	"response": {
+		"status": 200,
+		"bodyFileName": "archive.json",
+		"transformers": ["response-template"],
+		"headers": {
+			"Content-Type": "application/json",
+			"Access-Control-Allow-Origin": "*",
+			"Access-Control-Allow-Methods": "*",
+			"Access-Control-Allow-Headers": "Accept, Content-Type, Content-Encoding, Server, Transfer-Encoding",
+			"X-Content-Type-Options": "nosniff",
+			"x-frame-options": "DENY",
+			"x-xss-protection": "1; mode=block"
+		}
+	}
+}

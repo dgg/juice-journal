@@ -32,6 +32,15 @@ services:
       db:
         condition: service_healthy
 
+  weather:
+    image: dhi.io/wiremock:${WIREMOCK_VERSION:-3.13}
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./data/mocks:/home/wiremock/mappings
+      - ./data/forecast.mock.json:/home/wiremock/__files/forecast.json
+      - ./data/archive.mock.json:/home/wiremock/__files/archive.json
+
 volumes:
   pg_data:
     driver: local
