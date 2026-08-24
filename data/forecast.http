@@ -1,0 +1,14 @@
+#@host= https://api.open-meteo.com
+@host= http://localhost:8081
+@props=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,wind_direction_10m,weather_code
+
+GET {{host}}/v1/forecast
+?latitude={{$dotenv LAT}}
+&longitude={{$dotenv LONG}}
+&hourly={{props}}
+&current={{props}}
+&past_days=2
+&past_hours=1
+&forecast_days=1
+&wind_speed_unit=ms
+&models=dmi_harmonie_arome_europe
