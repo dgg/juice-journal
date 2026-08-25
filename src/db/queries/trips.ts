@@ -3,7 +3,7 @@ import { db } from "../client"
 import { toNumber, toUtcDateTime } from "../convert"
 import type { TripInput } from "../../backend/types"
 import { locationsQueries } from "./locations"
-import { recordWeather } from "../../backend/weather/recorder"
+import { storeWeather, type WeatherParam } from "../../backend/weather/storage"
 
 export interface TripRow {
 	id: string
@@ -128,17 +128,21 @@ export const tripsQueries = {
 			: null
 
 		if (startLoc || endLoc) {
-			await recordWeather(
-				trip.id,
-				{
-					startLat: startLoc?.latitude ?? null,
-					startLong: startLoc?.longitude ?? null,
-					endLat: endLoc?.latitude ?? null,
-					endLong: endLoc?.longitude ?? null
+			const start: WeatherParam = {
+				location: {
+					latitude: startLoc!.latitude,
+					longitude: startLoc!.longitude
 				},
-				input.start_time,
-				input.end_time
-			)
+				time: DateTime.fromISO(input.start_time, {zone: "UTC"})
+			}
+			const end: WeatherParam = {
+				location: {
+					latitude: endLoc!.latitude,
+					longitude: endLoc!.longitude
+				},
+				time: DateTime.fromISO(input.end_time, {zone: "UTC"})
+			}
+			await storeWeather(trip.id, start, end)
 
 			const updated = await db`SELECT * FROM trips WHERE id = ${trip.id}`
 			if (updated.length > 0) {

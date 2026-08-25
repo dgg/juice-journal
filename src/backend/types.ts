@@ -5,8 +5,8 @@ export const tripInputSchema = z.object({
 		.string()
 		.length(16)
 		.regex(/^[A-Za-z0-9_-]{16}$/),
-	start_time: z.iso.datetime(),
-	end_time: z.iso.datetime(),
+	start_time: z.iso.datetime({offset: true}),
+	end_time: z.iso.datetime({offset: true}),
 	daypart: z.enum(["morning", "afternoon"]),
 	duration_min: z.number().int().positive(),
 	distance_km: z.number().positive(),
