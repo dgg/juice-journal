@@ -1,6 +1,8 @@
 import { rootLogger } from "../../utils/logger"
 
-import { fetchWeather, type WeatherParam, WeatherFetchError } from "./fetcher"
+import { fetchWeather, WeatherFetchError } from "./fetcher"
+import { type WeatherParam } from "./types"
+
 import { tripsQueries } from "../../db/queries/trips"
 
 const RETRY_DELAYS = [5_000, 30_000]
