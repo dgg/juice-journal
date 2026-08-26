@@ -34,7 +34,13 @@ The `tripInputSchema` SHALL mark `vehicle_id`, `start_time`, `end_time`, `daypar
 
 ### Requirement: Field types and constraints enforced
 
-The schema SHALL enforce: `vehicle_id` as a 16-character nanoid-format string, `start_time`/`end_time` as ISO 8601 datetimes (`z.iso.datetime()`), `daypart` enum `["morning","afternoon"]`, `duration_min` integer, `distance_km` positive number, `start_location_id`/`end_location_id` as optional 16-character nanoid-format strings, and optional `avg_speed_kmh`/`avg_consumption_kwh_100km`/`odometer_km` numbers.
+The schema SHALL enforce: `vehicle_id` as a 16-character nanoid-format string, `start_time`/`end_time` as ISO 8601 datetimes with offset (`z.iso.datetime({ offset: true })`) transformed to UTC Luxon `DateTime` via `DateTime.fromISO(s, { setZone: true }).toUTC()`, `daypart` enum `["morning","afternoon"]`, `duration_min` integer, `distance_km` positive number, `start_location_id`/`end_location_id` as optional 16-character nanoid-format strings, and optional `avg_speed_kmh`/`avg_consumption_kwh_100km`/`odometer_km` numbers. The transform SHALL run inside `zValidator` so that `c.req.valid('json')` yields the transformed `DateTime` values.
+
+#### Scenario: Valid ISO datetime with offset transforms to UTC DateTime
+
+- **GIVEN** a `POST /api/trips` body with `start_time: "2026-08-25T14:30:00+02:00"`
+- **WHEN** the `zValidator` middleware runs the schema
+- **THEN** `c.req.valid('json').start_time` SHALL be a Luxon `DateTime` with zone `UTC` representing `2026-08-25T12:30:00.000Z`
 
 #### Scenario: Invalid daypart enum
 
@@ -76,9 +82,15 @@ The `zValidator` error hook SHALL be `zodProblemHook()` from `hono-problem-detai
 - **WHEN** the schema is validated
 - **THEN** the `422` problem+json response's `errors` extension array SHALL contain one entry per failing field
 
-### Requirement: Async foreign-key checks in a dedicated validation step
+### Requirement: Async foreign-key, uniqueness, and odometer checks in a single validation middleware
 
-The system SHALL verify that `vehicle_id` (always) and `start_location_id`/`end_location_id` (when provided) reference existing rows, performed by an async Hono middleware in `src/backend/validators.ts` that runs AFTER `zValidator` and BEFORE `creationHandler`. This step SHALL NOT be implemented inside `creationHandler`. On a missing reference, the middleware SHALL `throw` a `FOREIGN_KEY_VIOLATION` problem (via the problem type registry) with status `422`, a `detail` naming the missing field, and an `errors`/`field` extension identifying the offending field, so that the response flows through `app.onError` as `application/problem+json`. The middleware SHALL NOT return a `c.json({ path, message }, 400)` body.
+The system SHALL verify that `vehicle_id` (always) and `start_location_id`/`end_location_id` (when provided) reference existing rows, plus the `(vehicle_id, end_time)` uniqueness pre-check, plus the odometer monotonicity check, in a SINGLE async Hono middleware that runs AFTER `zValidator` and BEFORE `creationHandler`. The middleware SHALL read the validated input via `c.req.valid("json")` (the transformed `DateTime`-bearing value). On a missing reference, the middleware SHALL `throw` a `FOREIGN_KEY_VIOLATION` problem with status `422`. On a duplicate `(vehicle_id, end_time)`, the middleware SHALL `throw` a `TRIP_CONFLICT` problem with status `409`. On an odometer reading lower than the previous reading, the middleware SHALL `throw` a `FOREIGN_KEY_VIOLATION` problem with status `422`.
+
+#### Scenario: Middleware reads transformed DateTime, not raw body
+
+- **GIVEN** a `POST /api/trips` body with `start_time: "2026-08-25T14:30:00+02:00"` has passed `zValidator`
+- **WHEN** the single validation middleware runs
+- **THEN** it SHALL read `c.req.valid("json").start_time` as a Luxon `DateTime` (zone `UTC`), and SHALL NOT read the raw `validator("json")` `req` parameter
 
 #### Scenario: Non-existent vehicle rejected
 
@@ -98,48 +110,54 @@ The system SHALL verify that `vehicle_id` (always) and `start_location_id`/`end_
 - **WHEN** inspecting `creationHandler` in `src/backend/handlers.ts`
 - **THEN** it SHALL perform only the INSERT and the `201` response shaping, with no vehicle/location existence queries, no unique-conflict detection, no `try/catch` around the INSERT, and no error-body construction
 
-### Requirement: Unique-existence pre-check in a dedicated validation step
+### Requirement: Unique-existence pre-check in single validation middleware
 
-The system SHALL reject a `POST /api/trips` request whose `(vehicle_id, end_time)` already matches an existing row in `trips`, performed by an async Hono middleware (`tripConflictValidator`) in `src/backend/validators.ts` that runs AFTER the foreign-key checks and BEFORE `creationHandler`. The middleware SHALL issue a `SELECT` against `trips` for a row with the request's `vehicle_id` and `end_time`; if a row is found it SHALL `throw` a `TRIP_CONFLICT` problem (via the problem type registry) with status `409`, a `detail` indicating a trip with this `vehicle_id` and `end_time` already exists, and an `extensions` object carrying `vehicle_id` and `end_time`, so the response flows through `app.onError` as `application/problem+json`. The middleware SHALL NOT be implemented inside `creationHandler`, and `creationHandler` SHALL NOT catch a database unique-constraint violation.
+The system SHALL reject a `POST /api/trips` request whose `(vehicle_id, end_time)` already matches an existing row in `trips`, performed by the single validation middleware in `src/backend/validators.ts` that runs AFTER `zValidator` and BEFORE `creationHandler`. The middleware SHALL issue a `SELECT` against `trips` for a row with the request's `vehicle_id` and `end_time`; if a row is found the middleware SHALL `throw` a `TRIP_CONFLICT` problem (via the problem type registry) with status `409`, a `detail` indicating a trip with this `vehicle_id` and `end_time` already exists, and an `extensions` object carrying `vehicle_id` and `end_time`, so the response flows through `app.onError` as `application/problem+json`. The middleware SHALL NOT be implemented inside `creationHandler`, and `creationHandler` SHALL NOT catch a database unique-constraint violation.
 
 #### Scenario: Pre-existing duplicate trip rejected
 
 - **GIVEN** a trip exists for `vehicle_id` X with `end_time` T
 - **WHEN** another `POST /api/trips` request is received with the same `vehicle_id` X and `end_time` T
-- **THEN** the `tripConflictValidator` middleware SHALL respond `409 Conflict` `application/problem+json` whose `type` is the registry-defined `TRIP_CONFLICT` URI, whose `detail` indicates a trip with this `vehicle_id` and `end_time` already exists, and whose `extensions` carries `vehicle_id` X and `end_time` T, and `creationHandler` SHALL NOT execute
+- **THEN** the single validation middleware SHALL respond `409 Conflict` `application/problem+json` whose `type` is the registry-defined `TRIP_CONFLICT` URI, whose `detail` indicates a trip with this `vehicle_id` and `end_time` already exists, and whose `extensions` carries `vehicle_id` X and `end_time` T, and `creationHandler` SHALL NOT execute
 
 #### Scenario: Non-duplicate trip passes the pre-check
 
 - **GIVEN** no trip exists for `vehicle_id` X with `end_time` T
 - **WHEN** a `POST /api/trips` request is received with `vehicle_id` X and `end_time` T
-- **THEN** the `tripConflictValidator` middleware SHALL return the request value unchanged and the request SHALL proceed to `creationHandler`
+- **THEN** the single validation middleware SHALL return the request value unchanged
 
 #### Scenario: Pre-check runs after foreign-key validation
 
 - **GIVEN** a `POST /api/trips` request whose `vehicle_id` does not exist in `vehicles`
 - **WHEN** the validation chain executes
-- **THEN** the foreign-key check SHALL reject the request with `422` before the unique-existence pre-check queries the `trips` table
+- **THEN** the foreign-key check SHALL reject the request with `422` before the uniqueness pre-check queries the `trips` table
 
 #### Scenario: Race condition surfaces as unhandled error
 
 - **GIVEN** no trip exists for `vehicle_id` X with `end_time` T at pre-check time
-- **WHEN** a row with `vehicle_id` X and `end_time` T is inserted into `trips` between the `tripConflictValidator` `SELECT` and `creationHandler`'s `INSERT`
-- **THEN** the database unique-constraint violation SHALL propagate uncaught to `app.onError` and the system SHALL respond `500` `application/problem+json` (per the `error-handling` capability), not `409`
+- **WHEN** a row with `vehicle_id` X and `end_time` T is inserted into `trips` between the uniqueness pre-check `SELECT` and `creationHandler`'s `INSERT`
+- **THEN** the database unique-constraint violation SHALL propagate uncaught to `app.onError` and the system SHALL respond `500` `application/problem+json` (per the `error-handling` capability), not `409`, and SHALL NOT be caught by the single validation middleware
 
-### Requirement: TripInput type derived from schema
+### Requirement: TripInput type derived from schema output
 
-The `TripInput` TypeScript type SHALL be derived as `z.infer<typeof tripInputSchema>` in `src/backend/types.ts`, eliminating the hand-maintained interface and providing a single source of truth. The legacy `ValidationError` interface SHALL be removed.
+The `TripInput` TypeScript type SHALL be derived as `z.output<typeof tripInputSchema>` in `src/backend/types.ts`, yielding `start_time`/`end_time` as Luxon `DateTime` (zone `UTC`). A new `TripInputRaw` type SHALL be derived as `z.input<typeof tripInputSchema>`, naming the string-shaped input. The legacy `Trip` interface SHALL be removed.
 
-#### Scenario: Handler receives typed input
+#### Scenario: Handler receives typed DateTime input
 
-- **GIVEN** the `zValidator` middleware has validated a request body
+- **GIVEN** the `zValidator` middleware has validated and transformed a request body
 - **WHEN** `createTrip` reads `c.req.valid('json')`
-- **THEN** the value SHALL be statically typed as `TripInput` with no manual casts in handler code
+- **THEN** the value SHALL be statically typed as `TripInput` with `start_time: DateTime` and `end_time: DateTime`, with no manual casts in handler code
 
-#### Scenario: Legacy ValidationError type removed
+#### Scenario: Form handler returns TripInputRaw
+
+- **GIVEN** `parseFormTripInput` has assembled the offset-bearing ISO strings
+- **WHEN** its return type is inspected
+- **THEN** it SHALL be `TripInputRaw` (string fields), which `tripInputSchema.parse()` then converts to `TripInput` (DateTime fields)
+
+#### Scenario: Legacy Trip interface removed
 
 - **GIVEN** the codebase after migration
-- **WHEN** searching `src/backend/types.ts` for `ValidationError`
+- **WHEN** searching `src/backend/types.ts` for `export interface Trip`
 - **THEN** zero matches SHALL exist
 
 ### Requirement: Legacy validation module removed
