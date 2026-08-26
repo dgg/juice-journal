@@ -26,8 +26,8 @@ function appDisplayTz(): string {
 
 export const statsQueries = {
 	async periodAggregates(params: {
-		startUtc: string
-		endUtc: string
+		startUtc: DateTime
+		endUtc: DateTime
 		vehicleId?: string
 	}): Promise<PeriodAggregates> {
 const rows = params.vehicleId
@@ -40,8 +40,8 @@ const rows = params.vehicleId
 						AVG(avg_speed_kmh) as avg_speed,
 						COUNT(*) as trip_count
 					FROM trips
-					WHERE end_time >= ${params.startUtc}
-						AND end_time < ${params.endUtc}
+					WHERE end_time >= ${params.startUtc.toISO()}
+						AND end_time < ${params.endUtc.toISO()}
 						AND vehicle_id = ${params.vehicleId}
 				`
 				: await db`
@@ -53,8 +53,8 @@ const rows = params.vehicleId
 						AVG(avg_speed_kmh) as avg_speed,
 						COUNT(*) as trip_count
 					FROM trips
-					WHERE end_time >= ${params.startUtc}
-						AND end_time < ${params.endUtc}
+					WHERE end_time >= ${params.startUtc.toISO()}
+						AND end_time < ${params.endUtc.toISO()}
 				`
 		const raw = rows[0] as unknown as Record<string, unknown>
 		const totalDistance = toNumber(raw.total_distance as string | null)
@@ -74,8 +74,8 @@ return {
 
 	// Backwards compatibility alias - keep existing callers working
 	monthlyAggregates: async function (params: {
-		startUtc: string
-		endUtc: string
+		startUtc: DateTime
+		endUtc: DateTime
 		vehicleId?: string
 	}) {
 		const result = await this.periodAggregates(params)
@@ -87,8 +87,8 @@ return {
 	},
 
 	async periodSeries(params: {
-		startUtc: string
-		endUtc: string
+		startUtc: DateTime
+		endUtc: DateTime
 		vehicleId?: string
 		bucket: "trip" | "day" | "week" | "month"
 		displayTz?: string
@@ -107,8 +107,8 @@ return {
 						avg_speed_kmh,
 						avg_consumption_kwh_100km
 					FROM trips
-					WHERE end_time >= ${startUtc}
-						AND end_time < ${endUtc}
+					WHERE end_time >= ${startUtc.toISO()}
+						AND end_time < ${endUtc.toISO()}
 						AND vehicle_id = ${vehicleId}
 					ORDER BY end_time ASC
 				`
@@ -121,8 +121,8 @@ return {
 						avg_speed_kmh,
 						avg_consumption_kwh_100km
 					FROM trips
-					WHERE end_time >= ${startUtc}
-						AND end_time < ${endUtc}
+					WHERE end_time >= ${startUtc.toISO()}
+						AND end_time < ${endUtc.toISO()}
 					ORDER BY end_time ASC
 				`
 
@@ -160,8 +160,8 @@ return {
 			`.trim()
 
 			const queryParams = vehicleId
-				? [startUtc, endUtc, vehicleId]
-				: [startUtc, endUtc]
+				? [startUtc.toISO(), endUtc.toISO(), vehicleId]
+				: [startUtc.toISO(), endUtc.toISO()]
 			const rows = await db.unsafe(sql, queryParams)
 
 			return rows.map((row: Record<string, unknown>) => {

@@ -13,11 +13,8 @@ import {
 	htmlCreationHandler
 } from "./html-handlers.tsx"
 import {
-	endLocationValidator,
 	creationValidator,
-	startLocationValidator,
-	vehicleValidator,
-	tripConflictValidator
+	validateTripInput
 } from "./validators"
 
 const app = new Hono<Env>()
@@ -57,10 +54,7 @@ app.get("/api/health", (c) => c.json({ status: "ok" }))
 	.post(
 		"/api/trips",
 		creationValidator,
-		endLocationValidator,
-		startLocationValidator,
-		vehicleValidator,
-		tripConflictValidator,
+		validateTripInput,
 		creationHandler
 	)
 	.post("/trips", htmlCreationHandler)

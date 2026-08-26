@@ -12,8 +12,8 @@ beforeAll(async () => {
 	} catch {}
 	try {
 		await db`
-			INSERT INTO locations (id, label, latitude, longitude, timezone)
-			VALUES (${TEST_LOC_ID}, 'Recorder Loc', 55.73, 9.62, 'Europe/Copenhagen')
+			INSERT INTO locations (id, label, latitude, longitude)
+			VALUES (${TEST_LOC_ID}, 'Recorder Loc', 55.73, 9.62)
 		`
 	} catch {}
 })

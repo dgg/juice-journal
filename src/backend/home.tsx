@@ -1,5 +1,5 @@
 import {
-	resolveDisplayTz,
+	displayTz,
 	currentMonthBoundsUtc,
 	prevMonthBoundsUtc
 } from "../utils/dates"
@@ -46,20 +46,16 @@ interface HomeData {
 }
 
 export async function homeHandler(c: Context<Env>) {
-	const displayTz = resolveDisplayTz(
-		undefined,
-		undefined,
-		process.env.DISPLAY_TZ || "Europe/Copenhagen"
-	)
+	const displayTz_ = displayTz()
 
 	const now = DateTime.now()
-	const { startUtc, endUtc } = currentMonthBoundsUtc(displayTz, now)
+	const { startUtc, endUtc } = currentMonthBoundsUtc(displayTz_, now)
 	const { startUtc: prevStartUtc, endUtc: prevEndUtc } = prevMonthBoundsUtc(
-		displayTz,
+		displayTz_,
 		now
 	)
 
-	const monthLabel = now.setZone(displayTz).toFormat("MMMM yyyy")
+	const monthLabel = now.setZone(displayTz_).toFormat("MMMM yyyy")
 
 	const vehicleId = await tripsQueries.findLatestTripVehicleId()
 	let vehicle = null
@@ -89,8 +85,8 @@ export async function homeHandler(c: Context<Env>) {
 
 	const trips = tripsResult.map((trip) => ({
 		id: trip.id,
-		startTime: new Date(trip.start_time.toISO() as string),
-		endTime: new Date(trip.end_time.toISO() as string),
+		startTime: trip.start_time.toJSDate(),
+		endTime: trip.end_time.toJSDate(),
 		daypart: trip.daypart,
 		durationMin: trip.duration_min,
 		distanceKm: trip.distance_km,

@@ -3,9 +3,9 @@
 INSERT INTO vehicles (description)
 VALUES ('commuter');
 
-INSERT INTO locations (label, latitude, longitude, timezone)
-VALUES ('home', 0, 0, 'Europe/Copenhagen'),
-       ('work', 0, 0, 'Europe/Copenhagen');
+INSERT INTO locations (label, latitude, longitude)
+VALUES ('home', 0, 0),
+       ('work', 0, 0);
 
 -- migrate:down
 

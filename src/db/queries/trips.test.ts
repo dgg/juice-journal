@@ -5,6 +5,10 @@ import { vehiclesQueries } from "./vehicles"
 import { locationsQueries } from "./locations"
 import { DateTime } from "luxon"
 
+function utcIso(s: string): DateTime {
+	return DateTime.fromISO(s, { setZone: true }).toUTC()
+}
+
 const TEST_VEHICLE_ID = "V1StGXR8_Z5jdHi6"
 const TEST_LOCATION_ID = "Bw_0wK4q2xJp5m7n"
 
@@ -14,8 +18,8 @@ beforeAll(async () => {
 	} catch {}
 	try {
 		await db`
-			INSERT INTO locations (id, label, latitude, longitude, timezone)
-			VALUES (${TEST_LOCATION_ID}, 'Home', 55.676098, 12.568337, 'Europe/Copenhagen')
+			INSERT INTO locations (id, label, latitude, longitude)
+			VALUES (${TEST_LOCATION_ID}, 'Home', 55.676098, 12.568337)
 		`
 	} catch {}
 })
@@ -33,8 +37,8 @@ describe("tripsQueries", () => {
 		it("inserts a trip and returns typed TripRow with DateTime fields", async () => {
 			const result = await tripsQueries.createTrip({
 				vehicle_id: TEST_VEHICLE_ID,
-				start_time: "2026-07-20T08:00:00Z",
-				end_time: "2026-07-20T08:45:00Z",
+				start_time: utcIso("2026-07-20T08:00:00Z"),
+				end_time: utcIso("2026-07-20T08:45:00Z"),
 				daypart: "morning",
 				duration_min: 45,
 				distance_km: 15.5,
@@ -64,16 +68,16 @@ describe("tripsQueries", () => {
 		it("returns trips within month window", async () => {
 			await tripsQueries.createTrip({
 				vehicle_id: TEST_VEHICLE_ID,
-				start_time: "2026-07-21T08:00:00Z",
-				end_time: "2026-07-21T08:45:00Z",
+				start_time: utcIso("2026-07-21T08:00:00Z"),
+				end_time: utcIso("2026-07-21T08:45:00Z"),
 				daypart: "morning",
 				duration_min: 45,
 				distance_km: 15.5
 			})
 
 			const trips = await tripsQueries.findTripsByMonth({
-				startUtc: "2026-07-01T00:00:00Z",
-				endUtc: "2026-08-01T00:00:00Z"
+				startUtc: utcIso("2026-07-01T00:00:00Z"),
+				endUtc: utcIso("2026-08-01T00:00:00Z")
 			})
 
 			const testTrips = trips.filter((t) => t.vehicle_id === TEST_VEHICLE_ID)
@@ -86,7 +90,7 @@ describe("tripsQueries", () => {
 		it("returns true when trip exists", async () => {
 			const exists = await tripsQueries.existsTripByVehicleAndEndTime({
 				vehicleId: TEST_VEHICLE_ID,
-				endTime: "2026-07-20T08:45:00Z"
+				endTime: utcIso("2026-07-20T08:45:00Z")
 			})
 			expect(exists).toBe(true)
 		})
@@ -94,7 +98,7 @@ describe("tripsQueries", () => {
 		it("returns false when trip does not exist", async () => {
 			const exists = await tripsQueries.existsTripByVehicleAndEndTime({
 				vehicleId: TEST_VEHICLE_ID,
-				endTime: "2026-01-01T00:00:00Z"
+				endTime: utcIso("2026-01-01T00:00:00Z")
 			})
 			expect(exists).toBe(false)
 		})
@@ -105,8 +109,8 @@ describe("tripsQueries", () => {
 			// Insert a trip with a very recent end_time to ensure it's the latest
 			await tripsQueries.createTrip({
 				vehicle_id: TEST_VEHICLE_ID,
-				start_time: "2099-12-31T23:00:00Z",
-				end_time: "2099-12-31T23:30:00Z",
+				start_time: utcIso("2099-12-31T23:00:00Z"),
+				end_time: utcIso("2099-12-31T23:30:00Z"),
 				daypart: "afternoon",
 				duration_min: 30,
 				distance_km: 10.0
@@ -122,8 +126,8 @@ describe("tripsQueries", () => {
 			// Create a trip with location IDs in the current month
 			await tripsQueries.createTrip({
 				vehicle_id: TEST_VEHICLE_ID,
-				start_time: "2026-07-22T08:00:00Z",
-				end_time: "2026-07-22T08:45:00Z",
+				start_time: utcIso("2026-07-22T08:00:00Z"),
+				end_time: utcIso("2026-07-22T08:45:00Z"),
 				daypart: "morning",
 				duration_min: 45,
 				distance_km: 15.5,
@@ -132,8 +136,8 @@ describe("tripsQueries", () => {
 			})
 
 			const trips = await tripsQueries.findTripsWithLocations({
-				startUtc: "2026-07-01T00:00:00Z",
-				endUtc: "2026-08-01T00:00:00Z",
+				startUtc: utcIso("2026-07-01T00:00:00Z"),
+				endUtc: utcIso("2026-08-01T00:00:00Z"),
 				vehicleId: TEST_VEHICLE_ID
 			})
 

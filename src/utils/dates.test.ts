@@ -11,27 +11,23 @@ import { DateTime } from "luxon";
 describe("dates utilities", () => {
   describe("currentWeekBoundsUtc", () => {
     it("should return ISO week bounds in UTC", () => {
-      // Use a known date that's definitely in the middle of a week
-      const date = DateTime.fromISO("2026-08-13T12:00:00", { zone: "Europe/Copenhagen" }); // Thursday
+      const date = DateTime.fromISO("2026-08-13T12:00:00", { zone: "Europe/Copenhagen" });
       const bounds = currentWeekBoundsUtc("Europe/Copenhagen", date);
       
       expect(bounds.startUtc).toBeDefined();
       expect(bounds.endUtc).toBeDefined();
-      expect(typeof bounds.startUtc).toBe("string");
-      expect(typeof bounds.endUtc).toBe("string");
+      expect(bounds.startUtc instanceof DateTime).toBe(true);
+      expect(bounds.endUtc instanceof DateTime).toBe(true);
+      expect(bounds.startUtc.zoneName).toBe("UTC");
+      expect(bounds.endUtc.zoneName).toBe("UTC");
     });
 
     it("handles week boundary: Friday late local vs Saturday early UTC", () => {
-      // Friday evening in Europe/Copenhagen becomes Saturday early morning UTC
-      // This should still belong to the current week (the Friday-Saturday week)
-      const fridayLateLocal = DateTime.fromISO("2026-08-14T23:30:00", { zone: "Europe/Copenhagen" }); // Friday 11:30 PM
+      const fridayLateLocal = DateTime.fromISO("2026-08-14T23:30:00", { zone: "Europe/Copenhagen" });
       const bounds = currentWeekBoundsUtc("Europe/Copenhagen", fridayLateLocal);
 
-      // This should be the week that contains this Friday (starts Monday Aug 10)
-      // So the week bounds should be Monday Aug 10 00:00 (CET) to Monday Aug 17 00:00 (CET) -> in UTC
-      // Aug 9 22:00:00 - Aug 16 22:00:00
-      expect(bounds.startUtc).toBe("2026-08-09T22:00:00.000Z"); // Monday Aug 10 00:00 CET -> UTC
-      expect(bounds.endUtc).toBe("2026-08-16T22:00:00.000Z");   // Monday Aug 17 00:00 CET -> UTC
+      expect(bounds.startUtc.toISO()).toBe("2026-08-09T22:00:00.000Z");
+      expect(bounds.endUtc.toISO()).toBe("2026-08-16T22:00:00.000Z");
     });
   });
 
@@ -42,8 +38,10 @@ describe("dates utilities", () => {
       
       expect(bounds.startUtc).toBeDefined();
       expect(bounds.endUtc).toBeDefined();
-      expect(typeof bounds.startUtc).toBe("string");
-      expect(typeof bounds.endUtc).toBe("string");
+      expect(bounds.startUtc instanceof DateTime).toBe(true);
+      expect(bounds.endUtc instanceof DateTime).toBe(true);
+      expect(bounds.startUtc.zoneName).toBe("UTC");
+      expect(bounds.endUtc.zoneName).toBe("UTC");
     });
   });
 
@@ -54,8 +52,10 @@ describe("dates utilities", () => {
       
       expect(bounds.startUtc).toBeDefined();
       expect(bounds.endUtc).toBeDefined();
-      expect(typeof bounds.startUtc).toBe("string");
-      expect(typeof bounds.endUtc).toBe("string");
+      expect(bounds.startUtc instanceof DateTime).toBe(true);
+      expect(bounds.endUtc instanceof DateTime).toBe(true);
+      expect(bounds.startUtc.zoneName).toBe("UTC");
+      expect(bounds.endUtc.zoneName).toBe("UTC");
     });
   });
 
@@ -66,8 +66,10 @@ describe("dates utilities", () => {
       
       expect(bounds.startUtc).toBeDefined();
       expect(bounds.endUtc).toBeDefined();
-      expect(typeof bounds.startUtc).toBe("string");
-      expect(typeof bounds.endUtc).toBe("string");
+      expect(bounds.startUtc instanceof DateTime).toBe(true);
+      expect(bounds.endUtc instanceof DateTime).toBe(true);
+      expect(bounds.startUtc.zoneName).toBe("UTC");
+      expect(bounds.endUtc.zoneName).toBe("UTC");
     });
   });
 
@@ -82,6 +84,8 @@ describe("dates utilities", () => {
       expect(bounds.current.endUtc).toBeDefined();
       expect(bounds.previous.startUtc).toBeDefined();
       expect(bounds.previous.endUtc).toBeDefined();
+      expect(bounds.current.startUtc instanceof DateTime).toBe(true);
+      expect(bounds.current.endUtc instanceof DateTime).toBe(true);
     });
 
     it("should dispatch correctly for month", () => {
@@ -94,6 +98,8 @@ describe("dates utilities", () => {
       expect(bounds.current.endUtc).toBeDefined();
       expect(bounds.previous.startUtc).toBeDefined();
       expect(bounds.previous.endUtc).toBeDefined();
+      expect(bounds.current.startUtc instanceof DateTime).toBe(true);
+      expect(bounds.current.endUtc instanceof DateTime).toBe(true);
     });
 
     it("should dispatch correctly for year", () => {
@@ -106,6 +112,8 @@ describe("dates utilities", () => {
       expect(bounds.current.endUtc).toBeDefined();
       expect(bounds.previous.startUtc).toBeDefined();
       expect(bounds.previous.endUtc).toBeDefined();
+      expect(bounds.current.startUtc instanceof DateTime).toBe(true);
+      expect(bounds.current.endUtc instanceof DateTime).toBe(true);
     });
 
     it("should throw error for invalid period", () => {

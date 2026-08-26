@@ -1,6 +1,6 @@
 import { DateTime } from "luxon"
 import { db } from "../client"
-import { toNumber, toUtcDateTime } from "../convert"
+import { toNumber, toUtcDateTime, fromUtcDateTime } from "../convert"
 import type { TripInput } from "../../backend/types"
 import { locationsQueries } from "./locations"
 import { storeWeather, type WeatherParam } from "../../backend/weather/storage"
@@ -36,8 +36,6 @@ export interface TripWithLocationRow {
 	odometer_km: number | null
 	start_location: string | null
 	end_location: string | null
-	start_tz: string | null
-	end_tz: string | null
 }
 
 function mapTripRow(raw: Record<string, unknown>): TripRow {
@@ -77,9 +75,7 @@ function mapTripWithLocationRow(raw: Record<string, unknown>): TripWithLocationR
 		),
 		odometer_km: toNumber(raw.odometer_km as string | null),
 		start_location: (raw.start_location as string | null) ?? null,
-		end_location: (raw.end_location as string | null) ?? null,
-		start_tz: (raw.start_tz as string | null) ?? null,
-		end_tz: (raw.end_tz as string | null) ?? null
+		end_location: (raw.end_location as string | null) ?? null
 	}
 }
 
@@ -103,8 +99,8 @@ export const tripsQueries = {
 			)
 			VALUES (
 				${input.vehicle_id},
-				${input.start_time},
-				${input.end_time},
+				${fromUtcDateTime(input.start_time)},
+				${fromUtcDateTime(input.end_time)},
 				${input.start_location_id ?? null},
 				${input.end_location_id ?? null},
 				${input.daypart},
@@ -133,14 +129,14 @@ export const tripsQueries = {
 					latitude: startLoc!.latitude,
 					longitude: startLoc!.longitude
 				},
-				time: DateTime.fromISO(input.start_time, {zone: "UTC"})
+				time: input.start_time
 			}
 			const end: WeatherParam = {
 				location: {
 					latitude: endLoc!.latitude,
 					longitude: endLoc!.longitude
 				},
-				time: DateTime.fromISO(input.end_time, {zone: "UTC"})
+				time: input.end_time
 			}
 			await storeWeather(trip.id, start, end)
 
@@ -168,27 +164,27 @@ export const tripsQueries = {
 	},
 
 	async findTripsByMonth(params: {
-		startUtc: string
-		endUtc: string
+		startUtc: DateTime
+		endUtc: DateTime
 	}): Promise<TripRow[]> {
 		const rows = await db`
 			SELECT * FROM trips
-			WHERE end_time >= ${params.startUtc}
-				AND end_time < ${params.endUtc}
+			WHERE end_time >= ${params.startUtc.toISO()}
+				AND end_time < ${params.endUtc.toISO()}
 			ORDER BY end_time DESC
 		`
 		return rows.map((r: unknown) => mapTripRow(r as Record<string, unknown>))
 	},
 
 	async findTripsByMonthForVehicle(params: {
-		startUtc: string
-		endUtc: string
+		startUtc: DateTime
+		endUtc: DateTime
 		vehicleId: string
 	}): Promise<TripRow[]> {
 		const rows = await db`
 			SELECT * FROM trips
-			WHERE end_time >= ${params.startUtc}
-				AND end_time < ${params.endUtc}
+			WHERE end_time >= ${params.startUtc.toISO()}
+				AND end_time < ${params.endUtc.toISO()}
 				AND vehicle_id = ${params.vehicleId}
 			ORDER BY end_time DESC
 		`
@@ -197,12 +193,12 @@ export const tripsQueries = {
 
 	async existsTripByVehicleAndEndTime(params: {
 		vehicleId: string
-		endTime: string
+		endTime: DateTime
 	}): Promise<boolean> {
 		const rows = await db`
 			SELECT 1 FROM trips
 			WHERE vehicle_id = ${params.vehicleId}
-				AND end_time = ${params.endTime}
+				AND end_time = ${fromUtcDateTime(params.endTime)}
 		`
 		return rows.length > 0
 	},
@@ -240,8 +236,8 @@ export const tripsQueries = {
 	},
 
 	async findTripsWithLocations(params: {
-		startUtc: string
-		endUtc: string
+		startUtc: DateTime
+		endUtc: DateTime
 		vehicleId?: string
 	}): Promise<TripWithLocationRow[]> {
 		const rows = params.vehicleId
@@ -257,14 +253,12 @@ export const tripsQueries = {
 					t.avg_consumption_kwh_100km,
 					t.odometer_km,
 					start_loc.label as start_location,
-					end_loc.label as end_location,
-					start_loc.timezone as start_tz,
-					end_loc.timezone as end_tz
+					end_loc.label as end_location
 				FROM trips t
 				LEFT JOIN locations start_loc ON t.start_location_id = start_loc.id
 				LEFT JOIN locations end_loc ON t.end_location_id = end_loc.id
-				WHERE t.end_time >= ${params.startUtc}
-					AND t.end_time < ${params.endUtc}
+				WHERE t.end_time >= ${params.startUtc.toISO()}
+					AND t.end_time < ${params.endUtc.toISO()}
 					AND t.vehicle_id = ${params.vehicleId}
 				ORDER BY t.end_time DESC
 			`
@@ -280,14 +274,12 @@ export const tripsQueries = {
 					t.avg_consumption_kwh_100km,
 					t.odometer_km,
 					start_loc.label as start_location,
-					end_loc.label as end_location,
-					start_loc.timezone as start_tz,
-					end_loc.timezone as end_tz
+					end_loc.label as end_location
 				FROM trips t
 				LEFT JOIN locations start_loc ON t.start_location_id = start_loc.id
 				LEFT JOIN locations end_loc ON t.end_location_id = end_loc.id
-				WHERE t.end_time >= ${params.startUtc}
-					AND t.end_time < ${params.endUtc}
+				WHERE t.end_time >= ${params.startUtc.toISO()}
+					AND t.end_time < ${params.endUtc.toISO()}
 				ORDER BY t.end_time DESC
 			`
 		return rows.map((r: unknown) =>
