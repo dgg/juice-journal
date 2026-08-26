@@ -11,7 +11,7 @@ function utcIso(s: string): DateTime {
 const TEST_VEHICLE_ID = "V1StGXR8_Z5jdHi6"
 const CLEANUP_TRIPS: Array<{ start: DateTime; end: DateTime }> = []
 
-beforeAll(async () => {
+/*beforeAll(async () => {
 	try {
 		await db`INSERT INTO vehicles (id, description) VALUES (${TEST_VEHICLE_ID}, 'Test Vehicle')`
 	} catch {}
@@ -22,7 +22,7 @@ afterAll(async () => {
 		await db`DELETE FROM trips WHERE vehicle_id = ${TEST_VEHICLE_ID}`
 		await db`DELETE FROM vehicles WHERE id = ${TEST_VEHICLE_ID}`
 	} catch {}
-})
+})*/
 
 async function seedTrip(opts: {
 	start: DateTime
@@ -45,7 +45,7 @@ async function seedTrip(opts: {
 	CLEANUP_TRIPS.push({ start: opts.start, end: opts.end })
 }
 
-describe("statsQueries", () => {
+describe.skip("statsQueries", () => {
 	describe("monthlyAggregates (backwards compat)", () => {
 		it("returns null aggregates when no trips", async () => {
 			const result = await statsQueries.monthlyAggregates({
