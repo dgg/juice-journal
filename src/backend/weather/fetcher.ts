@@ -6,21 +6,6 @@ import { ApiUrl } from "./ApiUrl"
 
 export const MAX_FOR_FORECAST: Duration = Duration.fromObject({ days: 7 })
 
-export const QUDT_UNITS = {
-	temperature: "DEG_C",
-	humidity: "PERCENT",
-	precipitation: "MILLI-M",
-	windSpeed: "M-PER-SEC",
-	windDirection: "DEG"
-} as const
-
-export type WeatherUnit = (typeof QUDT_UNITS)[keyof typeof QUDT_UNITS]
-
-export interface WeatherReading {
-	v: number | null
-	u: WeatherUnit
-}
-
 interface ApiResponse {
 	hourly: {
 		time: string[]
@@ -38,12 +23,17 @@ export interface WeatherInfo {
 	observedAt: DateTime
 	fetchedAt: DateTime
 	weatherCode: number | null
-	temperature: WeatherReading
-	humidity: WeatherReading
-	precipitation: WeatherReading
+	/** DEG_C */
+	temperature: number | null
+	/** PERCENT */
+	humidity: number | null
+	/** MILLI-M */
+	precipitation: number | null
 	wind: {
-		speed: WeatherReading
-		direction: WeatherReading
+		/** M-PER-SEC */
+		speed: number | null
+		/** QUDT DEG */
+		direction: number | null
 	}
 }
 
@@ -58,29 +48,14 @@ const buildExcerpt = (
 	hourly: ApiResponse["hourly"],
 	picked: Bucket
 ): WeatherSnapshot => ({
-	humidity: {
-		u: QUDT_UNITS.humidity,
-		v: hourly.relative_humidity_2m[picked.index] ?? null
-	},
+	humidity: hourly.relative_humidity_2m[picked.index] ?? null,
 	observedAt: picked.value,
-	precipitation: {
-		u: QUDT_UNITS.precipitation,
-		v: hourly.precipitation[picked.index] ?? null
-	},
-	temperature: {
-		u: QUDT_UNITS.temperature,
-		v: hourly.temperature_2m[picked.index] ?? null
-	},
+	precipitation: hourly.precipitation[picked.index] ?? null,
+	temperature: hourly.temperature_2m[picked.index] ?? null,
 	weatherCode: hourly.weather_code[picked.index] ?? null,
 	wind: {
-		direction: {
-			u: QUDT_UNITS.windDirection,
-			v: hourly.wind_direction_10m[picked.index] ?? null
-		},
-		speed: {
-			u: QUDT_UNITS.windSpeed,
-			v: hourly.wind_speed_10m[picked.index]?? null
-		}
+		direction: hourly.wind_direction_10m[picked.index] ?? null,
+		speed: hourly.wind_speed_10m[picked.index] ?? null
 	}
 })
 
