@@ -118,12 +118,18 @@ export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
 								)}
 								{trip.startLocation}
 								{trip.startLocation && trip.endLocation && (
-									<span class="icon-circle-arrow-right" aria-hidden="true"></span>
-								)}
-								{trip.endLocation && (
-									<span class="icon-flag-triangle-right" aria-hidden="true"></span>
+									<span
+										class="icon-circle-arrow-right"
+										aria-hidden="true"
+									></span>
 								)}
 								{trip.endLocation}
+								{trip.endLocation && (
+									<span
+										class="icon-flag-triangle-right"
+										aria-hidden="true"
+									></span>
+								)}
 							</dd>
 						</>
 					) : null}
