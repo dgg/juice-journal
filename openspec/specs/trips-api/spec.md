@@ -24,7 +24,7 @@ The system SHALL maintain a `vehicles` table with a synthetic 16-character nanoi
 
 ### Requirement: Locations table
 
-The system SHALL maintain a `locations` table storing commute endpoints with `id` (16-character nanoid generated in Postgres via `nanoid-postgres`, `DEFAULT nanoid(16)`), `label` (text), `latitude` (`DECIMAL(9,6)`), `longitude` (`DECIMAL(9,6)`), `timezone` (IANA name text), and audit columns. Both `latitude` and `longitude` MUST be within valid ranges (-90 to 90, -180 to 180).
+The system SHALL maintain a `locations` table storing commute endpoints with `id` (16-character nanoid generated in Postgres via `nanoid-postgres`, `DEFAULT nanoid(16)`), `label` (text), `latitude` (`DECIMAL(9,6)`), `longitude` (`DECIMAL(9,6)`), and audit columns. Both `latitude` and `longitude` MUST be within valid ranges (-90 to 90, -180 to 180).
 
 #### Scenario: Location with valid coordinates
 
@@ -36,7 +36,7 @@ The system SHALL maintain a `locations` table storing commute endpoints with `id
 
 - **GIVEN** a location exists
 - **WHEN** a trip is created with `start_location_id` or `end_location_id` referencing that location
-- **THEN** the trip SHALL store the foreign key and the location's `timezone` SHALL be usable for display timezone resolution
+- **THEN** the trip SHALL store the foreign key; the location row SHALL NOT carry a `timezone` column
 
 ### Requirement: Trips table
 
@@ -112,7 +112,7 @@ The system SHALL expose `POST /api/trips` accepting a JSON body. Required fields
 
 ### Requirement: GET /api/trips endpoint (current month)
 
-The system SHALL expose `GET /api/trips` returning trips for the current calendar month in the display timezone. Display timezone SHALL be resolved via the `date-handling` capability's `resolveDisplayTz` using the fallback chain: `end_location.timezone` → `start_location.timezone` → app config default (`DISPLAY_TZ`, default `Europe/Copenhagen`). Month bounds SHALL be computed via the `date-handling` capability's `currentMonthBoundsUtc` as inclusive start / exclusive end in UTC. The response SHALL be `200 OK` with a JSON array of trip objects, sorted by `end_time` descending. If no trips exist, the response SHALL be an empty array.
+The system SHALL expose `GET /api/trips` returning trips for the current calendar month in the display timezone. Display timezone SHALL be resolved via the `date-handling` capability's `displayTz` (returns `DISPLAY_TZ`, default `Europe/Copenhagen`). Month bounds SHALL be computed via the `date-handling` capability's `currentMonthBoundsUtc` as inclusive start / exclusive end in UTC, returned as UTC `DateTime` instances; the query layer SHALL serialize them to ISO strings for the SQL comparison. The response SHALL be `200 OK` with a JSON array of trip objects, sorted by `end_time` descending. If no trips exist, the response SHALL be an empty array.
 
 #### Scenario: Trips exist in current month
 
@@ -132,20 +132,20 @@ The system SHALL expose `GET /api/trips` returning trips for the current calenda
 - **WHEN** a `GET /api/trips` request is sent during that month
 - **THEN** the trip SHALL be included in the response
 
-### Requirement: Display timezone resolution
+### Requirement: Display timezone from environment variable
 
-The system SHALL resolve the display timezone for month-boundary computation using the `date-handling` capability's `resolveDisplayTz` function, which implements the following fallback chain: `end_location.timezone` → `start_location.timezone` → `DISPLAY_TZ` env var (default `Europe/Copenhagen`). All stored timestamps SHALL be in UTC; only display and month-boundary computation uses the resolved timezone.
+The system SHALL resolve the display timezone for month-boundary computation via the `date-handling` capability's `displayTz` function, which returns the `DISPLAY_TZ` environment variable (default `Europe/Copenhagen`). The system SHALL NOT consult location columns for timezone resolution. All stored timestamps SHALL be in UTC; only display and month-boundary computation uses the resolved timezone.
 
-#### Scenario: Location timezone takes priority
+#### Scenario: DISPLAY_TZ used for boundary computation
 
-- **GIVEN** a trip with `end_location` having `timezone=Europe/Copenhagen` and `DISPLAY_TZ=UTC`
-- **WHEN** the current month is computed for that trip
+- **GIVEN** `DISPLAY_TZ=Europe/Copenhagen`
+- **WHEN** the current month is computed
 - **THEN** the system SHALL use `Europe/Copenhagen` for boundary computation
 
-#### Scenario: Config fallback when no location
+#### Scenario: DISPLAY_TZ unset defaults to Copenhagen
 
-- **GIVEN** a trip with no `start_location_id` or `end_location_id` and `DISPLAY_TZ=Europe/Copenhagen`
-- **WHEN** the current month is computed for that trip
+- **GIVEN** `DISPLAY_TZ` is unset
+- **WHEN** the current month is computed
 - **THEN** the system SHALL use `Europe/Copenhagen` for boundary computation
 
 ### Requirement: Database migrations with dbmate
