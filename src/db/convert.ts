@@ -17,3 +17,16 @@ export function toNumber(value: string | null | undefined): number | null {
 export function toUtcDateTime(value: Date): DateTime {
 	return DateTime.fromJSDate(value, { zone: "utc" })
 }
+
+/**
+ * Convert a Luxon DateTime to an ISO string for insertion into a
+ * TIMESTAMPTZ column. Asserts the DateTime is in UTC.
+ */
+export function fromUtcDateTime(value: DateTime): string {
+	if (value.zoneName !== "UTC") {
+		throw new Error(
+			`fromUtcDateTime expected a UTC DateTime but got zone "${value.zoneName}"`
+		)
+	}
+	return value.toISO()!
+}

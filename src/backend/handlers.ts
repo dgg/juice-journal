@@ -1,5 +1,5 @@
 import { tripsQueries } from "../db/queries/trips"
-import { resolveDisplayTz, currentMonthBoundsUtc } from "../utils/dates"
+import { displayTz, currentMonthBoundsUtc } from "../utils/dates"
 import type { Context } from "hono"
 import type { TripInput } from "./types"
 import type { Env } from "../utils/logger"
@@ -33,19 +33,15 @@ export async function creationHandler(c: Context) {
 }
 
 export async function getTrips(c: Context<Env>) {
-	const displayTz = resolveDisplayTz(
-		undefined,
-		undefined,
-		process.env.DISPLAY_TZ || "Europe/Copenhagen"
-	)
+	const displayTz_ = displayTz()
 
-	const { startUtc, endUtc } = currentMonthBoundsUtc(displayTz)
+	const { startUtc, endUtc } = currentMonthBoundsUtc(displayTz_)
 
 	c.var.logger.info(
 		"Fetching trips for month [%s .. %s] (display tz: %s)",
-		startUtc,
-		endUtc,
-		displayTz
+		startUtc.toISO(),
+		endUtc.toISO(),
+		displayTz_
 	)
 
 	const trips = await tripsQueries.findTripsByMonth({ startUtc, endUtc })

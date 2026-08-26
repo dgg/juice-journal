@@ -1,6 +1,6 @@
 import { zValidator } from "@hono/zod-validator"
 import type { Context } from "hono"
-import { validator } from "hono/validator"
+import type { MiddlewareHandler } from "hono"
 import { ProblemDetailsError } from "hono-problem-details"
 import { zodProblemHook } from "hono-problem-details/zod"
 
@@ -11,7 +11,7 @@ import { tripsQueries } from "../db/queries/trips"
 import { tripInputSchema, type TripInput } from "./types"
 import { problems } from "./problems"
 
-export const creationValidator = zValidator("json", tripInputSchema, zodProblemHook({}))
+export const creationValidator = zValidator("json", tripInputSchema, zodProblemHook({})) as any
 
 export async function validateVehicle(req: TripInput): Promise<TripInput> {
 	try {
@@ -162,18 +162,12 @@ export async function validateOdometer(req: TripInput): Promise<TripInput> {
 	}
 }
 
-export const vehicleValidator = validator("json", async (req: TripInput) => {
-	return validateVehicle(req)
-})
-
-export const startLocationValidator = validator("json", async (req: TripInput) => {
-	return validateStartLocation(req)
-})
-
-export const endLocationValidator = validator("json", async (req: TripInput) => {
-	return validateEndLocation(req)
-})
-
-export const tripConflictValidator = validator("json", async (req: TripInput) => {
-	return validateTripConflict(req)
-})
+export const validateTripInput: MiddlewareHandler = async (c, next) => {
+	const req = (c as any).req.valid("json") as TripInput
+	await validateVehicle(req)
+	await validateStartLocation(req)
+	await validateEndLocation(req)
+	await validateTripConflict(req)
+	await validateOdometer(req)
+	await next()
+}

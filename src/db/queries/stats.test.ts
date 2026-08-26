@@ -4,8 +4,12 @@ import { statsQueries } from "./stats"
 import { tripsQueries } from "./trips"
 import { DateTime } from "luxon"
 
+function utcIso(s: string): DateTime {
+	return DateTime.fromISO(s, { setZone: true }).toUTC()
+}
+
 const TEST_VEHICLE_ID = "V1StGXR8_Z5jdHi6"
-const CLEANUP_TRIPS: Array<{ start: string; end: string }> = []
+const CLEANUP_TRIPS: Array<{ start: DateTime; end: DateTime }> = []
 
 beforeAll(async () => {
 	try {
@@ -21,8 +25,8 @@ afterAll(async () => {
 })
 
 async function seedTrip(opts: {
-	start: string
-	end: string
+	start: DateTime
+	end: DateTime
 	duration_min: number
 	distance_km: number
 	avg_speed_kmh?: number
@@ -45,8 +49,8 @@ describe("statsQueries", () => {
 	describe("monthlyAggregates (backwards compat)", () => {
 		it("returns null aggregates when no trips", async () => {
 			const result = await statsQueries.monthlyAggregates({
-				startUtc: "2026-01-01T00:00:00Z",
-				endUtc: "2026-02-01T00:00:00Z",
+				startUtc: utcIso("2026-01-01T00:00:00Z"),
+				endUtc: utcIso("2026-02-01T00:00:00Z"),
 				vehicleId: TEST_VEHICLE_ID
 			})
 			expect(result.avgConsumption).toBeNull()
@@ -57,8 +61,8 @@ describe("statsQueries", () => {
 		it("computes aggregates for trips in window", async () => {
 			await tripsQueries.createTrip({
 				vehicle_id: TEST_VEHICLE_ID,
-				start_time: "2026-07-10T08:00:00Z",
-				end_time: "2026-07-10T08:45:00Z",
+				start_time: utcIso("2026-07-10T08:00:00Z"),
+				end_time: utcIso("2026-07-10T08:45:00Z"),
 				daypart: "morning",
 				duration_min: 45,
 				distance_km: 15.0,
@@ -66,8 +70,8 @@ describe("statsQueries", () => {
 			})
 			await tripsQueries.createTrip({
 				vehicle_id: TEST_VEHICLE_ID,
-				start_time: "2026-07-11T08:00:00Z",
-				end_time: "2026-07-11T08:30:00Z",
+				start_time: utcIso("2026-07-11T08:00:00Z"),
+				end_time: utcIso("2026-07-11T08:30:00Z"),
 				daypart: "morning",
 				duration_min: 30,
 				distance_km: 10.0,
@@ -75,8 +79,8 @@ describe("statsQueries", () => {
 			})
 
 			const result = await statsQueries.monthlyAggregates({
-				startUtc: "2026-07-01T00:00:00Z",
-				endUtc: "2026-08-01T00:00:00Z",
+				startUtc: utcIso("2026-07-01T00:00:00Z"),
+				endUtc: utcIso("2026-08-01T00:00:00Z"),
 				vehicleId: TEST_VEHICLE_ID
 			})
 
@@ -87,8 +91,8 @@ describe("statsQueries", () => {
 
 		it("works without vehicle filter", async () => {
 			const result = await statsQueries.monthlyAggregates({
-				startUtc: "2026-07-01T00:00:00Z",
-				endUtc: "2026-08-01T00:00:00Z"
+				startUtc: utcIso("2026-07-01T00:00:00Z"),
+				endUtc: utcIso("2026-08-01T00:00:00Z")
 			})
 			expect(result.avgConsumption).not.toBeNull()
 			expect(result.avgDuration).not.toBeNull()
@@ -99,8 +103,8 @@ describe("statsQueries", () => {
 	describe("periodAggregates", () => {
 		it("returns null aggregates when no trips", async () => {
 			const result = await statsQueries.periodAggregates({
-				startUtc: "2025-01-01T00:00:00Z",
-				endUtc: "2025-02-01T00:00:00Z",
+				startUtc: utcIso("2025-01-01T00:00:00Z"),
+				endUtc: utcIso("2025-02-01T00:00:00Z"),
 				vehicleId: TEST_VEHICLE_ID
 			})
 			expect(result.avgConsumption).toBeNull()
@@ -113,16 +117,16 @@ describe("statsQueries", () => {
 
 		it("includes avgSpeed and tripCount", async () => {
 			await seedTrip({
-				start: "2026-06-01T08:00:00Z",
-				end: "2026-06-01T08:45:00Z",
+				start: utcIso("2026-06-01T08:00:00Z"),
+				end: utcIso("2026-06-01T08:45:00Z"),
 				duration_min: 45,
 				distance_km: 15.0,
 				avg_speed_kmh: 20.0,
 				avg_consumption_kwh_100km: 18.0
 			})
 			await seedTrip({
-				start: "2026-06-02T08:00:00Z",
-				end: "2026-06-02T08:30:00Z",
+				start: utcIso("2026-06-02T08:00:00Z"),
+				end: utcIso("2026-06-02T08:30:00Z"),
 				duration_min: 30,
 				distance_km: 10.0,
 				avg_speed_kmh: 40.0,
@@ -130,8 +134,8 @@ describe("statsQueries", () => {
 			})
 
 			const result = await statsQueries.periodAggregates({
-				startUtc: "2026-06-01T00:00:00Z",
-				endUtc: "2026-07-01T00:00:00Z",
+				startUtc: utcIso("2026-06-01T00:00:00Z"),
+				endUtc: utcIso("2026-07-01T00:00:00Z"),
 				vehicleId: TEST_VEHICLE_ID
 			})
 
@@ -146,8 +150,8 @@ describe("statsQueries", () => {
 	describe("periodSeries", () => {
 		it("returns per-trip rows for bucket=trip", async () => {
 			const series = await statsQueries.periodSeries({
-				startUtc: "2026-06-01T00:00:00Z",
-				endUtc: "2026-07-01T00:00:00Z",
+				startUtc: utcIso("2026-06-01T00:00:00Z"),
+				endUtc: utcIso("2026-07-01T00:00:00Z"),
 				vehicleId: TEST_VEHICLE_ID,
 				bucket: "trip"
 			})
@@ -161,8 +165,8 @@ describe("statsQueries", () => {
 
 		it("returns bucketed rows for bucket=month", async () => {
 			const series = await statsQueries.periodSeries({
-				startUtc: "2026-06-01T00:00:00Z",
-				endUtc: "2026-07-01T00:00:00Z",
+				startUtc: utcIso("2026-06-01T00:00:00Z"),
+				endUtc: utcIso("2026-07-01T00:00:00Z"),
 				vehicleId: TEST_VEHICLE_ID,
 				bucket: "month"
 			})
@@ -178,8 +182,8 @@ describe("statsQueries", () => {
 
 		it("returns bucketed rows for bucket=week", async () => {
 			const series = await statsQueries.periodSeries({
-				startUtc: "2026-06-01T00:00:00Z",
-				endUtc: "2026-07-01T00:00:00Z",
+				startUtc: utcIso("2026-06-01T00:00:00Z"),
+				endUtc: utcIso("2026-07-01T00:00:00Z"),
 				vehicleId: TEST_VEHICLE_ID,
 				bucket: "week"
 			})
@@ -192,8 +196,8 @@ describe("statsQueries", () => {
 
 		it("returns empty array for empty period", async () => {
 			const series = await statsQueries.periodSeries({
-				startUtc: "2025-01-01T00:00:00Z",
-				endUtc: "2025-02-01T00:00:00Z",
+				startUtc: utcIso("2025-01-01T00:00:00Z"),
+				endUtc: utcIso("2025-02-01T00:00:00Z"),
 				vehicleId: TEST_VEHICLE_ID,
 				bucket: "trip"
 			})

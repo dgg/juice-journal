@@ -1,7 +1,7 @@
 import { tripsQueries } from "../db/queries/trips"
 import { statsQueries } from "../db/queries/stats"
 import { vehiclesQueries } from "../db/queries/vehicles"
-import { resolveDisplayTz, periodBoundsUtc } from "../utils/dates"
+import { displayTz, periodBoundsUtc } from "../utils/dates"
 import { formatDurationHm } from "../utils/format"
 import type { Context } from "hono"
 import type { Env } from "../utils/logger"
@@ -265,14 +265,10 @@ export async function statsHandler(c: Context<Env>) {
 	if ("error" in parsed) return parsed.error
 
 	const { period, yearGranularity, date } = parsed
-	const displayTz = resolveDisplayTz(
-		undefined,
-		undefined,
-		process.env.DISPLAY_TZ || "Europe/Copenhagen"
-	)
-	const now = resolveAnchor(date, period, displayTz)
+	const displayTz_ = displayTz()
+	const now = resolveAnchor(date, period, displayTz_)
 
-	const view = await computeStatsView({ period, yearGranularity, displayTz, now })
+	const view = await computeStatsView({ period, yearGranularity, displayTz: displayTz_, now })
 
 	return c.html(<StatsPage data={view} />)
 }
@@ -282,14 +278,10 @@ export async function getPartialTripStats(c: Context<Env>) {
 	if ("error" in parsed) return parsed.error
 
 	const { period, yearGranularity, date } = parsed
-	const displayTz = resolveDisplayTz(
-		undefined,
-		undefined,
-		process.env.DISPLAY_TZ || "Europe/Copenhagen"
-	)
-	const now = resolveAnchor(date, period, displayTz)
+	const displayTz_ = displayTz()
+	const now = resolveAnchor(date, period, displayTz_)
 
-	const view = await computeStatsView({ period, yearGranularity, displayTz, now })
+	const view = await computeStatsView({ period, yearGranularity, displayTz: displayTz_, now })
 
 	return c.html(<StatsChartsFragment data={view} />)
 }

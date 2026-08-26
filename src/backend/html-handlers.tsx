@@ -3,14 +3,14 @@ import { vehiclesQueries } from "../db/queries/vehicles"
 import { locationsQueries } from "../db/queries/locations"
 import { statsQueries } from "../db/queries/stats"
 import {
-	resolveDisplayTz,
+	displayTz,
 	currentMonthBoundsUtc,
 	prevMonthBoundsUtc
 } from "../utils/dates"
 import type { Context } from "hono"
 import type { Env } from "../utils/logger"
 import { DateTime } from "luxon"
-import { tripInputSchema, type TripInput } from "./types"
+import { tripInputSchema, type TripInput, type TripInputRaw } from "./types"
 import {
 	validateVehicle,
 	validateStartLocation,
@@ -24,13 +24,9 @@ import { StatsSummaryGrid } from "../frontend/fragments/StatsSummaryGrid"
 import { formatDurationHm } from "../utils/format"
 
 export async function getTripFormPage(c: Context<Env>) {
-	const displayTz = resolveDisplayTz(
-		undefined,
-		undefined,
-		process.env.DISPLAY_TZ || "Europe/Copenhagen"
-	)
+	const displayTz_ = displayTz()
 
-	const now = DateTime.now().setZone(displayTz)
+	const now = DateTime.now().setZone(displayTz_)
 	const nowDate = now.toFormat("yyyy-MM-dd")
 	const nowTime = now.toFormat("HH:mm")
 
@@ -69,14 +65,10 @@ export async function getTripFormPage(c: Context<Env>) {
 }
 
 export async function getPartialTrips(c: Context<Env>) {
-	const displayTz = resolveDisplayTz(
-		undefined,
-		undefined,
-		process.env.DISPLAY_TZ || "Europe/Copenhagen"
-	)
+	const displayTz_ = displayTz()
 
 	const now = DateTime.now()
-	const { startUtc, endUtc } = currentMonthBoundsUtc(displayTz, now)
+	const { startUtc, endUtc } = currentMonthBoundsUtc(displayTz_, now)
 
 	const vehicleId = await tripsQueries.findLatestTripVehicleId()
 	const tripsResult = await tripsQueries.findTripsWithLocations({
@@ -87,8 +79,8 @@ export async function getPartialTrips(c: Context<Env>) {
 
 	const trips = tripsResult.map((trip) => ({
 		id: trip.id,
-		startTime: new Date(trip.start_time.toISO() as string),
-		endTime: new Date(trip.end_time.toISO() as string),
+		startTime: trip.start_time.toJSDate(),
+		endTime: trip.end_time.toJSDate(),
 		daypart: trip.daypart,
 		durationMin: trip.duration_min,
 		distanceKm: trip.distance_km,
@@ -103,16 +95,12 @@ export async function getPartialTrips(c: Context<Env>) {
 }
 
 export async function getPartialStats(c: Context<Env>) {
-	const displayTz = resolveDisplayTz(
-		undefined,
-		undefined,
-		process.env.DISPLAY_TZ || "Europe/Copenhagen"
-	)
+	const displayTz_ = displayTz()
 
 	const now = DateTime.now()
-	const { startUtc, endUtc } = currentMonthBoundsUtc(displayTz, now)
+	const { startUtc, endUtc } = currentMonthBoundsUtc(displayTz_, now)
 	const { startUtc: prevStartUtc, endUtc: prevEndUtc } = prevMonthBoundsUtc(
-		displayTz,
+		displayTz_,
 		now
 	)
 
@@ -161,14 +149,14 @@ interface FormBody {
 	end_location_id?: string
 }
 
-function parseFormTripInput(body: FormBody): TripInput {
+function parseFormTripInput(body: FormBody): TripInputRaw {
 	const displayTz = process.env.DISPLAY_TZ || "Europe/Copenhagen"
 	const startDt = DateTime.fromISO(`${body.trip_date}T${body.start_time}`, {
 		zone: displayTz
-	}).toUTC()
+	})
 	const endDt = DateTime.fromISO(`${body.trip_date}T${body.end_time}`, {
 		zone: displayTz
-	}).toUTC()
+	})
 
 	const durationMin = Math.round(endDt.diff(startDt, "minutes").minutes)
 

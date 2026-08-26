@@ -1,12 +1,17 @@
 import { z } from "zod"
+import { DateTime } from "luxon"
 
 export const tripInputSchema = z.object({
 	vehicle_id: z
 		.string()
 		.length(16)
 		.regex(/^[A-Za-z0-9_-]{16}$/),
-	start_time: z.iso.datetime({offset: true}),
-	end_time: z.iso.datetime({offset: true}),
+	start_time: z.iso.datetime({ offset: true }).transform((s) =>
+		DateTime.fromISO(s, { setZone: true }).toUTC()
+	),
+	end_time: z.iso.datetime({ offset: true }).transform((s) =>
+		DateTime.fromISO(s, { setZone: true }).toUTC()
+	),
 	daypart: z.enum(["morning", "afternoon"]),
 	duration_min: z.number().int().positive(),
 	distance_km: z.number().positive(),
@@ -25,12 +30,5 @@ export const tripInputSchema = z.object({
 	odometer_km: z.number().optional()
 })
 
-export type TripInput = z.infer<typeof tripInputSchema>
-
-export interface Trip extends TripInput {
-	id: string
-	weather_start?: object
-	weather_end?: object
-	tracking_created: string
-	tracking_updated: string
-}
+export type TripInput = z.output<typeof tripInputSchema>
+export type TripInputRaw = z.input<typeof tripInputSchema>
