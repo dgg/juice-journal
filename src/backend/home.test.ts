@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from "bun:test"
-import { db } from "../db/client"
+import { db } from "./db/client"
 import { sql, SQL } from "bun"
 import { homeHandler } from "./home.tsx"
 import {

@@ -35,10 +35,10 @@ describe("TripRow", () => {
 		expect(html).toContain('value="0.4"')
 		expect(html).toContain('value="80"')
 		expect(html).toContain('value="7"')
-		expect(html).toContain('<small class="pill__unit">mm</small>')
+		expect(html).toContain('<small class=\"pill__unit\"> mm</small>')
 		expect(html).toContain('<small class="pill__unit">%</small>')
 		expect(html).toContain('<span class="pill__unit">°</span>')
-		expect(html).toContain('<small class="pill__unit">m/s</small>')
+		expect(html).toContain('<small class="pill__unit"> m/s</small>')
 	})
 
 	it("does not render weather pill when weatherStart is null", () => {

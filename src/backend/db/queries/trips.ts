@@ -1,9 +1,11 @@
 import { DateTime } from "luxon"
+
+import { locationsQueries } from "./locations"
+
 import { db } from "../client"
 import { toNumber, toUtcDateTime, fromUtcDateTime } from "../convert"
-import type { TripInput } from "../../backend/types"
-import { locationsQueries } from "./locations"
-import { storeWeather, type WeatherParam } from "../../backend/weather/storage"
+import type { TripInput } from "../../types"
+import { storeWeather, type WeatherParam } from "../../weather/storage"
 
 export interface TripRow {
 	id: string

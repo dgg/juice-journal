@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "bun:test"
-import { db } from "../db/client"
+import { db } from "./db/client"
 import { getTrips } from "./handlers"
 import { DateTime } from "luxon"
 
