@@ -14,6 +14,7 @@ interface Trip {
 	odometerKm: number | null
 	startLocation: string | null
 	endLocation: string | null
+	weatherStart: object | null
 }
 
 export const TripListFragment: FC<{ trips: Trip[]; hasTrips: boolean }> = ({

@@ -2,11 +2,7 @@ import { tripsQueries } from "../db/queries/trips"
 import { vehiclesQueries } from "../db/queries/vehicles"
 import { locationsQueries } from "../db/queries/locations"
 import { statsQueries } from "../db/queries/stats"
-import {
-	displayTz,
-	currentMonthBoundsUtc,
-	prevMonthBoundsUtc
-} from "../utils/dates"
+import { displayTz, currentMonthBoundsUtc, prevMonthBoundsUtc } from "../utils/dates"
 import type { Context } from "hono"
 import type { Env } from "../utils/logger"
 import { DateTime } from "luxon"
@@ -88,7 +84,8 @@ export async function getPartialTrips(c: Context<Env>) {
 		avgConsumptionKwh100km: trip.avg_consumption_kwh_100km,
 		odometerKm: trip.odometer_km,
 		startLocation: trip.start_location,
-		endLocation: trip.end_location
+		endLocation: trip.end_location,
+		weatherStart: trip.weatherStart
 	}))
 
 	return c.html(<TripListFragment trips={trips} hasTrips={trips.length > 0} />)
@@ -106,33 +103,45 @@ export async function getPartialStats(c: Context<Env>) {
 
 	const vehicleId = await tripsQueries.findLatestTripVehicleId()
 
-const currentStats = await statsQueries.periodAggregates({
-			startUtc,
-			endUtc,
-			vehicleId: vehicleId ?? undefined
-		})
+	const currentStats = await statsQueries.periodAggregates({
+		startUtc,
+		endUtc,
+		vehicleId: vehicleId ?? undefined
+	})
 
-		const prevStats = await statsQueries.periodAggregates({
-			startUtc: prevStartUtc,
-			endUtc: prevEndUtc,
-			vehicleId: vehicleId ?? undefined
-		})
+	const prevStats = await statsQueries.periodAggregates({
+		startUtc: prevStartUtc,
+		endUtc: prevEndUtc,
+		vehicleId: vehicleId ?? undefined
+	})
 
-		return c.html(
-			<StatsSummaryGrid
-				data={{
-					totalDistance: { value: currentStats.totalDistance, prev: prevStats.totalDistance },
-					totalTime: { value: currentStats.totalDuration, prev: prevStats.totalDuration },
-					totalTimeHm: formatDurationHm(currentStats.totalDuration),
-					avgSpeed: { value: currentStats.avgSpeed, prev: prevStats.avgSpeed },
-					avgDuration: { value: currentStats.avgDuration, prev: prevStats.avgDuration },
-					avgDurationHm: formatDurationHm(currentStats.avgDuration),
-					avgConsumption: { value: currentStats.avgConsumption, prev: prevStats.avgConsumption },
-					tripCount: { value: currentStats.tripCount, prev: prevStats.tripCount },
-					period: "month" as const
-				}}
-			/>
-		)
+	return c.html(
+		<StatsSummaryGrid
+			data={{
+				totalDistance: {
+					value: currentStats.totalDistance,
+					prev: prevStats.totalDistance
+				},
+				totalTime: {
+					value: currentStats.totalDuration,
+					prev: prevStats.totalDuration
+				},
+				totalTimeHm: formatDurationHm(currentStats.totalDuration),
+				avgSpeed: { value: currentStats.avgSpeed, prev: prevStats.avgSpeed },
+				avgDuration: {
+					value: currentStats.avgDuration,
+					prev: prevStats.avgDuration
+				},
+				avgDurationHm: formatDurationHm(currentStats.avgDuration),
+				avgConsumption: {
+					value: currentStats.avgConsumption,
+					prev: prevStats.avgConsumption
+				},
+				tripCount: { value: currentStats.tripCount, prev: prevStats.tripCount },
+				period: "month" as const
+			}}
+		/>
+	)
 }
 
 interface FormBody {

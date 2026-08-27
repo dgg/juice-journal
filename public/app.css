@@ -503,7 +503,10 @@ small.badge {
 	max-width: 10rem;
 	font-size: 0.875rem;
 	padding: 0.3rem 0.5rem;
-	height: calc(1rem * var(--pico-line-height) + var(--pico-form-element-spacing-vertical) * 2 + var(--pico-border-width) * 2);
+	height: calc(
+		1rem * var(--pico-line-height) + var(--pico-form-element-spacing-vertical) * 2 +
+			var(--pico-border-width) * 2
+	);
 }
 
 @media (max-width: 768px) {
@@ -519,4 +522,75 @@ small.badge {
 		font-size: 1rem;
 		padding: 0.4rem 0.5rem;
 	}
+}
+
+/* ── Wind direction arrows ── */
+
+.trip-detail-pill .icon-mouse-pointer-2 {
+	font-size: 0.7rem;
+	display: inline-block;
+}
+
+.wind-from-se {
+	-webkit-transform: rotate(0deg);
+	-moz-transform: rotate(0deg);
+	-ms-transform: rotate(0deg);
+	-o-transform: rotate(0deg);
+	transform: rotate(0deg);
+}
+
+.wind-from-s {
+	-webkit-transform: rotate(45deg);
+	-moz-transform: rotate(45deg);
+	-ms-transform: rotate(45deg);
+	-o-transform: rotate(45deg);
+	transform: rotate(45deg);
+}
+
+.wind-from-sw {
+	-webkit-transform: rotate(90deg);
+	-moz-transform: rotate(90deg);
+	-ms-transform: rotate(90deg);
+	-o-transform: rotate(90deg);
+	transform: rotate(90deg);
+}
+
+.wind-from-w {
+	-webkit-transform: rotate(135deg);
+	-moz-transform: rotate(135deg);
+	-ms-transform: rotate(135deg);
+	-o-transform: rotate(135deg);
+	transform: rotate(135deg);
+}
+
+.wind-from-nw {
+	-webkit-transform: rotate(180deg);
+	-moz-transform: rotate(180deg);
+	-ms-transform: rotate(180deg);
+	-o-transform: rotate(180deg);
+	transform: rotate(180deg);
+}
+
+.wind-from-n {
+	-webkit-transform: rotate(225deg);
+	-moz-transform: rotate(225deg);
+	-ms-transform: rotate(225deg);
+	-o-transform: rotate(225deg);
+	transform: rotate(225deg);
+}
+
+.wind-from-ne {
+	-webkit-transform: rotate(270deg);
+	-moz-transform: rotate(270deg);
+	-ms-transform: rotate(270deg);
+	-o-transform: rotate(270deg);
+	transform: rotate(270deg);
+}
+
+.wind-from-e {
+	-webkit-transform: rotate(315deg);
+	-moz-transform: rotate(315deg);
+	-ms-transform: rotate(315deg);
+	-o-transform: rotate(315deg);
+	transform: rotate(315deg);
 }
