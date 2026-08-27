@@ -3,7 +3,7 @@ import { requestId } from "hono/request-id"
 import { structuredLogger } from "@hono/structured-logger"
 import { problemDetailsHandler } from "hono-problem-details"
 import { rootLogger, type Env } from "./utils/logger.ts"
-import { creationHandler, getTrips } from "./handlers"
+import { creationHandler } from "./handlers"
 import { homeHandler } from "./home.tsx"
 import { statsHandler, getPartialTripStats } from "./stats.tsx"
 import {
@@ -58,7 +58,6 @@ app.get("/api/health", (c) => c.json({ status: "ok" }))
 		creationHandler
 	)
 	.post("/trips", htmlCreationHandler)
-	.get("/api/trips", getTrips)
 
 rootLogger.info({ port: PORT }, "Server listening on port")
 
