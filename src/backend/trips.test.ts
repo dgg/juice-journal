@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "bun:test"
-import { db } from "../db/client"
+import { db } from "./db/client"
 
 const TEST_VEHICLE_ID = "V1StGXR8_Z5jdHi6"
 const TEST_LOCATION_ID = "Bw_0wK4q2xJp5m7n"

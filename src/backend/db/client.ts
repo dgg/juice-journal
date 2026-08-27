@@ -1,4 +1,5 @@
 import { SQL } from "bun"
+
 import { rootLogger } from "../utils/logger"
 
 const DATABASE_URL = process.env.DATABASE_URL

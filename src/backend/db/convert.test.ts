@@ -1,6 +1,6 @@
 import { describe, it, expect } from "bun:test"
+
 import { toNumber, toUtcDateTime } from "./convert"
-import { DateTime } from "luxon"
 
 describe("convert", () => {
 	describe("toNumber", () => {

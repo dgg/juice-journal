@@ -1,9 +1,9 @@
-import { rootLogger } from "../../utils/logger"
+import { rootLogger } from "../utils/logger"
 
 import { fetchWeather, WeatherFetchError } from "./fetcher"
 import { type WeatherParam } from "./types"
 
-import { tripsQueries } from "../../db/queries/trips"
+import { tripsQueries } from "../db/queries/trips"
 
 const RETRY_DELAYS = [5_000, 30_000]
 const MAX_RETRIES = 2

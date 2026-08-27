@@ -1,14 +1,15 @@
-import { zValidator } from "@hono/zod-validator"
-import type { Context } from "hono"
 import type { MiddlewareHandler } from "hono"
 import { ProblemDetailsError } from "hono-problem-details"
 import { zodProblemHook } from "hono-problem-details/zod"
 
-import { vehiclesQueries } from "../db/queries/vehicles"
-import { locationsQueries } from "../db/queries/locations"
-import { tripsQueries } from "../db/queries/trips"
+import { zValidator } from "@hono/zod-validator"
+
+import { vehiclesQueries } from "./db/queries/vehicles"
+import { locationsQueries } from "./db/queries/locations"
+import { tripsQueries } from "./db/queries/trips"
 
 import { tripInputSchema, type TripInput } from "./types"
+
 import { problems } from "./problems"
 
 export const creationValidator = zValidator("json", tripInputSchema, zodProblemHook({})) as any
