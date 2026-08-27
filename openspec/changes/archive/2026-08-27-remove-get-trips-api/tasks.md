@@ -16,4 +16,4 @@
 
 - [x] 4.1 Verify the server builds and starts
 - [x] 4.2 Run `bun test` to ensure no test breakage
-- [ ] 4.3 Commit with `feat!: remove GET /api/trips endpoint`
+- [x] 4.3 Commit with `feat!: remove GET /api/trips endpoint`
