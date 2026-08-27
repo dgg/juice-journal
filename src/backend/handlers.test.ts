@@ -59,7 +59,7 @@ describe.skip("GET /api/trips (month window with Luxon)", () => {
 
 		// Should return trips
 		expect(result.status).toBe(200)
-		const trips = result.data
+		const trips = result._data
 
 		// Filter to just our test trips
 		const testTrips = trips.filter((t: any) => t.vehicle_id === TEST_VEHICLE_ID)
@@ -84,7 +84,7 @@ describe.skip("GET /api/trips (month window with Luxon)", () => {
 
 		const mockCtx = createMockContext()
 		const result = await getTrips(mockCtx as any)
-		const trips = result.data
+		const trips = result._data
 
 		// Find trips in the result
 		const testTrips = trips.filter((t: any) => t.vehicle_id === TEST_VEHICLE_ID)
@@ -110,7 +110,7 @@ describe.skip("GET /api/trips (month window with Luxon)", () => {
 
 		const mockCtx = createMockContext()
 		const result = await getTrips(mockCtx as any)
-		const trips = result.data
+		const trips = result._data
 
 		// Find our test trip
 		const testTrip = trips.find((t: any) => t.id === tripResult[0].id)
@@ -133,7 +133,7 @@ describe.skip("GET /api/trips (month window with Luxon)", () => {
 
 			// Should return 200 OK with array
 			expect(result.status).toBe(200)
-			expect(Array.isArray(result.data)).toBe(true)
+			expect(Array.isArray(result._data)).toBe(true)
 		} finally {
 			await db`DELETE FROM vehicles WHERE id = ${emptyVehicleId}`
 		}
