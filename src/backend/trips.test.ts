@@ -191,7 +191,7 @@ describe("Trips API Database", () => {
             10.0
           )
         `
-				expect.fail("Should have thrown enum validation error")
+				expect().fail("Should have thrown enum validation error")
 			} catch (error) {
 				const errorMsg = String(error)
 				expect(errorMsg.includes("invalid") || errorMsg.includes("enum")).toBe(
@@ -243,7 +243,7 @@ describe("Trips API Database", () => {
             10.0
           )
         `
-				expect.fail("Should have thrown unique constraint violation")
+				expect().fail("Should have thrown unique constraint violation")
 			} catch (error) {
 				const errorMsg = String(error)
 				expect(
@@ -276,7 +276,7 @@ describe("Trips API Database", () => {
             10.0
           )
         `
-				expect.fail("Should have thrown foreign key constraint")
+				expect().fail("Should have thrown foreign key constraint")
 			} catch (error) {
 				const errorMsg = String(error)
 				expect(errorMsg.includes("foreign key") || errorMsg.includes("Key")).toBe(
@@ -307,7 +307,7 @@ describe("Trips API Database", () => {
             'invalid-test-id4'
           )
         `
-				expect.fail("Should have thrown foreign key constraint")
+				expect().fail("Should have thrown foreign key constraint")
 			} catch (error) {
 				const errorMsg = String(error)
 				expect(errorMsg.includes("foreign key") || errorMsg.includes("Key")).toBe(

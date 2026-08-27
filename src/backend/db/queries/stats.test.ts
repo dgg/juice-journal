@@ -2,9 +2,9 @@ import { describe, it, expect, beforeAll, afterAll } from "bun:test"
 import { db } from "../client"
 import { statsQueries } from "./stats"
 import { tripsQueries } from "./trips"
-import { DateTime } from "luxon"
+import { DateTime, type DateTimeMaybeValid } from "luxon"
 
-function utcIso(s: string): DateTime {
+function utcIso(s: string): DateTimeMaybeValid {
 	return DateTime.fromISO(s, { setZone: true }).toUTC()
 }
 
@@ -25,8 +25,8 @@ afterAll(async () => {
 })*/
 
 async function seedTrip(opts: {
-	start: DateTime
-	end: DateTime
+	start: DateTimeMaybeValid
+	end: DateTimeMaybeValid
 	duration_min: number
 	distance_km: number
 	avg_speed_kmh?: number

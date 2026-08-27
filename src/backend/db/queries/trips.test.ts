@@ -3,9 +3,9 @@ import { db } from "../client"
 import { tripsQueries } from "./trips"
 import { vehiclesQueries } from "./vehicles"
 import { locationsQueries } from "./locations"
-import { DateTime } from "luxon"
+import { DateTime, type DateTimeMaybeValid } from "luxon"
 
-function utcIso(s: string): DateTime {
+function utcIso(s: string): DateTimeMaybeValid {
 	return DateTime.fromISO(s, { setZone: true }).toUTC()
 }
 
@@ -82,7 +82,7 @@ describe.skip("tripsQueries", () => {
 
 			const testTrips = trips.filter((t) => t.vehicle_id === TEST_VEHICLE_ID)
 			expect(testTrips.length).toBeGreaterThanOrEqual(1)
-			expect(testTrips[0].end_time).toBeInstanceOf(DateTime)
+			expect(testTrips[0]?.end_time).toBeInstanceOf(DateTime)
 		})
 	})
 
@@ -143,9 +143,9 @@ describe.skip("tripsQueries", () => {
 
 			const testTrips = trips.filter((t) => t.id)
 			expect(testTrips.length).toBeGreaterThanOrEqual(1)
-			expect(testTrips[0].start_location).toBe("Home")
-			expect(testTrips[0].end_location).toBe("Home")
-			expect(testTrips[0].start_time).toBeInstanceOf(DateTime)
+			expect(testTrips[0]?.start_location).toBe("Home")
+			expect(testTrips[0]?.end_location).toBe("Home")
+			expect(testTrips[0]?.start_time).toBeInstanceOf(DateTime)
 		})
 	})
 })
