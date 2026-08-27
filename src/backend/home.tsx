@@ -1,8 +1,4 @@
-import {
-	displayTz,
-	currentMonthBoundsUtc,
-	prevMonthBoundsUtc
-} from "../utils/dates"
+import { displayTz, currentMonthBoundsUtc, prevMonthBoundsUtc } from "../utils/dates"
 import { formatDurationHm } from "../utils/format"
 import { tripsQueries } from "../db/queries/trips"
 import { vehiclesQueries } from "../db/queries/vehicles"
@@ -41,6 +37,7 @@ interface HomeData {
 		odometerKm: number | null
 		startLocation: string | null
 		endLocation: string | null
+		weatherStart: object | null
 	}>
 	hasTrips: boolean
 }
@@ -94,7 +91,8 @@ export async function homeHandler(c: Context<Env>) {
 		avgConsumptionKwh100km: trip.avg_consumption_kwh_100km,
 		odometerKm: trip.odometer_km,
 		startLocation: trip.start_location,
-		endLocation: trip.end_location
+		endLocation: trip.end_location,
+		weatherStart: trip.weatherStart
 	}))
 
 	const hasTrips = trips.length > 0
@@ -103,13 +101,22 @@ export async function homeHandler(c: Context<Env>) {
 		vehicle: vehicle ? { id: vehicle.id, description: vehicle.description } : null,
 		monthLabel,
 		stats: {
-			totalDistance: { value: currentStats.totalDistance, prev: prevStats.totalDistance },
-			totalTime: { value: currentStats.totalDuration, prev: prevStats.totalDuration },
+			totalDistance: {
+				value: currentStats.totalDistance,
+				prev: prevStats.totalDistance
+			},
+			totalTime: {
+				value: currentStats.totalDuration,
+				prev: prevStats.totalDuration
+			},
 			totalTimeHm: formatDurationHm(currentStats.totalDuration),
 			avgSpeed: { value: currentStats.avgSpeed, prev: prevStats.avgSpeed },
 			avgDuration: { value: currentStats.avgDuration, prev: prevStats.avgDuration },
 			avgDurationHm: formatDurationHm(currentStats.avgDuration),
-			avgConsumption: { value: currentStats.avgConsumption, prev: prevStats.avgConsumption },
+			avgConsumption: {
+				value: currentStats.avgConsumption,
+				prev: prevStats.avgConsumption
+			},
 			tripCount: { value: currentStats.tripCount, prev: prevStats.tripCount },
 			period: "month"
 		},

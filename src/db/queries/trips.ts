@@ -36,6 +36,7 @@ export interface TripWithLocationRow {
 	odometer_km: number | null
 	start_location: string | null
 	end_location: string | null
+	weatherStart: object | null
 }
 
 function mapTripRow(raw: Record<string, unknown>): TripRow {
@@ -75,7 +76,8 @@ function mapTripWithLocationRow(raw: Record<string, unknown>): TripWithLocationR
 		),
 		odometer_km: toNumber(raw.odometer_km as string | null),
 		start_location: (raw.start_location as string | null) ?? null,
-		end_location: (raw.end_location as string | null) ?? null
+		end_location: (raw.end_location as string | null) ?? null,
+		weatherStart: (raw.weather_start as object | null) ?? null
 	}
 }
 
@@ -252,6 +254,7 @@ export const tripsQueries = {
 					t.avg_speed_kmh,
 					t.avg_consumption_kwh_100km,
 					t.odometer_km,
+					t.weather_start,
 					start_loc.label as start_location,
 					end_loc.label as end_location
 				FROM trips t
@@ -273,6 +276,7 @@ export const tripsQueries = {
 					t.avg_speed_kmh,
 					t.avg_consumption_kwh_100km,
 					t.odometer_km,
+					t.weather_start,
 					start_loc.label as start_location,
 					end_loc.label as end_location
 				FROM trips t

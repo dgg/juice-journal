@@ -1,5 +1,17 @@
 import type { FC } from "hono/jsx"
 import { formatNumber } from "../format"
+import { weatherCodeToIcon, windDirectionToClass } from "../weather/display"
+
+interface WeatherData {
+	weatherCode: number | null
+	temperature: number | null
+	humidity: number | null
+	precipitation: number | null
+	wind: {
+		speed: number | null
+		direction: number | null
+	}
+}
 
 interface Trip {
 	id: string
@@ -13,6 +25,7 @@ interface Trip {
 	odometerKm: number | null
 	startLocation: string | null
 	endLocation: string | null
+	weatherStart: object | null
 }
 
 export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
@@ -82,8 +95,10 @@ export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
 					<dt class="sr-only">Duration</dt>
 					<dd class="trip-detail-pill">
 						<span class="icon-hourglass" aria-hidden="true"></span>
-						<data value={trip.durationMin}>{trip.durationMin}</data>
-						<small class="pill__unit">min</small>
+						<data value={trip.durationMin}>
+							{trip.durationMin}
+							<small class="pill__unit">&nbsp;min</small>
+						</data>
 					</dd>
 					{trip.avgSpeedKmh !== null && (
 						<>
@@ -92,8 +107,8 @@ export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
 								<span class="icon-gauge" aria-hidden="true"></span>
 								<data value={trip.avgSpeedKmh}>
 									{formatNumber(trip.avgSpeedKmh, 0)}
+									<small class="pill__unit">&nbsp;km/h</small>
 								</data>
-								<small class="pill__unit">km/h</small>
 							</dd>
 						</>
 					)}
@@ -104,8 +119,8 @@ export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
 								<span class="icon-circle-gauge" aria-hidden="true"></span>
 								<data value={trip.odometerKm}>
 									{formatNumber(trip.odometerKm, 1)}
+									<small class="pill__unit">&nbsp;km</small>
 								</data>
-								<small class="pill__unit">km</small>
 							</dd>
 						</>
 					)}
@@ -133,6 +148,53 @@ export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
 							</dd>
 						</>
 					) : null}
+					{trip.weatherStart &&
+						(() => {
+							const w = trip.weatherStart as WeatherData
+							const windClass = windDirectionToClass(w.wind.direction)
+							return (
+								<>
+									<dt class="sr-only">Weather</dt>
+									<dd class="trip-detail-pill">
+										<span
+											class={weatherCodeToIcon(w.weatherCode)}
+											aria-hidden="true"
+										></span>
+										<data value={w.temperature ?? ""}>
+											{formatNumber(w.temperature, 0)}
+											<span class="pill__unit">°</span>
+										</data>
+										<span
+											class="icon-umbrella"
+											aria-hidden="true"
+										></span>
+										<data value={w.precipitation ?? ""}>
+											{formatNumber(w.precipitation, 1)}
+											<small class="pill__unit">&nbsp;mm</small>
+										</data>
+										<span
+											class="icon-droplets"
+											aria-hidden="true"
+										></span>
+										<data value={w.humidity ?? ""}>
+											{formatNumber(w.humidity, 0)}
+											<small class="pill__unit">%</small>
+										</data>
+										<span class="icon-wind" aria-hidden="true"></span>
+										{windClass && (
+											<span
+												class={`icon-mouse-pointer-2 ${windClass}`}
+												aria-hidden="true"
+											></span>
+										)}
+										<data value={w.wind.speed ?? ""}>
+											{formatNumber(w.wind.speed, 0)}
+											<small class="pill__unit">&nbsp;m/s</small>
+										</data>
+									</dd>
+								</>
+							)
+						})()}
 				</dl>
 			</div>
 		</details>

@@ -18,6 +18,7 @@ interface Trip {
 	odometerKm: number | null
 	startLocation: string | null
 	endLocation: string | null
+	weatherStart: object | null
 }
 
 interface HomePageData {
