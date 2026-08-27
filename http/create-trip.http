@@ -3,8 +3,8 @@ Content-Type: application/json
 
 {
 	"vehicle_id": "6s66iyKtw4hC_h54",
-	"start_time": "2026-08-22T13:02:46Z",
-	"end_time": "2026-08-22T13:57:43Z",
+	"start_time": "2026-08-23T13:02:46Z",
+	"end_time": "2026-08-23T13:57:43Z",
 	"daypart": "afternoon",
 	"duration_min": 4,
 	"distance_km": 66,

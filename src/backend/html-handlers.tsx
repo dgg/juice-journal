@@ -17,7 +17,7 @@ import {
 	validateEndLocation,
 	validateTripConflict,
 	validateOdometer
-} from "./validators"
+} from "./api/validators"
 
 import { TripFormPage } from "../frontend/pages/TripFormPage"
 import { TripListFragment } from "../frontend/fragments/TripListFragment"

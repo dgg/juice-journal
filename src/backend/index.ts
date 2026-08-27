@@ -3,7 +3,9 @@ import { requestId } from "hono/request-id"
 import { structuredLogger } from "@hono/structured-logger"
 import { problemDetailsHandler } from "hono-problem-details"
 import { rootLogger, type Env } from "./utils/logger.ts"
-import { creationHandler } from "./handlers"
+
+import { apiTrips } from "./api/trips.ts"
+
 import { homeHandler } from "./home.tsx"
 import { statsHandler, getPartialTripStats } from "./stats.tsx"
 import {
@@ -12,10 +14,6 @@ import {
 	getPartialStats,
 	htmlCreationHandler
 } from "./html-handlers.tsx"
-import {
-	creationValidator,
-	validateTripInput
-} from "./validators"
 
 const app = new Hono<Env>()
 
@@ -43,20 +41,15 @@ app.get("/static/*", async (c) => {
 	return new Response(file)
 })
 
-app.get("/api/health", (c) => c.json({ status: "ok" }))
+app
+	.route("/api", apiTrips)
+	// htmx handlers
 	.get("/", homeHandler)
 	.get("/trips/new", getTripFormPage)
 	.get("/partials/trips", getPartialTrips)
 	.get("/partials/stats", getPartialStats)
 	.get("/partials/trip-stats", getPartialTripStats)
 	.get("/stats", statsHandler)
-	// Trips routes
-	.post(
-		"/api/trips",
-		creationValidator,
-		validateTripInput,
-		creationHandler
-	)
 	.post("/trips", htmlCreationHandler)
 
 rootLogger.info({ port: PORT }, "Server listening on port")

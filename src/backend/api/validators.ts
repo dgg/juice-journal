@@ -1,31 +1,30 @@
-import type { MiddlewareHandler } from "hono"
 import { ProblemDetailsError } from "hono-problem-details"
-import { zodProblemHook } from "hono-problem-details/zod"
 
-import { zValidator } from "@hono/zod-validator"
+import { vehiclesQueries } from "../db/queries/vehicles"
+import { locationsQueries } from "../db/queries/locations"
+import { tripsQueries } from "../db/queries/trips"
 
-import { vehiclesQueries } from "./db/queries/vehicles"
-import { locationsQueries } from "./db/queries/locations"
-import { tripsQueries } from "./db/queries/trips"
+import type { TripInput } from "../types"
 
-import { tripInputSchema, type TripInput } from "./types"
+import { problems } from "../problems"
 
-import { problems } from "./problems"
-
-export const creationValidator = zValidator("json", tripInputSchema, zodProblemHook({})) as any
-
-export async function validateVehicle(req: TripInput): Promise<TripInput> {
+export async function validateVehicle(req: TripInput): Promise<void> {
 	try {
 		const exists = await vehiclesQueries.vehicleExists(req.vehicle_id)
 		if (!exists) {
 			throw problems.create("FOREIGN_KEY_VIOLATION", {
 				detail: `Vehicle '${req.vehicle_id}' does not exist`,
 				extensions: {
-					errors: [{ field: "vehicle_id", message: "vehicle does not exist" }]
+					errors: [
+						{
+							field: "vehicle_id",
+							message: "does not exist",
+							value: req.vehicle_id
+						}
+					]
 				}
 			})
 		}
-		return req
 	} catch (error) {
 		if (error instanceof ProblemDetailsError) {
 			throw error
@@ -39,10 +38,8 @@ export async function validateVehicle(req: TripInput): Promise<TripInput> {
 	}
 }
 
-export async function validateStartLocation(req: TripInput): Promise<TripInput> {
-	if (!req.start_location_id) {
-		return req
-	}
+export async function validateStartLocation(req: TripInput): Promise<void> {
+	if (!req.start_location_id) return
 	try {
 		const exists = await locationsQueries.locationExists(req.start_location_id)
 		if (!exists) {
@@ -52,13 +49,13 @@ export async function validateStartLocation(req: TripInput): Promise<TripInput> 
 					errors: [
 						{
 							field: "start_location_id",
-							message: "start_location does not exist"
+							message: "does not exist",
+							value: req.start_location_id
 						}
 					]
 				}
 			})
 		}
-		return req
 	} catch (error) {
 		if (error instanceof ProblemDetailsError) {
 			throw error
@@ -72,10 +69,8 @@ export async function validateStartLocation(req: TripInput): Promise<TripInput> 
 	}
 }
 
-export async function validateEndLocation(req: TripInput): Promise<TripInput> {
-	if (!req.end_location_id) {
-		return req
-	}
+export async function validateEndLocation(req: TripInput): Promise<void> {
+	if (!req.end_location_id) return
 	try {
 		const exists = await locationsQueries.locationExists(req.end_location_id)
 		if (!exists) {
@@ -85,13 +80,13 @@ export async function validateEndLocation(req: TripInput): Promise<TripInput> {
 					errors: [
 						{
 							field: "end_location_id",
-							message: "end_location does not exist"
+							message: "does not exist",
+							value: req.end_location_id
 						}
 					]
 				}
 			})
 		}
-		return req
 	} catch (error) {
 		if (error instanceof ProblemDetailsError) {
 			throw error
@@ -105,7 +100,7 @@ export async function validateEndLocation(req: TripInput): Promise<TripInput> {
 	}
 }
 
-export async function validateTripConflict(req: TripInput): Promise<TripInput> {
+export async function validateTripConflict(req: TripInput): Promise<void> {
 	try {
 		const exists = await tripsQueries.existsTripByVehicleAndEndTime({
 			vehicleId: req.vehicle_id,
@@ -114,10 +109,20 @@ export async function validateTripConflict(req: TripInput): Promise<TripInput> {
 		if (exists) {
 			throw problems.create("TRIP_CONFLICT", {
 				detail: `A trip with this vehicle_id and end_time already exists`,
-				extensions: { vehicle_id: req.vehicle_id, end_time: req.end_time }
+				extensions: {
+					errors: [
+						{
+							field: "vehicle_id",
+							value: req.vehicle_id
+						},
+						{
+							field: "end_time",
+							value: req.end_time
+						}
+					]
+				}
 			})
 		}
-		return req
 	} catch (error) {
 		if (error instanceof ProblemDetailsError) {
 			throw error
@@ -129,10 +134,8 @@ export async function validateTripConflict(req: TripInput): Promise<TripInput> {
 	}
 }
 
-export async function validateOdometer(req: TripInput): Promise<TripInput> {
-	if (req.odometer_km === undefined) {
-		return req
-	}
+export async function validateOdometer(req: TripInput): Promise<void> {
+	if (req.odometer_km === undefined) return
 	try {
 		const latest = await tripsQueries.findLatestOdometerForVehicle(req.vehicle_id)
 		if (latest !== null && req.odometer_km < latest) {
@@ -143,13 +146,13 @@ export async function validateOdometer(req: TripInput): Promise<TripInput> {
 						{
 							field: "odometer_km",
 							message:
-								"odometer reading cannot be lower than the previous reading"
+								"odometer reading cannot be lower than the previous reading",
+							value: req.odometer_km
 						}
 					]
 				}
 			})
 		}
-		return req
 	} catch (error) {
 		if (error instanceof ProblemDetailsError) {
 			throw error
@@ -163,12 +166,10 @@ export async function validateOdometer(req: TripInput): Promise<TripInput> {
 	}
 }
 
-export const validateTripInput: MiddlewareHandler = async (c, next) => {
-	const req = (c as any).req.valid("json") as TripInput
-	await validateVehicle(req)
-	await validateStartLocation(req)
-	await validateEndLocation(req)
-	await validateTripConflict(req)
-	await validateOdometer(req)
-	await next()
+export const validateTripInput = async (input: TripInput): Promise<void> => {
+	await validateVehicle(input)
+	await validateStartLocation(input)
+	await validateEndLocation(input)
+	await validateTripConflict(input)
+	await validateOdometer(input)
 }
