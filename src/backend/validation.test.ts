@@ -8,8 +8,8 @@ describe("Trip Input Schema (Zod)", () => {
 				start_time: "2026-07-12T08:00:00Z",
 				end_time: "2026-07-12T08:45:00Z",
 				daypart: "morning",
-				duration_min: 45,
-				distance_km: 15.5
+				duration: 45,
+				distance: 15.5
 			})
 
 			expect(result.success).toBe(false)
@@ -20,39 +20,39 @@ describe("Trip Input Schema (Zod)", () => {
 			}
 		})
 
-		it("should reject missing distance_km", () => {
+		it("should reject missing distance", () => {
 			const result = tripInputSchema.safeParse({
 				vehicle_id: "V1StGXR8_Z5jdHi6",
 				start_time: "2026-07-12T08:00:00Z",
 				end_time: "2026-07-12T08:45:00Z",
 				daypart: "morning",
-				duration_min: 45
+				duration: 45
 			})
 
 			expect(result.success).toBe(false)
 			if (!result.success) {
 				expect(
-					result.error.issues.some((i) => i.path.includes("distance_km"))
+					result.error.issues.some((i) => i.path.includes("distance"))
 				).toBe(true)
 			}
 		})
 	})
 
 	describe("Type Validation", () => {
-		it("should reject non-numeric distance_km", () => {
+		it("should reject non-numeric distance", () => {
 			const result = tripInputSchema.safeParse({
 				vehicle_id: "V1StGXR8_Z5jdHi6",
 				start_time: "2026-07-12T08:00:00Z",
 				end_time: "2026-07-12T08:45:00Z",
 				daypart: "morning",
-				duration_min: 45,
-				distance_km: "not a number"
+				duration: 45,
+				distance: "not a number"
 			})
 
 			expect(result.success).toBe(false)
 			if (!result.success) {
 				expect(
-					result.error.issues.some((i) => i.path.includes("distance_km"))
+					result.error.issues.some((i) => i.path.includes("distance"))
 				).toBe(true)
 			}
 		})
@@ -65,8 +65,8 @@ describe("Trip Input Schema (Zod)", () => {
 				start_time: "2026-07-12T08:00:00Z",
 				end_time: "2026-07-12T08:45:00Z",
 				daypart: "evening",
-				duration_min: 45,
-				distance_km: 15.5
+				duration: 45,
+				distance: 15.5
 			})
 
 			expect(result.success).toBe(false)
@@ -83,8 +83,8 @@ describe("Trip Input Schema (Zod)", () => {
 				start_time: "2026-07-12T08:00:00Z",
 				end_time: "2026-07-12T08:45:00Z",
 				daypart: "morning",
-				duration_min: 45,
-				distance_km: 15.5
+				duration: 45,
+				distance: 15.5
 			})
 
 			const result2 = tripInputSchema.safeParse({
@@ -92,8 +92,8 @@ describe("Trip Input Schema (Zod)", () => {
 				start_time: "2026-07-12T14:00:00Z",
 				end_time: "2026-07-12T14:45:00Z",
 				daypart: "afternoon",
-				duration_min: 45,
-				distance_km: 15.5
+				duration: 45,
+				distance: 15.5
 			})
 
 			expect(result1.success).toBe(true)
@@ -102,20 +102,20 @@ describe("Trip Input Schema (Zod)", () => {
 	})
 
 	describe("Distance Validation", () => {
-		it("should reject distance_km <= 0", () => {
+		it("should reject distance <= 0", () => {
 			const result = tripInputSchema.safeParse({
 				vehicle_id: "V1StGXR8_Z5jdHi6",
 				start_time: "2026-07-12T08:00:00Z",
 				end_time: "2026-07-12T08:45:00Z",
 				daypart: "morning",
-				duration_min: 45,
-				distance_km: 0
+				duration: 45,
+				distance: 0
 			})
 
 			expect(result.success).toBe(false)
 			if (!result.success) {
 				expect(
-					result.error.issues.some((i) => i.path.includes("distance_km"))
+					result.error.issues.some((i) => i.path.includes("distance"))
 				).toBe(true)
 			}
 		})
@@ -128,8 +128,8 @@ describe("Trip Input Schema (Zod)", () => {
 				start_time: "not a timestamp",
 				end_time: "2026-07-12T08:45:00Z",
 				daypart: "morning",
-				duration_min: 45,
-				distance_km: 15.5
+				duration: 45,
+				distance: 15.5
 			})
 
 			expect(result.success).toBe(false)
@@ -148,15 +148,15 @@ describe("Trip Input Schema (Zod)", () => {
 				start_time: "2026-07-12T08:00:00Z",
 				end_time: "2026-07-12T08:45:00Z",
 				daypart: "morning",
-				duration_min: 45,
-				distance_km: 15.5,
-				avg_speed_kmh: 20.5,
-				avg_consumption_kwh_100km: 15.2
+				duration: 45,
+				distance: 15.5,
+				speed: 20.5,
+				consumption: 15.2
 			})
 
 			expect(result.success).toBe(true)
 			if (result.success) {
-				expect(result.data.avg_speed_kmh).toBe(20.5)
+				expect(result.data.speed).toBe(20.5)
 			}
 		})
 	})
@@ -165,7 +165,7 @@ describe("Trip Input Schema (Zod)", () => {
 		it("should return multiple field errors together", () => {
 			const result = tripInputSchema.safeParse({
 				daypart: "evening",
-				duration_min: 45
+				duration: 45
 			})
 
 			expect(result.success).toBe(false)
@@ -175,7 +175,7 @@ describe("Trip Input Schema (Zod)", () => {
 				expect(paths).toContain("vehicle_id")
 				expect(paths).toContain("start_time")
 				expect(paths).toContain("end_time")
-				expect(paths).toContain("distance_km")
+				expect(paths).toContain("distance")
 			}
 		})
 	})

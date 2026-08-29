@@ -2,46 +2,12 @@ import type { FC } from "hono/jsx"
 import { StatsSummaryGrid } from "./StatsSummaryGrid"
 import { EmptyState } from "../components/EmptyState"
 import { raw } from "hono/html"
+import type { StatsView } from "../../backend/stats"
 
 function periodIcon(value: string): string {
 	if (value === "week") return "calendar-1"
 	if (value === "month") return "calendar-days"
 	return "calendar"
-}
-
-interface StatWithDelta {
-	value: number | null
-	prev: number | null
-}
-
-interface StatsView {
-	period: "week" | "month" | "year"
-	yearGranularity: "month" | "week"
-	label: string
-	weekBoundsLabel: string | null
-	vehicle: { id: string; description: string } | null
-stats: {
-			totalDistance: StatWithDelta
-			totalTime: StatWithDelta
-			totalTimeHm: string | null
-			avgSpeed: StatWithDelta
-			avgDuration: StatWithDelta
-			avgDurationHm: string | null
-			avgConsumption: StatWithDelta
-			tripCount: StatWithDelta
-		}
-	series: {
-		labels: string[]
-		distance: number[]
-		duration: number[]
-		speed: (number | null)[]
-		consumption: (number | null)[]
-	}
-	hasTrips: boolean
-	date: string | null
-	prevDate: string | null
-	nextDate: string | null
-	yearOptions: number[]
 }
 
 const PeriodNavigation: FC<{ data: StatsView }> = ({ data }) => {

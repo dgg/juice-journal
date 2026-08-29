@@ -40,22 +40,22 @@ describe.skip("tripsQueries", () => {
 				start_time: utcIso("2026-07-20T08:00:00Z"),
 				end_time: utcIso("2026-07-20T08:45:00Z"),
 				daypart: "morning",
-				duration_min: 45,
-				distance_km: 15.5,
-				avg_speed_kmh: 60.0,
-				avg_consumption_kwh_100km: 18.5,
-				odometer_km: 12345.0,
+				duration: 45,
+				distance: 15.5,
+				speed: 60.0,
+				consumption: 18.5,
+				odometer: 12345.0,
 				start_location_id: TEST_LOCATION_ID,
 				end_location_id: TEST_LOCATION_ID
 			})
 
 			expect(result.vehicle_id).toBe(TEST_VEHICLE_ID)
 			expect(result.daypart).toBe("morning")
-			expect(result.duration_min).toBe(45)
-			expect(result.distance_km).toBe(15.5)
-			expect(result.avg_speed_kmh).toBe(60.0)
-			expect(result.avg_consumption_kwh_100km).toBe(18.5)
-			expect(result.odometer_km).toBe(12345.0)
+			expect(result.duration).toBe(45)
+			expect(result.distance).toBe(15.5)
+			expect(result.speed).toBe(60.0)
+			expect(result.consumption).toBe(18.5)
+			expect(result.odometer).toBe(12345.0)
 			expect(result.start_time).toBeInstanceOf(DateTime)
 			expect(result.end_time).toBeInstanceOf(DateTime)
 			expect(result.tracking_created).toBeInstanceOf(DateTime)
@@ -71,8 +71,8 @@ describe.skip("tripsQueries", () => {
 				start_time: utcIso("2026-07-21T08:00:00Z"),
 				end_time: utcIso("2026-07-21T08:45:00Z"),
 				daypart: "morning",
-				duration_min: 45,
-				distance_km: 15.5
+				duration: 45,
+				distance: 15.5
 			})
 
 			const trips = await tripsQueries.findTripsByMonth({
@@ -112,8 +112,8 @@ describe.skip("tripsQueries", () => {
 				start_time: utcIso("2099-12-31T23:00:00Z"),
 				end_time: utcIso("2099-12-31T23:30:00Z"),
 				daypart: "afternoon",
-				duration_min: 30,
-				distance_km: 10.0
+				duration: 30,
+				distance: 10.0
 			})
 
 			const vid = await tripsQueries.findLatestTripVehicleId()
@@ -129,8 +129,8 @@ describe.skip("tripsQueries", () => {
 				start_time: utcIso("2026-07-22T08:00:00Z"),
 				end_time: utcIso("2026-07-22T08:45:00Z"),
 				daypart: "morning",
-				duration_min: 45,
-				distance_km: 15.5,
+				duration: 45,
+				distance: 15.5,
 				start_location_id: TEST_LOCATION_ID,
 				end_location_id: TEST_LOCATION_ID
 			})

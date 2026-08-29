@@ -58,8 +58,8 @@ describe("Unique Constraint Pre-check (tripConflictValidator integration)", () =
           start_time,
           end_time,
           daypart,
-          duration_min,
-          distance_km
+          duration,
+          distance
         )
         VALUES (
           ${TEST_VEHICLE_ID},
@@ -86,8 +86,8 @@ describe("Unique Constraint Pre-check (tripConflictValidator integration)", () =
           start_time,
           end_time,
           daypart,
-          duration_min,
-          distance_km
+          duration,
+          distance
         )
         VALUES (
           ${TEST_VEHICLE_ID},
@@ -130,8 +130,8 @@ describe("Unique Constraint Pre-check (tripConflictValidator integration)", () =
           start_time,
           end_time,
           daypart,
-          duration_min,
-          distance_km
+          duration,
+          distance
         )
         VALUES (
           ${OTHER_VEHICLE_ID},

@@ -1,7 +1,7 @@
 import { DateTime, Duration } from "luxon"
 import { BucketPicker, type Bucket } from "./BucketPicker"
 import { WeatherFetchError, WeatherParseError } from "./errors"
-import type { WeatherParam, WeatherSource } from "./types"
+import type { WeatherParam, WeatherSource, WeatherSnapshot } from "./types"
 import { ApiUrl } from "./ApiUrl"
 
 export const MAX_FOR_FORECAST: Duration = Duration.fromObject({ days: 7 })
@@ -23,16 +23,16 @@ export interface WeatherInfo {
 	observedAt: DateTime
 	fetchedAt: DateTime
 	weatherCode: number | null
-	/** DEG_C */
+	/** qudt:ThermodynamicTemperature:DEG_C */
 	temperature: number | null
-	/** PERCENT */
+	/** qudt:RelativeHumidity:PERCENT */
 	humidity: number | null
-	/** MILLI-M */
+	/** qudt:Length:MILLI-M */
 	precipitation: number | null
 	wind: {
-		/** M-PER-SEC */
+		/** qudt:LinearVelocity:M-PER-SEC */
 		speed: number | null
-		/** QUDT DEG */
+		/** qudt:PositivePlaneAngle:DEG */
 		direction: number | null
 	}
 }
@@ -41,8 +41,6 @@ export interface TripWeather {
 	start: WeatherInfo
 	end: WeatherInfo
 }
-
-type WeatherSnapshot = Omit<WeatherInfo, "fetchedAt" | "source">
 
 const buildExcerpt = (
 	hourly: ApiResponse["hourly"],

@@ -1,23 +1,29 @@
 import { describe, it, expect } from "bun:test"
+import { DateTime } from "luxon"
 import { TripRow } from "../components/TripRow"
+
+function dt(s: string) {
+	return DateTime.fromISO(s, { setZone: true }).toUTC()
+}
 
 describe("TripRow", () => {
 	const baseTrip = {
 		id: "t1",
-		startTime: new Date("2026-08-26T06:00:00Z"),
-		endTime: new Date("2026-08-26T06:45:00Z"),
-		daypart: "morning",
-		durationMin: 45,
-		distanceKm: 15,
-		avgSpeedKmh: 60,
-		avgConsumptionKwh100km: 18.5,
-		odometerKm: 50000,
-		startLocation: "Home",
-		endLocation: "Work",
+		start_time: dt("2026-08-26T06:00:00Z"),
+		end_time: dt("2026-08-26T06:45:00Z"),
+		daypart: "morning" as const,
+		duration: 45,
+		distance: 15,
+		speed: 60,
+		consumption: 18.5,
+		odometer: 50000,
+		start_location: "Home",
+		end_location: "Work",
 		weatherStart: null
 	}
 
-	const weatherObject = {
+	const weatherSnapshot = {
+		observedAt: dt("2026-08-26T06:00:00Z"),
 		weatherCode: 61,
 		temperature: 13,
 		humidity: 80,
@@ -26,7 +32,7 @@ describe("TripRow", () => {
 	}
 
 	it("renders weather pill with all four data elements when weatherStart is provided", () => {
-		const trip = { ...baseTrip, weatherStart: weatherObject }
+		const trip = { ...baseTrip, weatherStart: weatherSnapshot }
 		const html = String(<TripRow trip={trip} />)
 
 		expect(html).toContain("Weather")
@@ -52,7 +58,7 @@ describe("TripRow", () => {
 	})
 
 	it("renders wind-from-sw class for direction 240", () => {
-		const trip = { ...baseTrip, weatherStart: weatherObject }
+		const trip = { ...baseTrip, weatherStart: weatherSnapshot }
 		const html = String(<TripRow trip={trip} />)
 
 		expect(html).toContain("icon-mouse-pointer-2")
@@ -60,7 +66,7 @@ describe("TripRow", () => {
 	})
 
 	it("omits wind arrow when wind.direction is null", () => {
-		const noDirWeather = { ...weatherObject, wind: { speed: 7, direction: null } }
+		const noDirWeather = { ...weatherSnapshot, wind: { speed: 7, direction: null } }
 		const trip = { ...baseTrip, weatherStart: noDirWeather }
 		const html = String(<TripRow trip={trip} />)
 

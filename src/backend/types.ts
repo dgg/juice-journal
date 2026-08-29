@@ -6,7 +6,9 @@ const nanoid = z
 	.length(16)
 	.regex(/^[A-Za-z0-9_-]{16}$/)
 
-const daypart = z.enum(["morning", "afternoon"])
+const DAYPARTS = ["morning", "afternoon"] as const
+const daypart = z.enum(DAYPARTS)
+export type Daypart = z.infer<typeof daypart>
 
 const datetime = z.iso
 		.datetime({ offset: true })
@@ -17,13 +19,18 @@ export const tripInputSchema = z.object({
 	start_time: datetime,
 	end_time: datetime,
 	daypart,
-	duration_min: z.number().int().positive(),
-	distance_km: z.number().positive(),
+	/** trip duration (qudt:MIN) */
+	duration: z.number().int().positive(),
+	/** trip distance (qudt:KiloM) */
+	distance: z.number().positive(),
 	start_location_id: nanoid.optional(),
 	end_location_id: nanoid.optional(),
-	avg_speed_kmh: z.number().positive().optional(),
-	avg_consumption_kwh_100km: z.number().positive().optional(),
-	odometer_km: z.number().optional()
+	/* trip average speed (qudt:KiloM-PER-HR) */
+	speed: z.number().positive().optional(),
+	/** trip average consumotion (qudt_:KiloW-HR-PER-HUNDRED-KiloM) */
+	consumption: z.number().positive().optional(),
+	/** odometer reading (qudt:KiloM) */
+	odometer: z.number().optional()
 })
 
 const waypoint = z.object({
@@ -38,10 +45,15 @@ export const tripCreationSchema = z.object({
 	vehicle: nanoid,
 	start: waypoint,
 	end: waypoint,
+	/** trip duration (MIN) */
 	duration: z.number().int().positive(),
+	/** trip distance (KiloM) */
 	distance: z.number().positive(),
+	/* trip average speed (KiloM-PER-HR) */
 	speed: z.number().positive().nullable(),
+	/** trip average consumotion (KiloW-HR-PER-HUNDRED-KiloM) */
 	consumption: z.number().positive().nullable(),
+	/** odometer reading (KiloM) */
 	odometer: z.number().nullable(),
 	tracking: z.object({
 		created: datetime,

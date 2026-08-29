@@ -5,9 +5,10 @@ import { displayTz, currentMonthBoundsUtc, prevMonthBoundsUtc } from "./utils/da
 import { formatDurationHm } from "./utils/format"
 import type { Env } from "./utils/logger"
 
-import { tripsQueries } from "./db/queries/trips"
+import { tripsQueries, type TripWithLocationRow } from "./db/queries/trips"
 import { vehiclesQueries } from "./db/queries/vehicles"
 import { statsQueries } from "./db/queries/stats"
+import type { StatWithDelta } from "./stats"
 
 import { HomePage } from "../frontend/pages/HomePage"
 
@@ -18,30 +19,17 @@ interface HomeData {
 	} | null
 	monthLabel: string
 	stats: {
-		totalDistance: { value: number | null; prev: number | null }
-		totalTime: { value: number | null; prev: number | null }
+		totalDistance: StatWithDelta
+		totalTime: StatWithDelta
 		totalTimeHm: string | null
-		avgSpeed: { value: number | null; prev: number | null }
-		avgDuration: { value: number | null; prev: number | null }
+		avgSpeed: StatWithDelta
+		avgDuration: StatWithDelta
 		avgDurationHm: string | null
-		avgConsumption: { value: number | null; prev: number | null }
-		tripCount: { value: number | null; prev: number | null }
+		avgConsumption: StatWithDelta
+		tripCount: StatWithDelta
 		period: "month"
 	}
-	trips: Array<{
-		id: string
-		startTime: Date
-		endTime: Date
-		daypart: string
-		durationMin: number
-		distanceKm: number
-		avgSpeedKmh: number | null
-		avgConsumptionKwh100km: number | null
-		odometerKm: number | null
-		startLocation: string | null
-		endLocation: string | null
-		weatherStart: object | null
-	}>
+	trips: TripWithLocationRow[]
 	hasTrips: boolean
 }
 
@@ -77,26 +65,11 @@ export async function homeHandler(c: Context<Env>) {
 		})
 	])
 
-	const tripsResult = await tripsQueries.findTripsWithLocations({
+	const trips = await tripsQueries.findTripsWithLocations({
 		startUtc,
 		endUtc,
 		vehicleId: vehicleId ?? undefined
 	})
-
-	const trips = tripsResult.map((trip) => ({
-		id: trip.id,
-		startTime: trip.start_time.toJSDate(),
-		endTime: trip.end_time.toJSDate(),
-		daypart: trip.daypart,
-		durationMin: trip.duration_min,
-		distanceKm: trip.distance_km,
-		avgSpeedKmh: trip.avg_speed_kmh,
-		avgConsumptionKwh100km: trip.avg_consumption_kwh_100km,
-		odometerKm: trip.odometer_km,
-		startLocation: trip.start_location,
-		endLocation: trip.end_location,
-		weatherStart: trip.weatherStart
-	}))
 
 	const hasTrips = trips.length > 0
 

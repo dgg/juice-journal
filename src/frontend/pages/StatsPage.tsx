@@ -3,41 +3,7 @@ import { raw } from "hono/html"
 import { Layout } from "../Layout"
 import { StatsChartsFragment } from "../fragments/StatsChartsFragment"
 import { StickyCta } from "../components/StickyCta"
-
-interface StatWithDelta {
-	value: number | null
-	prev: number | null
-}
-
-interface StatsView {
-	period: "week" | "month" | "year"
-	yearGranularity: "month" | "week"
-	label: string
-	weekBoundsLabel: string | null
-	vehicle: { id: string; description: string } | null
-	stats: {
-		totalDistance: StatWithDelta
-		totalTime: StatWithDelta
-		totalTimeHm: string | null
-		avgSpeed: StatWithDelta
-		avgDuration: StatWithDelta
-		avgDurationHm: string | null
-		avgConsumption: StatWithDelta
-		tripCount: StatWithDelta
-	}
-	series: {
-		labels: string[]
-		distance: number[]
-		duration: number[]
-		speed: (number | null)[]
-		consumption: (number | null)[]
-	}
-	hasTrips: boolean
-	date: string | null
-	prevDate: string | null
-	nextDate: string | null
-	yearOptions: number[]
-}
+import type { StatsView } from "../../backend/stats"
 
 const Scripts = () => (
 	<>

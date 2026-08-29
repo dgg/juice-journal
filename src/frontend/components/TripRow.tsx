@@ -1,61 +1,22 @@
 import type { FC } from "hono/jsx"
 import { formatNumber } from "../format"
 import { weatherCodeToIcon, windDirectionToClass } from "../weather/display"
+import type { TripWithLocationRow } from "../../backend/db/queries/trips"
+import type { WeatherSnapshot } from "../../backend/weather/types"
 
-interface WeatherData {
-	weatherCode: number | null
-	temperature: number | null
-	humidity: number | null
-	precipitation: number | null
-	wind: {
-		speed: number | null
-		direction: number | null
-	}
-}
-
-interface Trip {
-	id: string
-	startTime: Date
-	endTime: Date
-	daypart: string
-	durationMin: number
-	distanceKm: number
-	avgSpeedKmh: number | null
-	avgConsumptionKwh100km: number | null
-	odometerKm: number | null
-	startLocation: string | null
-	endLocation: string | null
-	weatherStart: object | null
-}
-
-export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
+export const TripRow: FC<{ trip: TripWithLocationRow }> = ({ trip }) => {
 	const displayTz = process.env.DISPLAY_TZ || "Europe/Copenhagen"
-	const dateStr = new Date(trip.endTime).toLocaleDateString("en-US", {
-		timeZone: displayTz,
-		weekday: "short",
-		month: "short",
-		day: "numeric"
-	})
-	const startTimeStr = new Date(trip.startTime).toLocaleTimeString("en-US", {
-		timeZone: displayTz,
-		hour: "2-digit",
-		minute: "2-digit",
-		hour12: false
-	})
-	const endTimeStr = new Date(trip.endTime).toLocaleTimeString("en-US", {
-		timeZone: displayTz,
-		hour: "2-digit",
-		minute: "2-digit",
-		hour12: false
-	})
+	const dateStr = trip.end_time.setZone(displayTz).toFormat("EEE, MMM d")
+	const startTimeStr = trip.start_time.setZone(displayTz).toFormat("HH:mm")
+	const endTimeStr = trip.end_time.setZone(displayTz).toFormat("HH:mm")
 	const timeStr = `${startTimeStr} \u2013 ${endTimeStr}`
 
-	const daypartClass = trip.daypart === "morning" ? "morning" : "afternoon"
+	const daypartClass: string = trip.daypart
 	const daypartIcon = trip.daypart === "morning" ? "icon-clock-8" : "icon-clock-4"
 
 	const consumptionStr =
-		trip.avgConsumptionKwh100km !== null
-			? formatNumber(trip.avgConsumptionKwh100km, 1)
+		trip.consumption !== null
+			? formatNumber(trip.consumption, 1)
 			: "--"
 
 	return (
@@ -69,14 +30,14 @@ export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
 					<small>
 						<time
 							class="trip-row__time"
-							datetime={new Date(trip.startTime).toISOString()}
+							datetime={trip.start_time.toISO() ?? undefined}
 						>
 							{timeStr}
 						</time>
 					</small>
 				</div>
 				<div class="trip-row__consumption">
-					<data value={trip.avgConsumptionKwh100km ?? ""}>
+					<data value={String(trip.consumption ?? "")}>
 						{consumptionStr}
 					</data>
 					<small>&nbsp;kWh/100km</small>
@@ -87,59 +48,59 @@ export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
 					<dt class="sr-only">Distance</dt>
 					<dd class="trip-detail-pill">
 						<span class="icon-route" aria-hidden="true"></span>
-						<data value={trip.distanceKm}>
-							{formatNumber(trip.distanceKm, 1)}
+						<data value={trip.distance}>
+							{formatNumber(trip.distance, 1)}
 						</data>
 						<small class="pill__unit">km</small>
 					</dd>
 					<dt class="sr-only">Duration</dt>
 					<dd class="trip-detail-pill">
 						<span class="icon-hourglass" aria-hidden="true"></span>
-						<data value={trip.durationMin}>
-							{trip.durationMin}
+						<data value={trip.duration}>
+							{trip.duration}
 							<small class="pill__unit">&nbsp;min</small>
 						</data>
 					</dd>
-					{trip.avgSpeedKmh !== null && (
+					{trip.speed !== null && (
 						<>
 							<dt class="sr-only">Avg speed</dt>
 							<dd class="trip-detail-pill">
 								<span class="icon-gauge" aria-hidden="true"></span>
-								<data value={trip.avgSpeedKmh}>
-									{formatNumber(trip.avgSpeedKmh, 0)}
+								<data value={trip.speed}>
+									{formatNumber(trip.speed, 0)}
 									<small class="pill__unit">&nbsp;km/h</small>
 								</data>
 							</dd>
 						</>
 					)}
-					{trip.odometerKm !== null && (
+					{trip.odometer !== null && (
 						<>
 							<dt class="sr-only">Odometer</dt>
 							<dd class="trip-detail-pill">
 								<span class="icon-circle-gauge" aria-hidden="true"></span>
-								<data value={trip.odometerKm}>
-									{formatNumber(trip.odometerKm, 1)}
+								<data value={trip.odometer}>
+									{formatNumber(trip.odometer, 1)}
 									<small class="pill__unit">&nbsp;km</small>
 								</data>
 							</dd>
 						</>
 					)}
-					{trip.startLocation || trip.endLocation ? (
+					{trip.start_location || trip.end_location ? (
 						<>
 							<dt class="sr-only">Route</dt>
 							<dd class="trip-detail-pill">
-								{trip.startLocation && (
+								{trip.start_location && (
 									<span class="icon-flag" aria-hidden="true"></span>
 								)}
-								{trip.startLocation}
-								{trip.startLocation && trip.endLocation && (
+								{trip.start_location}
+								{trip.start_location && trip.end_location && (
 									<span
 										class="icon-circle-arrow-right"
 										aria-hidden="true"
 									></span>
 								)}
-								{trip.endLocation}
-								{trip.endLocation && (
+								{trip.end_location}
+								{trip.end_location && (
 									<span
 										class="icon-flag-triangle-right"
 										aria-hidden="true"
@@ -150,7 +111,7 @@ export const TripRow: FC<{ trip: Trip }> = ({ trip }) => {
 					) : null}
 					{trip.weatherStart &&
 						(() => {
-							const w = trip.weatherStart as WeatherData
+							const w = trip.weatherStart
 							const windClass = windDirectionToClass(w.wind.direction)
 							return (
 								<>

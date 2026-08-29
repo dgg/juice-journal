@@ -1,7 +1,7 @@
 import type { Context } from "hono"
 import { DateTime } from "luxon"
 
-import { tripsQueries } from "./db/queries/trips"
+import { tripsQueries, type TripWithLocationRow } from "./db/queries/trips"
 import { vehiclesQueries } from "./db/queries/vehicles"
 import { locationsQueries } from "./db/queries/locations"
 import { statsQueries } from "./db/queries/stats"
@@ -71,26 +71,11 @@ export async function getPartialTrips(c: Context<Env>) {
 	const { startUtc, endUtc } = currentMonthBoundsUtc(displayTz_, now)
 
 	const vehicleId = await tripsQueries.findLatestTripVehicleId()
-	const tripsResult = await tripsQueries.findTripsWithLocations({
+	const trips = await tripsQueries.findTripsWithLocations({
 		startUtc,
 		endUtc,
 		vehicleId: vehicleId ?? undefined
 	})
-
-	const trips = tripsResult.map((trip) => ({
-		id: trip.id,
-		startTime: trip.start_time.toJSDate(),
-		endTime: trip.end_time.toJSDate(),
-		daypart: trip.daypart,
-		durationMin: trip.duration_min,
-		distanceKm: trip.distance_km,
-		avgSpeedKmh: trip.avg_speed_kmh,
-		avgConsumptionKwh100km: trip.avg_consumption_kwh_100km,
-		odometerKm: trip.odometer_km,
-		startLocation: trip.start_location,
-		endLocation: trip.end_location,
-		weatherStart: trip.weatherStart
-	}))
 
 	return c.html(<TripListFragment trips={trips} hasTrips={trips.length > 0} />)
 }
@@ -154,10 +139,10 @@ interface FormBody {
 	start_time: string
 	end_time: string
 	daypart: string
-	distance_km: string
-	avg_speed_kmh?: string
-	avg_consumption_kwh_100km?: string
-	odometer_km?: string
+	distance: string
+	speed?: string
+	consumption?: string
+	odometer?: string
 	start_location_id?: string
 	end_location_id?: string
 }
@@ -171,22 +156,20 @@ function parseFormTripInput(body: FormBody): TripInputRaw {
 		zone: displayTz
 	})
 
-	const durationMin = Math.round(endDt.diff(startDt, "minutes").minutes)
+	const duration = Math.round(endDt.diff(startDt, "minutes").minutes)
 
 	return {
 		vehicle_id: body.vehicle_id || "",
 		start_time: startDt.toISO() || "",
 		end_time: endDt.toISO() || "",
 		daypart: (body.daypart as "morning" | "afternoon") || "morning",
-		duration_min: durationMin > 0 ? durationMin : 0,
-		distance_km: parseFloat(body.distance_km || "0") || 0,
+		duration: duration > 0 ? duration : 0,
+		distance: parseFloat(body.distance || "0") || 0,
 		start_location_id: body.start_location_id || undefined,
 		end_location_id: body.end_location_id || undefined,
-		avg_speed_kmh: body.avg_speed_kmh ? parseFloat(body.avg_speed_kmh) : undefined,
-		avg_consumption_kwh_100km: body.avg_consumption_kwh_100km
-			? parseFloat(body.avg_consumption_kwh_100km)
-			: undefined,
-		odometer_km: body.odometer_km ? parseFloat(body.odometer_km) : undefined
+		speed: body.speed ? parseFloat(body.speed) : undefined,
+		consumption: body.consumption ? parseFloat(body.consumption) : undefined,
+		odometer: body.odometer ? parseFloat(body.odometer) : undefined
 	}
 }
 

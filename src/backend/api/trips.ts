@@ -44,11 +44,11 @@ export const apiTrips = new Hono()
 					weather: trip.weather_end
 				},
 				daypart: trip.daypart,
-				duration: trip.duration_min,
-				distance: trip.distance_km,
-				consumption: trip.avg_consumption_kwh_100km,
-				odometer: trip.odometer_km,
-				speed: trip.avg_speed_kmh,
+				duration: trip.duration,
+				distance: trip.distance,
+				consumption: trip.consumption,
+				odometer: trip.odometer,
+				speed: trip.speed,
 				tracking: {
 					created: trip.tracking_created.toISO()!,
 					updated: trip.tracking_updated.toISO()!

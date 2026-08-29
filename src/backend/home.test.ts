@@ -91,8 +91,8 @@ describe("homeHandler", () => {
 
 		await db`
 			INSERT INTO trips (
-				vehicle_id, start_time, end_time, daypart, duration_min, distance_km,
-				avg_speed_kmh, avg_consumption_kwh_100km
+				vehicle_id, start_time, end_time, daypart, duration, distance,
+				speed, consumption
 			) VALUES (
 				${TEST_VEHICLE_ID},
 				${tripDate.toUTC().toISO()},
@@ -122,7 +122,7 @@ describe("homeHandler", () => {
 		// Insert a trip that makes findLatestTripVehicleId return test vehicle
 		await db`
 			INSERT INTO trips (
-				vehicle_id, start_time, end_time, daypart, duration_min, distance_km
+				vehicle_id, start_time, end_time, daypart, duration, distance
 			) VALUES (
 				${TEST_VEHICLE_ID},
 				${DateTime.now().plus({ hours: 1 }).toUTC().toISO()},
@@ -151,7 +151,7 @@ describe("homeHandler", () => {
 
 		await db`
 			INSERT INTO trips (
-				vehicle_id, start_time, end_time, daypart, duration_min, distance_km
+				vehicle_id, start_time, end_time, daypart, duration, distance
 			) VALUES (
 				${TEST_VEHICLE_ID},
 				${tripDate.toUTC().toISO()},
@@ -174,8 +174,8 @@ describe("homeHandler", () => {
 
 		await db`
 			INSERT INTO trips (
-				vehicle_id, start_time, end_time, daypart, duration_min, distance_km,
-				avg_consumption_kwh_100km
+				vehicle_id, start_time, end_time, daypart, duration, distance,
+				consumption
 			) VALUES (
 				${TEST_VEHICLE_ID},
 				${currentDate.toUTC().toISO()},
@@ -187,8 +187,8 @@ describe("homeHandler", () => {
 
 		await db`
 			INSERT INTO trips (
-				vehicle_id, start_time, end_time, daypart, duration_min, distance_km,
-				avg_consumption_kwh_100km
+				vehicle_id, start_time, end_time, daypart, duration, distance,
+				consumption
 			) VALUES (
 				${TEST_VEHICLE_ID},
 				${prevDate.toUTC().toISO()},
@@ -212,7 +212,7 @@ describe("homeHandler", () => {
 
 		await db`
 			INSERT INTO trips (
-				vehicle_id, start_time, end_time, daypart, duration_min, distance_km
+				vehicle_id, start_time, end_time, daypart, duration, distance
 			) VALUES (
 				${TEST_VEHICLE_ID_2},
 				${now.toUTC().toISO()},
@@ -223,7 +223,7 @@ describe("homeHandler", () => {
 
 		await db`
 			INSERT INTO trips (
-				vehicle_id, start_time, end_time, daypart, duration_min, distance_km
+				vehicle_id, start_time, end_time, daypart, duration, distance
 			) VALUES (
 				${TEST_VEHICLE_ID},
 				${now.minus({ minutes: 5 }).toUTC().toISO()},
@@ -247,8 +247,8 @@ describe("GET /partials/trips", () => {
 
 		await db`
 			INSERT INTO trips (
-				vehicle_id, start_time, end_time, daypart, duration_min, distance_km,
-				avg_consumption_kwh_100km
+				vehicle_id, start_time, end_time, daypart, duration, distance,
+				consumption
 			) VALUES (
 				${TEST_VEHICLE_ID},
 				${now.toUTC().toISO()},
@@ -316,8 +316,8 @@ describe("POST /trips", () => {
 
 		await db`
 			INSERT INTO trips (
-				vehicle_id, start_time, end_time, daypart, duration_min, distance_km,
-				avg_consumption_kwh_100km
+				vehicle_id, start_time, end_time, daypart, duration, distance,
+				consumption
 			) VALUES (
 				${TEST_VEHICLE_ID},
 				${tripDate.toUTC().toISO()},
@@ -334,8 +334,8 @@ describe("POST /trips", () => {
 			start_time: "08:00",
 			end_time: "08:45",
 			daypart: "morning",
-			distance_km: "15.0",
-			avg_consumption_kwh_100km: "20.0"
+			distance: "15.0",
+			consumption: "20.0"
 		})
 
 		const result = await htmlCreationHandler(mockCtx as any)
@@ -352,7 +352,7 @@ describe("POST /trips", () => {
 			start_time: "bad",
 			end_time: "bad",
 			daypart: "morning",
-			distance_km: "0"
+			distance: "0"
 		})
 
 		try {

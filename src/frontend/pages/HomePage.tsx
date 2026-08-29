@@ -5,37 +5,24 @@ import { StatsSummaryGrid } from "../fragments/StatsSummaryGrid"
 import { TripRow } from "../components/TripRow"
 import { EmptyState } from "../components/EmptyState"
 import { StickyCta } from "../components/StickyCta"
-
-interface Trip {
-	id: string
-	startTime: Date
-	endTime: Date
-	daypart: string
-	durationMin: number
-	distanceKm: number
-	avgSpeedKmh: number | null
-	avgConsumptionKwh100km: number | null
-	odometerKm: number | null
-	startLocation: string | null
-	endLocation: string | null
-	weatherStart: object | null
-}
+import type { TripWithLocationRow } from "../../backend/db/queries/trips"
+import type { StatWithDelta } from "../../backend/stats"
 
 interface HomePageData {
 	vehicle: { id: string; description: string } | null
 	monthLabel: string
 	stats: {
-		totalDistance: { value: number | null; prev: number | null }
-		totalTime: { value: number | null; prev: number | null }
+		totalDistance: StatWithDelta
+		totalTime: StatWithDelta
 		totalTimeHm: string | null
-		avgSpeed: { value: number | null; prev: number | null }
-		avgDuration: { value: number | null; prev: number | null }
+		avgSpeed: StatWithDelta
+		avgDuration: StatWithDelta
 		avgDurationHm: string | null
-		avgConsumption: { value: number | null; prev: number | null }
-		tripCount: { value: number | null; prev: number | null }
+		avgConsumption: StatWithDelta
+		tripCount: StatWithDelta
 		period: "month"
 	}
-	trips: Trip[]
+	trips: TripWithLocationRow[]
 	hasTrips: boolean
 }
 

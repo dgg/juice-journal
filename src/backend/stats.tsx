@@ -80,14 +80,17 @@ export function formatDateForPeriod(dt: DateTime, period: "week" | "month" | "ye
 	}
 }
 
-interface StatWithDelta {
+export interface StatWithDelta {
 	value: number | null
 	prev: number | null
 }
 
-interface StatsView {
-	period: "week" | "month" | "year"
-	yearGranularity: "month" | "week"
+type Period = "week" | "month" | "year"
+type YearGranularity = Exclude<Period, "year">
+
+export interface StatsView {
+	period: Period
+	yearGranularity: YearGranularity
 	label: string
 	weekBoundsLabel: string | null
 	vehicle: { id: string; description: string } | null
@@ -115,7 +118,7 @@ interface StatsView {
 	yearOptions: number[]
 }
 
-function periodLabelFn(period: "week" | "month" | "year", now: DateTime): string {
+function periodLabelFn(period: Period, now: DateTime): string {
 	const nowInZone = now.setZone(process.env.DISPLAY_TZ || "Europe/Copenhagen")
 	switch (period) {
 		case "week":
@@ -128,8 +131,8 @@ function periodLabelFn(period: "week" | "month" | "year", now: DateTime): string
 }
 
 async function computeStatsView(params: {
-	period: "week" | "month" | "year"
-	yearGranularity: "month" | "week"
+	period: Period
+	yearGranularity: YearGranularity
 	displayTz: string
 	now: DateTime
 }): Promise<StatsView> {
@@ -197,10 +200,10 @@ async function computeStatsView(params: {
 				}
 				return label
 			}),
-			distance: rows.map((r) => r.distance_km),
-			duration: rows.map((r) => r.duration_min),
-			speed: rows.map((r) => r.avg_speed_kmh),
-			consumption: rows.map((r) => r.avg_consumption_kwh_100km)
+			distance: rows.map((r) => r.distance),
+			duration: rows.map((r) => r.duration),
+			speed: rows.map((r) => r.speed),
+			consumption: rows.map((r) => r.consumption)
 		}
 	}
 

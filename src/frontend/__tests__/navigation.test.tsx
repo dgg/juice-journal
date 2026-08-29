@@ -186,16 +186,16 @@ describe("StatsPage", () => {
 					label: "August 2026",
 					weekBoundsLabel: null,
 					vehicle: null,
-stats: {
-					totalDistance: { value: null, prev: null },
-					totalTime: { value: null, prev: null },
-					totalTimeHm: null,
-					avgSpeed: { value: null, prev: null },
-					avgDuration: { value: null, prev: null },
-					avgDurationHm: null,
-					avgConsumption: { value: null, prev: null },
-					tripCount: { value: null, prev: null }
-				},
+					stats: {
+						totalDistance: { value: null, prev: null },
+						totalTime: { value: null, prev: null },
+						totalTimeHm: null,
+						avgSpeed: { value: null, prev: null },
+						avgDuration: { value: null, prev: null },
+						avgDurationHm: null,
+						avgConsumption: { value: null, prev: null },
+						tripCount: { value: null, prev: null }
+					},
 					series: {
 						labels: [],
 						distance: [],

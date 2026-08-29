@@ -1,6 +1,7 @@
 import { db } from "../client"
 import { toNumber } from "../convert"
 import { DateTime } from "luxon"
+import type { Daypart } from "../../types"
 
 export interface PeriodAggregates {
 	avgConsumption: number | null
@@ -14,10 +15,10 @@ export interface PeriodAggregates {
 export interface PeriodSeriesRow {
 	time: DateTime
 	daypart: string | null
-	distance_km: number
-	duration_min: number
-	avg_speed_kmh: number | null
-	avg_consumption_kwh_100km: number | null
+	distance: number
+	duration: number
+	speed: number | null
+	consumption: number | null
 }
 
 function appDisplayTz(): string {
@@ -33,11 +34,11 @@ export const statsQueries = {
 const rows = params.vehicleId
 				? await db`
 					SELECT
-						AVG(avg_consumption_kwh_100km) as avg_consumption,
-						AVG(duration_min) as avg_duration,
-						SUM(distance_km) as total_distance,
-						SUM(duration_min) as total_duration,
-						AVG(avg_speed_kmh) as avg_speed,
+						AVG(consumption) as avg_consumption,
+						AVG(duration) as avg_duration,
+						SUM(distance) as total_distance,
+						SUM(duration) as total_duration,
+						AVG(speed) as avg_speed,
 						COUNT(*) as trip_count
 					FROM trips
 					WHERE end_time >= ${params.startUtc.toISO()}
@@ -46,11 +47,11 @@ const rows = params.vehicleId
 				`
 				: await db`
 					SELECT
-						AVG(avg_consumption_kwh_100km) as avg_consumption,
-						AVG(duration_min) as avg_duration,
-						SUM(distance_km) as total_distance,
-						SUM(duration_min) as total_duration,
-						AVG(avg_speed_kmh) as avg_speed,
+						AVG(consumption) as avg_consumption,
+						AVG(duration) as avg_duration,
+						SUM(distance) as total_distance,
+						SUM(duration) as total_duration,
+						AVG(speed) as avg_speed,
 						COUNT(*) as trip_count
 					FROM trips
 					WHERE end_time >= ${params.startUtc.toISO()}
@@ -102,10 +103,10 @@ return {
 					SELECT
 						trips.end_time,
 						trips.daypart,
-						distance_km,
-						duration_min,
-						avg_speed_kmh,
-						avg_consumption_kwh_100km
+						distance,
+						duration,
+						speed,
+						consumption
 					FROM trips
 					WHERE end_time >= ${startUtc.toISO()}
 						AND end_time < ${endUtc.toISO()}
@@ -116,10 +117,10 @@ return {
 					SELECT
 						trips.end_time,
 						trips.daypart,
-						distance_km,
-						duration_min,
-						avg_speed_kmh,
-						avg_consumption_kwh_100km
+						distance,
+						duration,
+						speed,
+						consumption
 					FROM trips
 					WHERE end_time >= ${startUtc.toISO()}
 						AND end_time < ${endUtc.toISO()}
@@ -134,13 +135,13 @@ return {
 				return {
 					time: endTime,
 					daypart: row.daypart as string | null,
-					distance_km: Number(row.distance_km) || 0,
-					duration_min: Number(row.duration_min) || 0,
-					avg_speed_kmh:
-						row.avg_speed_kmh !== null ? Number(row.avg_speed_kmh) : null,
-					avg_consumption_kwh_100km:
-						row.avg_consumption_kwh_100km !== null
-							? Number(row.avg_consumption_kwh_100km)
+					distance: Number(row.distance) || 0,
+					duration: Number(row.duration) || 0,
+					speed:
+						row.speed !== null ? Number(row.speed) : null,
+					consumption:
+						row.consumption !== null
+							? Number(row.consumption)
 							: null
 				}
 			})
@@ -148,10 +149,10 @@ return {
 			const sql = `
 				SELECT
 					date_trunc('${bucket}', timezone('${tz}', trips.end_time)) as bucket_start,
-					SUM(distance_km) as distance_km,
-					SUM(duration_min) as duration_min,
-					AVG(avg_speed_kmh) as avg_speed_kmh,
-					AVG(avg_consumption_kwh_100km) as avg_consumption_kwh_100km
+					SUM(distance) as distance,
+					SUM(duration) as duration,
+					AVG(speed) as speed,
+					AVG(consumption) as consumption
 				FROM trips
 				WHERE end_time >= $1 AND end_time < $2
 				${vehicleId ? "AND vehicle_id = $3" : ""}
@@ -172,13 +173,13 @@ return {
 				return {
 					time: bucketStart,
 					daypart: null,
-					distance_km: Number(row.distance_km) || 0,
-					duration_min: Number(row.duration_min) || 0,
-					avg_speed_kmh:
-						row.avg_speed_kmh !== null ? Number(row.avg_speed_kmh) : null,
-					avg_consumption_kwh_100km:
-						row.avg_consumption_kwh_100km !== null
-							? Number(row.avg_consumption_kwh_100km)
+					distance: Number(row.distance) || 0,
+					duration: Number(row.duration) || 0,
+					speed:
+						row.speed !== null ? Number(row.speed) : null,
+					consumption:
+						row.consumption !== null
+							? Number(row.consumption)
 							: null
 				}
 			})

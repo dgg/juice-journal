@@ -93,13 +93,13 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 					<div class="grid">
 						<label>
 							<span class="icon-route" aria-hidden="true"></span> Distance{" "}
-							<small>(km)</small>
-							<input name="distance_km" type="number" step="0.1" required />
+							<small data-tooltip="qudt:KiloM">(km)</small>
+							<input name="distance" type="number" step="0.1" required />
 						</label>
 						<label>
 							<span class="icon-circle-gauge" aria-hidden="true"></span>{" "}
-							Odometer <small>(km)</small>
-							<input name="odometer_km" type="number" step="0.1" />
+							Odometer <small data-tooltip="qudt:KiloM">(km)</small>
+							<input name="odometer" type="number" step="0.1" />
 						</label>
 					</div>
 
@@ -107,17 +107,17 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 					<div class="grid">
 						<label>
 							<span class="icon-gauge" aria-hidden="true"></span>
-							Avg speed <small>(km/h)</small>
-							<input name="avg_speed_kmh" type="number" step="1" />
+							Avg speed{" "}
+							<small data-tooltip="qudt:KiloM-PER-HR">(km/h)</small>
+							<input name="speed" type="number" step="1" />
 						</label>
 						<label>
 							<span class="icon-ev-charger" aria-hidden="true"></span>{" "}
-							Consumption <small>(kWh/100km)</small>
-							<input
-								name="avg_consumption_kwh_100km"
-								type="number"
-								step="0.1"
-							/>
+							Consumption{" "}
+							<small data-tooltip="qudt_:KiloW-HR-PER-HUNDRED-KiloM">
+								(kWh/100km)
+							</small>
+							<input name="consumption" type="number" step="0.1" />
 						</label>
 					</div>
 

@@ -73,8 +73,8 @@ describe("recordWeather", () => {
 			start_time: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
 			end_time: new Date().toISOString(),
 			daypart: "morning",
-			duration_min: 45,
-			distance_km: 15.0,
+			duration: 45,
+			distance: 15.0,
 			start_location_id: TEST_LOC_ID,
 			end_location_id: TEST_LOC_ID
 		})
@@ -103,8 +103,8 @@ describe("recordWeather", () => {
 			start_time: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
 			end_time: new Date().toISOString(),
 			daypart: "morning",
-			duration_min: 45,
-			distance_km: 15.0,
+			duration: 45,
+			distance: 15.0,
 			start_location_id: TEST_LOC_ID,
 			end_location_id: TEST_LOC_ID
 		})

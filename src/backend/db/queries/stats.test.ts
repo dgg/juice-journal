@@ -27,20 +27,20 @@ afterAll(async () => {
 async function seedTrip(opts: {
 	start: DateTimeMaybeValid
 	end: DateTimeMaybeValid
-	duration_min: number
-	distance_km: number
-	avg_speed_kmh?: number
-	avg_consumption_kwh_100km?: number
+	duration: number
+	distance: number
+	speed?: number
+	consumption?: number
 }) {
 	await tripsQueries.createTrip({
 		vehicle_id: TEST_VEHICLE_ID,
 		start_time: opts.start,
 		end_time: opts.end,
 		daypart: "morning",
-		duration_min: opts.duration_min,
-		distance_km: opts.distance_km,
-		avg_speed_kmh: opts.avg_speed_kmh,
-		avg_consumption_kwh_100km: opts.avg_consumption_kwh_100km
+		duration: opts.duration,
+		distance: opts.distance,
+		speed: opts.speed,
+		consumption: opts.consumption
 	})
 	CLEANUP_TRIPS.push({ start: opts.start, end: opts.end })
 }
@@ -64,18 +64,18 @@ describe.skip("statsQueries", () => {
 				start_time: utcIso("2026-07-10T08:00:00Z"),
 				end_time: utcIso("2026-07-10T08:45:00Z"),
 				daypart: "morning",
-				duration_min: 45,
-				distance_km: 15.0,
-				avg_consumption_kwh_100km: 20.0
+				duration: 45,
+				distance: 15.0,
+				consumption: 20.0
 			})
 			await tripsQueries.createTrip({
 				vehicle_id: TEST_VEHICLE_ID,
 				start_time: utcIso("2026-07-11T08:00:00Z"),
 				end_time: utcIso("2026-07-11T08:30:00Z"),
 				daypart: "morning",
-				duration_min: 30,
-				distance_km: 10.0,
-				avg_consumption_kwh_100km: 18.0
+				duration: 30,
+				distance: 10.0,
+				consumption: 18.0
 			})
 
 			const result = await statsQueries.monthlyAggregates({
@@ -119,18 +119,18 @@ describe.skip("statsQueries", () => {
 			await seedTrip({
 				start: utcIso("2026-06-01T08:00:00Z"),
 				end: utcIso("2026-06-01T08:45:00Z"),
-				duration_min: 45,
-				distance_km: 15.0,
-				avg_speed_kmh: 20.0,
-				avg_consumption_kwh_100km: 18.0
+				duration: 45,
+				distance: 15.0,
+				speed: 20.0,
+				consumption: 18.0
 			})
 			await seedTrip({
 				start: utcIso("2026-06-02T08:00:00Z"),
 				end: utcIso("2026-06-02T08:30:00Z"),
-				duration_min: 30,
-				distance_km: 10.0,
-				avg_speed_kmh: 40.0,
-				avg_consumption_kwh_100km: 20.0
+				duration: 30,
+				distance: 10.0,
+				speed: 40.0,
+				consumption: 20.0
 			})
 
 			const result = await statsQueries.periodAggregates({
@@ -157,8 +157,8 @@ describe.skip("statsQueries", () => {
 			})
 
 			expect(series.length).toBeGreaterThanOrEqual(2)
-			expect(series[0]!.distance_km).toBeGreaterThan(0)
-			expect(series[0]!.duration_min).toBeGreaterThan(0)
+			expect(series[0]!.distance).toBeGreaterThan(0)
+			expect(series[0]!.duration).toBeGreaterThan(0)
 			expect(series[0]!.time).toBeInstanceOf(DateTime)
 			expect(series[0]!.daypart).toBe("morning")
 		})
@@ -172,10 +172,10 @@ describe.skip("statsQueries", () => {
 			})
 
 			expect(series.length).toBe(1)
-			expect(series[0]!.distance_km).toBe(25.0)
-			expect(series[0]!.duration_min).toBe(75)
-			expect(series[0]!.avg_speed_kmh).toBe(30.0)
-			expect(series[0]!.avg_consumption_kwh_100km).toBe(19.0)
+			expect(series[0]!.distance).toBe(25.0)
+			expect(series[0]!.duration).toBe(75)
+			expect(series[0]!.speed).toBe(30.0)
+			expect(series[0]!.consumption).toBe(19.0)
 			expect(series[0]!.time).toBeInstanceOf(DateTime)
 			expect(series[0]!.daypart).toBeNull()
 		})
@@ -190,8 +190,8 @@ describe.skip("statsQueries", () => {
 
 			expect(series.length).toBeGreaterThanOrEqual(1)
 			// Two trips on same week should be in same bucket
-			expect(series[0]!.distance_km).toBe(25.0)
-			expect(series[0]!.duration_min).toBe(75)
+			expect(series[0]!.distance).toBe(25.0)
+			expect(series[0]!.duration).toBe(75)
 		})
 
 		it("returns empty array for empty period", async () => {

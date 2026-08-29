@@ -74,10 +74,10 @@ describe("Trips API Database", () => {
           start_time,
           end_time,
           daypart,
-          duration_min,
-          distance_km,
-          avg_speed_kmh,
-          avg_consumption_kwh_100km
+          duration,
+          distance,
+          speed,
+          consumption
         )
         VALUES (
           ${TEST_VEHICLE_ID},
@@ -94,18 +94,18 @@ describe("Trips API Database", () => {
 
 			expect(result.length).toBe(1)
 			expect(result[0].daypart).toBe("morning")
-			expect(result[0].duration_min).toBe(45)
+			expect(result[0].duration).toBe(45)
 		})
 
-		it("should store duration_min as provided", async () => {
+		it("should store duration as provided", async () => {
 			const result = await db`
         INSERT INTO trips (
           vehicle_id,
           start_time,
           end_time,
           daypart,
-          duration_min,
-          distance_km
+          duration,
+          distance
         )
         VALUES (
           ${TEST_VEHICLE_ID},
@@ -115,10 +115,10 @@ describe("Trips API Database", () => {
           40,
           20.0
         )
-        RETURNING duration_min
+        RETURNING duration
       `
 
-			expect(result[0].duration_min).toBe(40)
+			expect(result[0].duration).toBe(40)
 		})
 	})
 
@@ -130,8 +130,8 @@ describe("Trips API Database", () => {
           start_time,
           end_time,
           daypart,
-          duration_min,
-          distance_km
+          duration,
+          distance
         )
         VALUES (
           ${TEST_VEHICLE_ID},
@@ -154,8 +154,8 @@ describe("Trips API Database", () => {
           start_time,
           end_time,
           daypart,
-          duration_min,
-          distance_km
+          duration,
+          distance
         )
         VALUES (
           ${TEST_VEHICLE_ID},
@@ -179,8 +179,8 @@ describe("Trips API Database", () => {
             start_time,
             end_time,
             daypart,
-            duration_min,
-            distance_km
+            duration,
+            distance
           )
           VALUES (
             ${TEST_VEHICLE_ID},
@@ -210,8 +210,8 @@ describe("Trips API Database", () => {
           start_time,
           end_time,
           daypart,
-          duration_min,
-          distance_km
+          duration,
+          distance
         )
         VALUES (
           ${TEST_VEHICLE_ID},
@@ -231,8 +231,8 @@ describe("Trips API Database", () => {
             start_time,
             end_time,
             daypart,
-            duration_min,
-            distance_km
+            duration,
+            distance
           )
           VALUES (
             ${TEST_VEHICLE_ID},
@@ -264,8 +264,8 @@ describe("Trips API Database", () => {
             start_time,
             end_time,
             daypart,
-            duration_min,
-            distance_km
+            duration,
+            distance
           )
           VALUES (
             'invalid-test-id3',
@@ -293,8 +293,8 @@ describe("Trips API Database", () => {
             start_time,
             end_time,
             daypart,
-            duration_min,
-            distance_km,
+            duration,
+            distance,
             start_location_id
           )
           VALUES (
@@ -325,8 +325,8 @@ describe("Trips API Database", () => {
           start_time,
           end_time,
           daypart,
-          duration_min,
-          distance_km
+          duration,
+          distance
         )
         VALUES (
           ${TEST_VEHICLE_ID},

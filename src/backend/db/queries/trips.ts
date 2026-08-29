@@ -4,7 +4,8 @@ import { locationsQueries } from "./locations"
 
 import { db } from "../client"
 import { toNumber, toUtcDateTime, fromUtcDateTime } from "../convert"
-import type { TripInput } from "../../types"
+import type { TripInput, Daypart } from "../../types"
+import type { WeatherSnapshot } from "../../weather/types"
 import { storeWeather, type WeatherParam } from "../../weather/storage"
 
 export interface TripRow {
@@ -14,14 +15,19 @@ export interface TripRow {
 	end_time: DateTime
 	start_location_id: string | null
 	end_location_id: string | null
-	daypart: "morning" | "afternoon"
-	duration_min: number
-	distance_km: number
-	avg_speed_kmh: number | null
-	avg_consumption_kwh_100km: number | null
-	weather_start: object | null
-	weather_end: object | null
-	odometer_km: number | null
+	daypart: Daypart
+	/** trip duration (MIN) */
+	duration: number
+	/** trip distance (KiloM) */
+	distance: number
+	/* trip average speed (KiloM-PER-HR) */
+	speed: number | null
+	/** trip average consumotion (KiloW-HR-PER-HUNDRED-KiloM) */
+	consumption: number | null
+	weather_start: WeatherSnapshot | null
+	weather_end: WeatherSnapshot | null
+	/** odometer reading (KiloM) */
+	odometer: number | null
 	tracking_created: DateTime
 	tracking_updated: DateTime
 }
@@ -30,15 +36,15 @@ export interface TripWithLocationRow {
 	id: string
 	start_time: DateTime
 	end_time: DateTime
-	daypart: "morning" | "afternoon"
-	duration_min: number
-	distance_km: number
-	avg_speed_kmh: number | null
-	avg_consumption_kwh_100km: number | null
-	odometer_km: number | null
+	daypart: Daypart
+	duration: number
+	distance: number
+	speed: number | null
+	consumption: number | null
+	odometer: number | null
 	start_location: string | null
 	end_location: string | null
-	weatherStart: object | null
+	weatherStart: WeatherSnapshot | null
 }
 
 function mapTripRow(raw: Record<string, unknown>): TripRow {
@@ -49,16 +55,14 @@ function mapTripRow(raw: Record<string, unknown>): TripRow {
 		end_time: toUtcDateTime(raw.end_time as Date),
 		start_location_id: (raw.start_location_id as string | null) ?? null,
 		end_location_id: (raw.end_location_id as string | null) ?? null,
-		daypart: raw.daypart as "morning" | "afternoon",
-		duration_min: raw.duration_min as number,
-		distance_km: toNumber(raw.distance_km as string | null) ?? 0,
-		avg_speed_kmh: toNumber(raw.avg_speed_kmh as string | null),
-		avg_consumption_kwh_100km: toNumber(
-			raw.avg_consumption_kwh_100km as string | null
-		),
-		weather_start: (raw.weather_start as object | null) ?? null,
-		weather_end: (raw.weather_end as object | null) ?? null,
-		odometer_km: toNumber(raw.odometer_km as string | null),
+		daypart: raw.daypart as Daypart,
+		duration: raw.duration as number,
+		distance: toNumber(raw.distance as string | null) ?? 0,
+		speed: toNumber(raw.speed as string | null),
+		consumption: toNumber(raw.consumption as string | null),
+		weather_start: (raw.weather_start as WeatherSnapshot | null) ?? null,
+		weather_end: (raw.weather_end as WeatherSnapshot | null) ?? null,
+		odometer: toNumber(raw.odometer as string | null),
 		tracking_created: toUtcDateTime(raw.tracking_created as Date),
 		tracking_updated: toUtcDateTime(raw.tracking_updated as Date)
 	}
@@ -69,17 +73,15 @@ function mapTripWithLocationRow(raw: Record<string, unknown>): TripWithLocationR
 		id: raw.id as string,
 		start_time: toUtcDateTime(raw.start_time as Date),
 		end_time: toUtcDateTime(raw.end_time as Date),
-		daypart: raw.daypart as "morning" | "afternoon",
-		duration_min: raw.duration_min as number,
-		distance_km: toNumber(raw.distance_km as string | null) ?? 0,
-		avg_speed_kmh: toNumber(raw.avg_speed_kmh as string | null),
-		avg_consumption_kwh_100km: toNumber(
-			raw.avg_consumption_kwh_100km as string | null
-		),
-		odometer_km: toNumber(raw.odometer_km as string | null),
+		daypart: raw.daypart as Daypart,
+		duration: raw.duration as number,
+		distance: toNumber(raw.distance as string | null) ?? 0,
+		speed: toNumber(raw.speed as string | null),
+		consumption: toNumber(raw.consumption as string | null),
+		odometer: toNumber(raw.odometer as string | null),
 		start_location: (raw.start_location as string | null) ?? null,
 		end_location: (raw.end_location as string | null) ?? null,
-		weatherStart: (raw.weather_start as object | null) ?? null
+		weatherStart: (raw.weather_start as WeatherSnapshot | null) ?? null
 	}
 }
 
@@ -93,13 +95,13 @@ export const tripsQueries = {
 				start_location_id,
 				end_location_id,
 				daypart,
-				duration_min,
-				distance_km,
-				avg_speed_kmh,
-				avg_consumption_kwh_100km,
+				duration,
+				distance,
+				speed,
+				consumption,
 				weather_start,
 				weather_end,
-				odometer_km
+				odometer
 			)
 			VALUES (
 				${input.vehicle_id},
@@ -108,13 +110,13 @@ export const tripsQueries = {
 				${input.start_location_id ?? null},
 				${input.end_location_id ?? null},
 				${input.daypart},
-				${input.duration_min},
-				${input.distance_km},
-				${input.avg_speed_kmh ?? null},
-				${input.avg_consumption_kwh_100km ?? null},
+				${input.duration},
+				${input.distance},
+				${input.speed ?? null},
+				${input.consumption ?? null},
 				null,
 				null,
-				${input.odometer_km ?? null}
+				${input.odometer ?? null}
 			)
 			RETURNING *
 		`
@@ -155,8 +157,8 @@ export const tripsQueries = {
 
 	async updateWeather(
 		id: string,
-		weatherStart: object | null,
-		weatherEnd: object | null
+		weatherStart: WeatherSnapshot | null,
+		weatherEnd: WeatherSnapshot | null
 	): Promise<void> {
 		await db`
 			UPDATE trips SET
@@ -227,15 +229,15 @@ export const tripsQueries = {
 
 	async findLatestOdometerForVehicle(vehicleId: string): Promise<number | null> {
 		const rows = await db`
-			SELECT odometer_km FROM trips
+			SELECT odometer FROM trips
 			WHERE vehicle_id = ${vehicleId}
-				AND odometer_km IS NOT NULL
+				AND odometer IS NOT NULL
 			ORDER BY end_time DESC
 			LIMIT 1
 		`
 		if (rows.length === 0) return null
 		return toNumber(
-			(rows[0] as unknown as Record<string, unknown>).odometer_km as string | null
+			(rows[0] as unknown as Record<string, unknown>).odometer as string | null
 		)
 	},
 
@@ -251,11 +253,11 @@ export const tripsQueries = {
 					t.start_time,
 					t.end_time,
 					t.daypart,
-					t.duration_min,
-					t.distance_km,
-					t.avg_speed_kmh,
-					t.avg_consumption_kwh_100km,
-					t.odometer_km,
+					t.duration,
+					t.distance,
+					t.speed,
+					t.consumption,
+					t.odometer,
 					t.weather_start,
 					start_loc.label as start_location,
 					end_loc.label as end_location
@@ -273,11 +275,11 @@ export const tripsQueries = {
 					t.start_time,
 					t.end_time,
 					t.daypart,
-					t.duration_min,
-					t.distance_km,
-					t.avg_speed_kmh,
-					t.avg_consumption_kwh_100km,
-					t.odometer_km,
+					t.duration,
+					t.distance,
+					t.speed,
+					t.consumption,
+					t.odometer,
 					t.weather_start,
 					start_loc.label as start_location,
 					end_loc.label as end_location
