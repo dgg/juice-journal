@@ -64,18 +64,18 @@ The system SHALL let the user select a period of `week`, `month`, or `year`. The
 
 ### Requirement: Period switching uses HTMX partial swap
 
-The system SHALL switch periods without a full page reload by requesting `GET /partials/trip-stats` with the selected period, the current `date` value, and the current `yearGranularity`, and swapping the stats + charts region of the page.
+The system SHALL switch periods without a full page reload by requesting `GET /stats/fragments/charts` with the selected period, the current `date` value, and the current `yearGranularity`, and swapping the stats + charts region of the page.
 
 #### Scenario: Partial swap on period change
 
 - **WHEN** the user changes the period switcher
-- **THEN** the system SHALL request `/partials/trip-stats?period=<week|month|year>&date=<current>&yearGranularity=<month|week>` and replace only the stats and charts region, leaving the rest of the page intact
+- **THEN** the system SHALL request `/stats/fragments/charts?period=<week|month|year>&date=<current>&yearGranularity=<month|week>` and replace only the stats and charts region, leaving the rest of the page intact
 
 #### Scenario: Partial swap preserves date across period changes
 
 - **GIVEN** the user is viewing July 2026 (`date=2026-07`)
 - **WHEN** the user switches the period from month to week
-- **THEN** the system SHALL request `/partials/trip-stats?period=week&date=2026-07` and render the ISO week containing a day in July 2026
+- **THEN** the system SHALL request `/stats/fragments/charts?period=week&date=2026-07` and render the ISO week containing a day in July 2026
 
 ### Requirement: Stats values are aggregated for the selected period
 
@@ -226,7 +226,7 @@ The granularity toggle SHALL render directly above the chart region, not at the 
 #### Scenario: Toggling year granularity
 
 - **WHEN** the user toggles between Month and Week granularity while the period is year
-- **THEN** the system SHALL request `/partials/stats?period=year&yearGranularity=<month|week>` and swap the charts region without a full page reload
+- **THEN** the system SHALL request `/stats/fragments/charts?period=year&yearGranularity=<month|week>` and swap the charts region without a full page reload
 
 #### Scenario: Granularity toggle buttons render a granularity-specific icon
 
@@ -296,19 +296,19 @@ The system SHALL render a period navigation control below the period switcher, c
 
 - **GIVEN** the user is viewing August 2026 (`date=2026-08`)
 - **WHEN** the user clicks the ◀ button
-- **THEN** the system SHALL request `/partials/trip-stats?period=month&date=2026-07` and render July 2026 stats with the picker value updated to `2026-07`
+- **THEN** the system SHALL request `/stats/fragments/charts?period=month&date=2026-07` and render July 2026 stats with the picker value updated to `2026-07`
 
 #### Scenario: Stepper navigates to next period
 
 - **GIVEN** the user is viewing June 2026 (`date=2026-06`)
 - **WHEN** the user clicks the ▶ button
-- **THEN** the system SHALL request `/partials/trip-stats?period=month&date=2026-07` and render July 2026 stats with the picker value updated to `2026-07`
+- **THEN** the system SHALL request `/stats/fragments/charts?period=month&date=2026-07` and render July 2026 stats with the picker value updated to `2026-07`
 
 #### Scenario: Picker change triggers render
 
 - **GIVEN** the user is viewing August 2026 and the picker shows `2026-08`
 - **WHEN** the user selects `2026-03` in the picker and commits (e.g., taps Set on mobile)
-- **THEN** the system SHALL request `/partials/trip-stats?period=month&date=2026-03` and render March 2026 stats
+- **THEN** the system SHALL request `/stats/fragments/charts?period=month&date=2026-03` and render March 2026 stats
 
 #### Scenario: Picker and stepper stay in sync
 
@@ -320,7 +320,7 @@ The system SHALL render a period navigation control below the period switcher, c
 
 - **GIVEN** the user is viewing July 2026 and the picker shows `2026-07`
 - **WHEN** the user clears the picker (fires `change` with an empty value)
-- **THEN** the system SHALL request `/partials/trip-stats?period=month` without a `date` parameter and render the current month stats
+- **THEN** the system SHALL request `/stats/fragments/charts?period=month` without a `date` parameter and render the current month stats
 
 #### Scenario: Year picker is a select dropdown
 
