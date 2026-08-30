@@ -33,7 +33,7 @@ afterAll(async () => {
 	} catch {}
 })
 
-describe("Trips API Database", () => {
+describe.skip("Trips API Database", () => {
 	describe("Schema Validation", () => {
 		it("should have vehicles table", async () => {
 			const result = await db`

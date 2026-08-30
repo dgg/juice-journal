@@ -6,7 +6,7 @@ import { TripRow } from "../components/TripRow"
 import { EmptyState } from "../components/EmptyState"
 import { StickyCta } from "../components/StickyCta"
 import type { TripWithLocationRow } from "../../backend/db/queries/trips"
-import type { StatWithDelta } from "../../backend/stats"
+import type { StatWithDelta } from "../../backend/presentation/stats"
 
 interface HomePageData {
 	vehicle: { id: string; description: string } | null
@@ -53,7 +53,7 @@ export const HomePage: FC<{ data: HomePageData }> = ({ data }) => {
 							variant: "secondary",
 							icon: "chart-no-axes-combined"
 						},
-						{ href: "/trips/new", label: "Log new trip", icon: "circle-plus" }
+						{ href: "/trips/creation", label: "Log new trip", icon: "circle-plus" }
 					]}
 				/>
 			</main>

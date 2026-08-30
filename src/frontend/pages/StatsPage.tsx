@@ -3,7 +3,7 @@ import { raw } from "hono/html"
 import { Layout } from "../Layout"
 import { StatsChartsFragment } from "../fragments/StatsChartsFragment"
 import { StickyCta } from "../components/StickyCta"
-import type { StatsView } from "../../backend/stats"
+import type { StatsView } from "../../backend/presentation/stats"
 
 const Scripts = () => (
 	<>
