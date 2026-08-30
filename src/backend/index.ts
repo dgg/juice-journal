@@ -22,7 +22,10 @@ const PORT = process.env.PORT || 3000
 app.use(requestId())
 app.use(
 	structuredLogger({
-		createLogger: (c) => rootLogger.child({ requestId: c.var.requestId })
+		createLogger: (c) => rootLogger.child({ requestId: c.var.requestId }),
+		onResponse: (logger, c, elapsedMs) => {
+			logger.info({ method: c.req.method, path: c.req.path, elapsedMs })
+		}
 	})
 )
 
@@ -41,8 +44,7 @@ app.get("/static/*", async (c) => {
 	return new Response(file)
 })
 
-app
-	.route("/api", apiTrips)
+app.route("/api", apiTrips)
 	// htmx handlers
 	.get("/", homeHandler)
 	.get("/trips/new", getTripFormPage)
