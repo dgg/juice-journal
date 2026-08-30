@@ -195,13 +195,13 @@ Each primary page (home, stats) SHALL expose a sticky bottom-anchored navigation
 
 #### Scenario: Trip form page uses sticky CTA for back navigation
 
-- **GIVEN** the user is viewing the trip form page at `/trips/new`
+- **GIVEN** the user is viewing the trip form page at `/trips/creation`
 - **WHEN** the page renders
 - **THEN** the page SHALL expose a sticky CTA control containing an anchor to `/` with a label identifying the home page (Back)
 
 #### Scenario: Trip form page save action submits the form
 
-- **GIVEN** the user is viewing the trip form page at `/trips/new`
+- **GIVEN** the user is viewing the trip form page at `/trips/creation`
 - **WHEN** the page renders
 - **THEN** the sticky CTA control SHALL contain a `type="submit"` button that submits the trip form when activated
 
