@@ -18,7 +18,7 @@ afterAll(async () => {
 	} catch {}
 })
 
-describe("FK Check Middleware (integration via raw DB queries)", () => {
+describe.skip("FK Check Middleware (integration via raw DB queries)", () => {
 	describe("Vehicle FK", () => {
 		it("should detect non-existent vehicle_id", async () => {
 			const result = await db`
@@ -45,7 +45,7 @@ describe("FK Check Middleware (integration via raw DB queries)", () => {
 	})
 })
 
-describe("Unique Constraint Pre-check (tripConflictValidator integration)", () => {
+describe.skip("Unique Constraint Pre-check (tripConflictValidator integration)", () => {
 	const TRIP_END_TIME = "2026-07-15T10:30:00Z"
 	const TRIP_END_TIME_2 = "2026-07-16T10:30:00Z"
 

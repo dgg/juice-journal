@@ -10,12 +10,12 @@ describe("StickyCta", () => {
 			<StickyCta
 				actions={[
 					{ href: "/stats", label: "Stats", variant: "secondary" },
-					{ href: "/trips/new", label: "Log new trip" }
+					{ href: "/trips/creation", label: "Log new trip" }
 				]}
 			/>
 		)
 		expect(html).toContain('href="/stats"')
-		expect(html).toContain('href="/trips/new"')
+		expect(html).toContain('href="/trips/creation"')
 		expect(html).toContain(">Stats<")
 		expect(html).toContain(">Log new trip<")
 	})
@@ -41,7 +41,7 @@ describe("StickyCta", () => {
 	it("renders icon span before label when icon is provided", () => {
 		const html = String(
 			<StickyCta
-				actions={[{ href: "/trips/new", label: "Log new trip", icon: "plus" }]}
+				actions={[{ href: "/trips/creation", label: "Log new trip", icon: "plus" }]}
 			/>
 		)
 		expect(html).toContain('<span class="icon-plus" aria-hidden="true"></span>')
@@ -111,7 +111,7 @@ describe("HomePage", () => {
 		expect(html).toContain(">Stats</a>")
 	})
 
-	it("renders anchor to /trips/new in sticky CTA", () => {
+	it("renders anchor to /trips/creation in sticky CTA", () => {
 		const html = String(
 			<HomePage
 				data={{
@@ -123,7 +123,7 @@ describe("HomePage", () => {
 				}}
 			/>
 		)
-		expect(html).toContain('href="/trips/new"')
+		expect(html).toContain('href="/trips/creation"')
 		expect(html).toContain(">Log new trip</a>")
 	})
 

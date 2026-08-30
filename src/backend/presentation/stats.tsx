@@ -1,16 +1,17 @@
 import type { Context } from "hono"
 import { DateTime } from "luxon"
+import { Hono } from "hono"
 
-import { tripsQueries } from "./db/queries/trips"
-import { statsQueries } from "./db/queries/stats"
-import { vehiclesQueries } from "./db/queries/vehicles"
+import { tripsQueries } from "../db/queries/trips"
+import { statsQueries } from "../db/queries/stats"
+import { vehiclesQueries } from "../db/queries/vehicles"
 
-import { displayTz, periodBoundsUtc } from "./utils/dates"
-import { formatDurationHm } from "./utils/format"
-import type { Env } from "./utils/logger"
+import { displayTz, periodBoundsUtc } from "../utils/dates"
+import { formatDurationHm } from "../utils/format"
+import type { Env } from "../utils/logger"
 
-import { StatsPage } from "../frontend/pages/StatsPage"
-import { StatsChartsFragment } from "../frontend/fragments/StatsChartsFragment"
+import { StatsPage } from "../../frontend/pages/StatsPage"
+import { StatsChartsFragment } from "../../frontend/fragments/StatsChartsFragment"
 
 const STATS_PERIODS = ["week", "month", "year"] as const
 const YEAR_GRANULARITY = ["month", "week"] as const
@@ -239,10 +240,7 @@ async function computeStatsView(params: {
 				prev: prevStats.totalDuration
 			},
 			totalTimeHm: formatDurationHm(currentStats.totalDuration),
-			avgSpeed: {
-				value: currentStats.avgSpeed,
-				prev: prevStats.avgSpeed
-			},
+			avgSpeed: { value: currentStats.avgSpeed, prev: prevStats.avgSpeed },
 			avgDuration: {
 				value: currentStats.avgDuration,
 				prev: prevStats.avgDuration
@@ -252,10 +250,7 @@ async function computeStatsView(params: {
 				value: currentStats.avgConsumption,
 				prev: prevStats.avgConsumption
 			},
-			tripCount: {
-				value: currentStats.tripCount,
-				prev: prevStats.tripCount
-			}
+			tripCount: { value: currentStats.tripCount, prev: prevStats.tripCount }
 		},
 		series,
 		hasTrips,
@@ -266,7 +261,7 @@ async function computeStatsView(params: {
 	}
 }
 
-export async function statsHandler(c: Context<Env>) {
+async function statsHandler(c: Context<Env>) {
 	const parsed = parseStatsQuery(c)
 	if ("error" in parsed) return parsed.error
 
@@ -279,7 +274,7 @@ export async function statsHandler(c: Context<Env>) {
 	return c.html(<StatsPage data={view} />)
 }
 
-export async function getPartialTripStats(c: Context<Env>) {
+async function getPartialTripStats(c: Context<Env>) {
 	const parsed = parseStatsQuery(c)
 	if ("error" in parsed) return parsed.error
 
@@ -291,3 +286,7 @@ export async function getPartialTripStats(c: Context<Env>) {
 
 	return c.html(<StatsChartsFragment data={view} />)
 }
+
+export const statsDomain = new Hono<Env>()
+	.get("/", statsHandler)
+	.get("/fragments/charts", getPartialTripStats)

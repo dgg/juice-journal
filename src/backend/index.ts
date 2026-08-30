@@ -6,14 +6,10 @@ import { rootLogger, type Env } from "./utils/logger.ts"
 
 import { apiTrips } from "./api/trips.ts"
 
-import { homeHandler } from "./home.tsx"
-import { statsHandler, getPartialTripStats } from "./stats.tsx"
-import {
-	getTripFormPage,
-	getPartialTrips,
-	getPartialStats,
-	htmlCreationHandler
-} from "./html-handlers.tsx"
+import { homeDomain } from "./presentation/home.tsx"
+import { tripsDomain } from "./presentation/trips.tsx"
+import { statsDomain } from "./presentation/stats.tsx"
+import { summaryDomain } from "./presentation/summary.tsx"
 
 const app = new Hono<Env>()
 
@@ -37,22 +33,21 @@ app.onError(
 	})
 )
 
+app
+	// api handlers
+	.route("/api", apiTrips)
+	// htmx handlers
+	.route("/", homeDomain)
+	.route("/trips", tripsDomain)
+	.route("/stats", statsDomain)
+	.route("/summary", summaryDomain)
+
 app.get("/static/*", async (c) => {
 	const path = c.req.path.replace(/^\/static\//, "")
 	const file = Bun.file(`./public/${path}`)
 	if (!(await file.exists())) return c.notFound()
 	return new Response(file)
 })
-
-app.route("/api", apiTrips)
-	// htmx handlers
-	.get("/", homeHandler)
-	.get("/trips/new", getTripFormPage)
-	.get("/partials/trips", getPartialTrips)
-	.get("/partials/stats", getPartialStats)
-	.get("/partials/trip-stats", getPartialTripStats)
-	.get("/stats", statsHandler)
-	.post("/trips", htmlCreationHandler)
 
 rootLogger.info({ port: PORT }, "Server listening on port")
 

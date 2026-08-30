@@ -1,16 +1,17 @@
 import type { Context } from "hono"
 import { DateTime } from "luxon"
+import { Hono } from "hono"
 
-import { displayTz, currentMonthBoundsUtc, prevMonthBoundsUtc } from "./utils/dates"
-import { formatDurationHm } from "./utils/format"
-import type { Env } from "./utils/logger"
+import { displayTz, currentMonthBoundsUtc, prevMonthBoundsUtc } from "../utils/dates"
+import { formatDurationHm } from "../utils/format"
+import type { Env } from "../utils/logger"
 
-import { tripsQueries, type TripWithLocationRow } from "./db/queries/trips"
-import { vehiclesQueries } from "./db/queries/vehicles"
-import { statsQueries } from "./db/queries/stats"
+import { tripsQueries, type TripWithLocationRow } from "../db/queries/trips"
+import { vehiclesQueries } from "../db/queries/vehicles"
+import { statsQueries } from "../db/queries/stats"
 import type { StatWithDelta } from "./stats"
 
-import { HomePage } from "../frontend/pages/HomePage"
+import { HomePage } from "../../frontend/pages/HomePage"
 
 interface HomeData {
 	vehicle: {
@@ -102,3 +103,5 @@ export async function homeHandler(c: Context<Env>) {
 
 	return c.html(<HomePage data={data} />)
 }
+
+export const homeDomain = new Hono<Env>().get("/", homeHandler)

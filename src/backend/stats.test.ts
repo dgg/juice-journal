@@ -5,7 +5,7 @@ import {
 	parseStatsQuery,
 	resolveAnchor,
 	formatDateForPeriod
-} from "./stats.tsx"
+} from "./presentation/stats.tsx"
 
 const createMockContext = (query: Record<string, string>) => ({
 	req: { query: (name: string) => query[name] },

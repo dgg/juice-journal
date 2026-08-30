@@ -1,6 +1,6 @@
 import type { FC } from "hono/jsx"
 import { StatCard } from "../components/StatCard"
-import type { StatWithDelta } from "../../backend/stats"
+import type { StatWithDelta } from "../../backend/presentation/stats"
 
 export interface StatsSummary {
 	totalDistance: StatWithDelta

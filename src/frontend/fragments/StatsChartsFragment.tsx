@@ -2,7 +2,7 @@ import type { FC } from "hono/jsx"
 import { StatsSummaryGrid } from "./StatsSummaryGrid"
 import { EmptyState } from "../components/EmptyState"
 import { raw } from "hono/html"
-import type { StatsView } from "../../backend/stats"
+import type { StatsView } from "../../backend/presentation/stats"
 
 function periodIcon(value: string): string {
 	if (value === "week") return "calendar-1"
@@ -17,7 +17,7 @@ const PeriodNavigation: FC<{ data: StatsView }> = ({ data }) => {
 				type="week"
 				name="date"
 				value={data.date ?? ""}
-				hx-get="/partials/trip-stats"
+				hx-get="/stats/fragments/charts"
 				hx-target="#stats-region"
 				hx-swap="outerHTML"
 				hx-trigger="change"
@@ -33,7 +33,7 @@ const PeriodNavigation: FC<{ data: StatsView }> = ({ data }) => {
 				type="month"
 				name="date"
 				value={data.date ?? ""}
-				hx-get="/partials/trip-stats"
+				hx-get="/stats/fragments/charts"
 				hx-target="#stats-region"
 				hx-swap="outerHTML"
 				hx-trigger="change"
@@ -47,7 +47,7 @@ const PeriodNavigation: FC<{ data: StatsView }> = ({ data }) => {
 		) : (
 			<select
 				name="date"
-				hx-get="/partials/trip-stats"
+				hx-get="/stats/fragments/charts"
 				hx-target="#stats-region"
 				hx-swap="outerHTML"
 				hx-trigger="change"
@@ -70,7 +70,7 @@ const PeriodNavigation: FC<{ data: StatsView }> = ({ data }) => {
 		<div class="period-stepper period-stepper--picker" role="group">
 			<button
 				class="outline"
-				hx-get="/partials/trip-stats"
+				hx-get="/stats/fragments/charts"
 				hx-target="#stats-region"
 				hx-swap="outerHTML"
 				hx-vals={JSON.stringify({
@@ -85,7 +85,7 @@ const PeriodNavigation: FC<{ data: StatsView }> = ({ data }) => {
 			{picker}
 			<button
 				class="outline"
-				hx-get="/partials/trip-stats"
+				hx-get="/stats/fragments/charts"
 				hx-target="#stats-region"
 				hx-swap="outerHTML"
 				hx-vals={JSON.stringify({
@@ -112,7 +112,7 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 				{(["week", "month", "year"] as const).map((p) => (
 					<button
 						class={p === selectedPeriod ? "secondary" : "outline"}
-						hx-get="/partials/trip-stats"
+						hx-get="/stats/fragments/charts"
 						hx-target="#stats-region"
 						hx-swap="outerHTML"
 						hx-vals={JSON.stringify({
@@ -149,7 +149,7 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 							{(["month", "week"] as const).map((g) => (
 								<button
 									class={g === selectedGranularity ? "secondary" : "outline"}
-									hx-get="/partials/trip-stats"
+									hx-get="/stats/fragments/charts"
 									hx-target="#stats-region"
 									hx-swap="outerHTML"
 									hx-vals={JSON.stringify({
