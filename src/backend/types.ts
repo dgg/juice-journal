@@ -10,6 +10,10 @@ const DAYPARTS = ["morning", "afternoon"] as const
 const daypart = z.enum(DAYPARTS)
 export type Daypart = z.infer<typeof daypart>
 
+const LOCATIONS = ["home", "work"] as const
+const location = z.enum(LOCATIONS)
+export type Location = z.infer<typeof location>
+
 const datetime = z.iso
 		.datetime({ offset: true })
 		.transform((s) => DateTime.fromISO(s, { setZone: true }).toUTC())
@@ -23,8 +27,8 @@ export const tripInputSchema = z.object({
 	duration: z.number().int().positive(),
 	/** trip distance (qudt:KiloM) */
 	distance: z.number().positive(),
-	start_location_id: nanoid.optional(),
-	end_location_id: nanoid.optional(),
+	start_location: location.optional(),
+	end_location: location.optional(),
 	/* trip average speed (qudt:KiloM-PER-HR) */
 	speed: z.number().positive().optional(),
 	/** trip average consumotion (qudt_:KiloW-HR-PER-HUNDRED-KiloM) */
@@ -34,7 +38,7 @@ export const tripInputSchema = z.object({
 })
 
 const waypoint = z.object({
-	location: nanoid.nullable(),
+	location: location.nullable(),
 	time: datetime,
 	weather: z.unknown().nullable()
 })

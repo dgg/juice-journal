@@ -1,7 +1,6 @@
 import { ProblemDetailsError } from "hono-problem-details"
 
 import { vehiclesQueries } from "../db/queries/vehicles"
-import { locationsQueries } from "../db/queries/locations"
 import { tripsQueries } from "../db/queries/trips"
 
 import type { TripInput } from "../types"
@@ -33,68 +32,6 @@ export async function validateVehicle(req: TripInput): Promise<void> {
 			detail: `Could not verify vehicle '${req.vehicle_id}'`,
 			extensions: {
 				errors: [{ field: "vehicle_id", message: "verification failed" }]
-			}
-		})
-	}
-}
-
-export async function validateStartLocation(req: TripInput): Promise<void> {
-	if (!req.start_location_id) return
-	try {
-		const exists = await locationsQueries.locationExists(req.start_location_id)
-		if (!exists) {
-			throw problems.create("FOREIGN_KEY_VIOLATION", {
-				detail: `Start location '${req.start_location_id}' does not exist`,
-				extensions: {
-					errors: [
-						{
-							field: "start_location_id",
-							message: "does not exist",
-							value: req.start_location_id
-						}
-					]
-				}
-			})
-		}
-	} catch (error) {
-		if (error instanceof ProblemDetailsError) {
-			throw error
-		}
-		throw problems.create("FOREIGN_KEY_VIOLATION", {
-			detail: `Could not verify start location '${req.start_location_id}'`,
-			extensions: {
-				errors: [{ field: "start_location_id", message: "verification failed" }]
-			}
-		})
-	}
-}
-
-export async function validateEndLocation(req: TripInput): Promise<void> {
-	if (!req.end_location_id) return
-	try {
-		const exists = await locationsQueries.locationExists(req.end_location_id)
-		if (!exists) {
-			throw problems.create("FOREIGN_KEY_VIOLATION", {
-				detail: `End location '${req.end_location_id}' does not exist`,
-				extensions: {
-					errors: [
-						{
-							field: "end_location_id",
-							message: "does not exist",
-							value: req.end_location_id
-						}
-					]
-				}
-			})
-		}
-	} catch (error) {
-		if (error instanceof ProblemDetailsError) {
-			throw error
-		}
-		throw problems.create("FOREIGN_KEY_VIOLATION", {
-			detail: `Could not verify end location '${req.end_location_id}'`,
-			extensions: {
-				errors: [{ field: "end_location_id", message: "verification failed" }]
 			}
 		})
 	}
@@ -168,8 +105,6 @@ export async function validateOdometer(req: TripInput): Promise<void> {
 
 export const validateTripInput = async (input: TripInput): Promise<void> => {
 	await validateVehicle(input)
-	await validateStartLocation(input)
-	await validateEndLocation(input)
 	await validateTripConflict(input)
 	await validateOdometer(input)
 }

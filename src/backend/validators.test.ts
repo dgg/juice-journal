@@ -34,15 +34,6 @@ describe.skip("FK Check Middleware (integration via raw DB queries)", () => {
 			expect(result.length).toBe(1)
 		})
 	})
-
-	describe("Location FK", () => {
-		it("should detect non-existent start_location_id", async () => {
-			const result = await db`
-        SELECT id FROM locations WHERE id = 'invalid-test-id2'
-      `
-			expect(result.length).toBe(0)
-		})
-	})
 })
 
 describe.skip("Unique Constraint Pre-check (tripConflictValidator integration)", () => {

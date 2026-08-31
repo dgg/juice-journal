@@ -2,7 +2,6 @@ import { describe, it, expect, beforeAll, afterAll } from "bun:test"
 import { db } from "../client"
 import { tripsQueries } from "./trips"
 import { vehiclesQueries } from "./vehicles"
-import { locationsQueries } from "./locations"
 import { DateTime, type DateTimeMaybeValid } from "luxon"
 
 function utcIso(s: string): DateTimeMaybeValid {
@@ -10,7 +9,6 @@ function utcIso(s: string): DateTimeMaybeValid {
 }
 
 const TEST_VEHICLE_ID = "V1StGXR8_Z5jdHi6"
-const TEST_LOCATION_ID = "Bw_0wK4q2xJp5m7n"
 
 /*beforeAll(async () => {
 	try {
@@ -45,8 +43,8 @@ describe.skip("tripsQueries", () => {
 				speed: 60.0,
 				consumption: 18.5,
 				odometer: 12345.0,
-				start_location_id: TEST_LOCATION_ID,
-				end_location_id: TEST_LOCATION_ID
+				start_location: "home",
+				end_location: "home"
 			})
 
 			expect(result.vehicle_id).toBe(TEST_VEHICLE_ID)
@@ -123,7 +121,7 @@ describe.skip("tripsQueries", () => {
 
 	describe("findTripsWithLocations", () => {
 		it("returns trips with location labels", async () => {
-			// Create a trip with location IDs in the current month
+			// Create a trip with location enum values in the current month
 			await tripsQueries.createTrip({
 				vehicle_id: TEST_VEHICLE_ID,
 				start_time: utcIso("2026-07-22T08:00:00Z"),
@@ -131,8 +129,8 @@ describe.skip("tripsQueries", () => {
 				daypart: "morning",
 				duration: 45,
 				distance: 15.5,
-				start_location_id: TEST_LOCATION_ID,
-				end_location_id: TEST_LOCATION_ID
+				start_location: "home",
+				end_location: "work"
 			})
 
 			const trips = await tripsQueries.findTripsWithLocations({
@@ -143,8 +141,8 @@ describe.skip("tripsQueries", () => {
 
 			const testTrips = trips.filter((t) => t.id)
 			expect(testTrips.length).toBeGreaterThanOrEqual(1)
-			expect(testTrips[0]?.start_location).toBe("Home")
-			expect(testTrips[0]?.end_location).toBe("Home")
+			expect(testTrips[0]?.start_location).toBe("home")
+			expect(testTrips[0]?.end_location).toBe("work")
 			expect(testTrips[0]?.start_time).toBeInstanceOf(DateTime)
 		})
 	})
@@ -159,20 +157,6 @@ describe.skip("vehiclesQueries", () => {
 
 		it("returns false for non-existing vehicle", async () => {
 			const exists = await vehiclesQueries.vehicleExists("nonexistent")
-			expect(exists).toBe(false)
-		})
-	})
-})
-
-describe.skip("locationsQueries", () => {
-	describe("locationExists", () => {
-		it("returns true for existing location", async () => {
-			const exists = await locationsQueries.locationExists(TEST_LOCATION_ID)
-			expect(exists).toBe(true)
-		})
-
-		it("returns false for non-existing location", async () => {
-			const exists = await locationsQueries.locationExists("nonexistent")
 			expect(exists).toBe(false)
 		})
 	})
