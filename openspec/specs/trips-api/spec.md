@@ -22,37 +22,21 @@ The system SHALL maintain a `vehicles` table with a synthetic 16-character nanoi
 - **WHEN** a trip is created referencing that `vehicle_id`
 - **THEN** the trip record SHALL store the `vehicle_id` as a foreign key to the `vehicles` table
 
-### Requirement: Locations table
-
-The system SHALL maintain a `locations` table storing commute endpoints with `id` (16-character nanoid generated in Postgres via `nanoid-postgres`, `DEFAULT nanoid(16)`), `label` (text), `latitude` (`DECIMAL(9,6)`), `longitude` (`DECIMAL(9,6)`), and audit columns. Both `latitude` and `longitude` MUST be within valid ranges (-90 to 90, -180 to 180).
-
-#### Scenario: Location with valid coordinates
-
-- **GIVEN** the database is initialized
-- **WHEN** a location is created with `latitude=55.676098` and `longitude=12.568337`
-- **THEN** the system SHALL store the location and accept it as a reference from a trip
-
-#### Scenario: Location referenced as trip start or end
-
-- **GIVEN** a location exists
-- **WHEN** a trip is created with `start_location_id` or `end_location_id` referencing that location
-- **THEN** the trip SHALL store the foreign key; the location row SHALL NOT carry a `timezone` column
-
 ### Requirement: Trips table
 
-The system SHALL maintain a `trips` table with a synthetic 16-character nanoid primary key generated in Postgres via `nanoid-postgres` (`DEFAULT nanoid(16)`), a `UNIQUE(vehicle_id, end_time)` constraint, and the following columns: `vehicle_id` (NOT NULL `TEXT` FK to `vehicles`), `start_time` (NOT NULL timestamptz), `end_time` (NOT NULL timestamptz), `start_location_id` (nullable `TEXT` FK to `locations`), `end_location_id` (nullable `TEXT` FK to `locations`), `daypart` (enum `morning`/`afternoon`, NOT NULL), `duration` (NOT NULL int), `distance` (NOT NULL NUMERIC(8,2)), `speed` (nullable NUMERIC(5,1)), `consumption` (nullable NUMERIC(6,2)), `weather_start` (nullable JSONB), `weather_end` (nullable JSONB), `odometer` (nullable NUMERIC(8,1)), `tracking_created` (timestamptz default now()), `tracking_updated` (timestamptz default now()). Units SHALL NOT be encoded in column names; they are fixed per column and documented in the migration that introduces the column and on the consuming row type: `duration` is minutes, `distance` is kilometres, `speed` is kilometres per hour, `consumption` is kilowatt-hours per 100 kilometres, `odometer` is kilometres.
+The system SHALL maintain a `trips` table with a synthetic 16-character nanoid primary key generated in Postgres via `nanoid-postgres` (`DEFAULT nanoid(16)`), a `UNIQUE(vehicle_id, end_time)` constraint, and the following columns: `vehicle_id` (NOT NULL `TEXT` FK to `vehicles`), `start_time` (NOT NULL timestamptz), `end_time` (NOT NULL timestamptz), `start_location` (nullable `location_enum` — `'home'` or `'work'`), `end_location` (nullable `location_enum` — `'home'` or `'work'`), `daypart` (enum `morning`/`afternoon`, NOT NULL), `duration` (NOT NULL int), `distance` (NOT NULL NUMERIC(8,2)), `speed` (nullable NUMERIC(5,1)), `consumption` (nullable NUMERIC(6,2)), `weather_start` (nullable JSONB), `weather_end` (nullable JSONB), `odometer` (nullable NUMERIC(8,1)), `tracking_created` (timestamptz default now()), `tracking_updated` (timestamptz default now()). Units SHALL NOT be encoded in column names; they are fixed per column and documented in the migration that introduces the column and on the consuming row type: `duration` is minutes, `distance` is kilometres, `speed` is kilometres per hour, `consumption` is kilowatt-hours per 100 kilometres, `odometer` is kilometres. The `location_enum` type SHALL be `CREATE TYPE location_enum AS ENUM('home','work')` and SHALL be created by the initial migration.
 
 #### Scenario: Trip with full data
 
-- **GIVEN** a vehicle and a start location exist
-- **WHEN** a trip is created with `vehicle_id`, `start_time`, `end_time`, `daypart`, `duration`, `start_location_id`, `end_location_id`, `distance`, `speed`, `consumption`
+- **GIVEN** a vehicle exists
+- **WHEN** a trip is created with `vehicle_id`, `start_time`, `end_time`, `daypart`, `duration`, `start_location='home'`, `end_location='work'`, `distance`, `speed`, `consumption`
 - **THEN** the system SHALL store all fields and set `tracking_created` and `tracking_updated` to the current timestamp
 
 #### Scenario: Trip with minimal data
 
 - **GIVEN** a vehicle exists
 - **WHEN** a trip is created with only the required fields `vehicle_id`, `start_time`, `end_time`, `daypart`, `duration`, and `distance`
-- **THEN** the system SHALL store the trip with nullable fields set to NULL
+- **THEN** the system SHALL store the trip with nullable fields set to NULL (including `start_location` and `end_location`)
 
 #### Scenario: Duplicate trip rejected
 
@@ -78,7 +62,7 @@ The system SHALL store the `duration` value provided in the request. This value 
 
 ### Requirement: POST /api/trips endpoint
 
-The system SHALL expose `POST /api/trips` accepting a JSON body. Required fields: `vehicle_id`, `start_time`, `end_time`, `daypart`, `duration`, `distance`. Optional fields: `start_location_id`, `end_location_id`, `speed`, `consumption`, `weather_start`, `weather_end`, `odometer`. On success, the system SHALL return `201 Created` with the full trip record (including generated `id`, `tracking_created`, `tracking_updated`). On schema validation failure, the system SHALL return `422 Unprocessable Content` as `application/problem+json` with field-level errors in the `errors` extension (per the `request-validation` capability). On a foreign-key violation, the system SHALL return `422` problem+json. When a trip with the same `vehicle_id` and `end_time` already exists, the system SHALL return `409` problem+json whose `type` is the registry-defined `TRIP_CONFLICT` URI, detected by a dedicated validation step that runs before the handler (per the `request-validation` capability); the handler itself SHALL NOT catch a database unique-constraint violation, so a concurrent race that violates the `UNIQUE(vehicle_id, end_time)` constraint at insert time SHALL surface as an unhandled error. On any other unhandled error, the system SHALL return `500` problem+json with a constant `detail` (per the `error-handling` capability).
+The system SHALL expose `POST /api/trips` accepting a JSON body. Required fields: `vehicle_id`, `start_time`, `end_time`, `daypart`, `duration`, `distance`. Optional fields: `start_location` (`'home'` or `'work'`), `end_location` (`'home'` or `'work'`), `speed`, `consumption`, `weather_start`, `weather_end`, `odometer`. On success, the system SHALL return `201 Created` with the full trip record (including generated `id`, `tracking_created`, `tracking_updated`). On schema validation failure, the system SHALL return `422 Unprocessable Content` as `application/problem+json` with field-level errors in the `errors` extension (per the `request-validation` capability). On a foreign-key violation (non-existent `vehicle_id`), the system SHALL return `422` problem+json. When a trip with the same `vehicle_id` and `end_time` already exists, the system SHALL return `409` problem+json whose `type` is the registry-defined `TRIP_CONFLICT` URI, detected by a dedicated validation step that runs before the handler (per the `request-validation` capability); the handler itself SHALL NOT catch a database unique-constraint violation, so a concurrent race that violates the `UNIQUE(vehicle_id, end_time)` constraint at insert time SHALL surface as an unhandled error. On any other unhandled error, the system SHALL return `500` problem+json with a constant `detail` (per the `error-handling` capability).
 
 #### Scenario: Successful trip creation
 
@@ -150,37 +134,55 @@ The system SHALL resolve the display timezone for month-boundary computation via
 
 ### Requirement: Database migrations with dbmate
 
-The system SHALL use dbmate for schema migrations. Migration SQL files SHALL live in `db/migrations/` with up and down scripts. The initial migration SHALL create `vehicles`, `locations`, and `trips` tables plus dbmate's `schema_migrations` table. A subsequent migration SHALL install the `nanoid-postgres` extension and alter the primary-key and foreign-key columns from `UUID` to `TEXT` with `DEFAULT nanoid(16)` on the `id` columns. A further migration SHALL rename the unit-suffixed `trips` columns to unit-free names (`duration_min`→`duration`, `distance_km`→`distance`, `avg_speed_kmh`→`speed`, `avg_consumption_kwh_100km`→`consumption`, `odometer_km`→`odometer`) and SHALL document each column's unit in a SQL comment. Migrations SHALL be runnable locally via `bunx dbmate up`.
+The system SHALL use dbmate for schema migrations. Migration SQL files SHALL live in `db/migrations/` with up and down scripts. A single initial migration SHALL create the `nanoid-postgres` extension, the `daypart_enum` and `location_enum` types, the `vehicles` and `trips` tables (with nanoid `TEXT` primary keys `DEFAULT nanoid(16)` from the outset, unit-free column names with SQL comments documenting each column's unit, and `start_location`/`end_location` as nullable `location_enum` columns — no `locations` table SHALL exist), plus dbmate's `schema_migrations` table. A seed migration SHALL insert a single default vehicle row (`description='commuter'`). Migrations SHALL be runnable locally via `bunx dbmate up`.
 
 #### Scenario: Initial migration applies cleanly
 
 - **GIVEN** an empty Postgres database (from docker-compose)
 - **WHEN** `bunx dbmate up` is run
-- **THEN** all three tables and the `schema_migrations` table SHALL exist
+- **THEN** the `vehicles` and `trips` tables, the `daypart_enum` and `location_enum` types, the `nanoid-postgres` extension, and the `schema_migrations` table SHALL exist; no `locations` table SHALL exist
 
 #### Scenario: Down migration rolls back
 
 - **GIVEN** the initial migration has been applied
 - **WHEN** `bunx dbmate down` is run
-- **THEN** the `trips`, `locations`, and `vehicles` tables SHALL be dropped (in correct FK order)
+- **THEN** the `trips` and `vehicles` tables, the `daypart_enum` and `location_enum` types, and the nanoid functions SHALL be dropped (in correct FK order)
 
 #### Scenario: Nanoid migration alters column types
 
-- **GIVEN** the initial migration is applied with UUID columns
-- **WHEN** the nanoid migration is applied
-- **THEN** the `id` columns on `vehicles`, `locations`, and `trips` SHALL be `TEXT DEFAULT nanoid(16)`, the FK columns on `trips` SHALL be `TEXT`, and the `nanoid-postgres` extension SHALL be installed
+- **GIVEN** the initial migration has been applied
+- **WHEN** the `id` columns on `vehicles` and `trips` are inspected
+- **THEN** the `id` columns SHALL be `TEXT DEFAULT nanoid(16)` from the outset (no separate UUID-to-nanoid migration exists); the FK column `vehicle_id` on `trips` SHALL be `TEXT`
 
 #### Scenario: Column rename migration drops unit suffixes
 
-- **GIVEN** the nanoid migration is applied and the `trips` table has unit-suffixed columns
-- **WHEN** the column rename migration is applied
-- **THEN** the `trips` table SHALL have columns named `duration`, `distance`, `speed`, `consumption`, and `odometer`, each carrying a SQL comment documenting its unit, and no unit-suffixed column SHALL remain
+- **GIVEN** the initial migration has been applied
+- **WHEN** the `trips` table columns are inspected
+- **THEN** the columns SHALL be named `duration`, `distance`, `speed`, `consumption`, and `odometer` from the outset (no separate rename migration exists), each carrying a SQL comment documenting its unit
 
 #### Scenario: Column rename down migration restores suffixes
 
-- **GIVEN** the column rename migration has been applied
-- **WHEN** `bunx dbmate down` is run for that migration
-- **THEN** the `trips` table SHALL restore the unit-suffixed column names (`duration_min`, `distance_km`, `avg_speed_kmh`, `avg_consumption_kwh_100km`, `odometer_km`)
+- **GIVEN** the initial migration has been applied
+- **WHEN** the `trips` table is inspected
+- **THEN** no unit-suffixed column names SHALL exist (the consolidated init migration creates unit-free names from the start; there is no rename migration to roll back)
+
+#### Scenario: Seed migration inserts default vehicle
+
+- **GIVEN** the initial migration has been applied
+- **WHEN** the seed migration is applied
+- **THEN** a single vehicle row with `description='commuter'` SHALL exist; no location rows SHALL be inserted
+
+#### Scenario: Unit-free column names from the outset
+
+- **GIVEN** the initial migration has been applied
+- **WHEN** the `trips` table columns are inspected
+- **THEN** the columns SHALL be named `duration`, `distance`, `speed`, `consumption`, and `odometer` (no unit-suffixed names), each carrying a SQL comment documenting its unit, and no intermediate rename migration SHALL exist
+
+#### Scenario: Location enum columns on trips
+
+- **GIVEN** the initial migration has been applied
+- **WHEN** the `trips` table columns are inspected
+- **THEN** `start_location` and `end_location` SHALL be nullable `location_enum` columns (type `home` or `work`); no `start_location_id` or `end_location_id` columns SHALL exist
 
 ### Requirement: Postgres client singleton
 
