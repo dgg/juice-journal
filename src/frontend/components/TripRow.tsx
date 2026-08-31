@@ -85,30 +85,22 @@ export const TripRow: FC<{ trip: TripWithLocationRow }> = ({ trip }) => {
 							</dd>
 						</>
 					)}
-					{trip.start_location || trip.end_location ? (
-						<>
-							<dt class="sr-only">Route</dt>
-							<dd class="trip-detail-pill">
-								{trip.start_location && (
-									<span class="icon-flag" aria-hidden="true"></span>
-								)}
-								{trip.start_location}
-								{trip.start_location && trip.end_location && (
-									<span
-										class="icon-circle-arrow-right"
-										aria-hidden="true"
-									></span>
-								)}
-								{trip.end_location}
-								{trip.end_location && (
-									<span
-										class="icon-flag-triangle-right"
-										aria-hidden="true"
-									></span>
-								)}
-							</dd>
-						</>
-					) : null}
+					<>
+						<dt class="sr-only">Route</dt>
+						<dd class="trip-detail-pill">
+							<span class="icon-flag" aria-hidden="true"></span>
+							{trip.start_location}
+							<span
+								class="icon-circle-arrow-right"
+								aria-hidden="true"
+							></span>
+							{trip.end_location}
+							<span
+								class="icon-flag-triangle-right"
+								aria-hidden="true"
+							></span>
+						</dd>
+					</>
 					{trip.weatherStart &&
 						(() => {
 							const w = trip.weatherStart

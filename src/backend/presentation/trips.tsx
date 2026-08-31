@@ -53,8 +53,8 @@ function parseFormTripInput(body: FormBody): TripInputRaw {
 		daypart: (body.daypart as "morning" | "afternoon") || "morning",
 		duration: duration > 0 ? duration : 0,
 		distance: parseFloat(body.distance || "0") || 0,
-		start_location: (body.start_location as "home" | "work") || undefined,
-		end_location: (body.end_location as "home" | "work") || undefined,
+start_location: body.start_location as "home" | "work",
+			end_location: body.end_location as "home" | "work",
 		speed: body.speed ? parseFloat(body.speed) : undefined,
 		consumption: body.consumption ? parseFloat(body.consumption) : undefined,
 		odometer: body.odometer ? parseFloat(body.odometer) : undefined

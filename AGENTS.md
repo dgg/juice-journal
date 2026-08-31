@@ -55,6 +55,7 @@ Default to using Bun instead of Node.js.
 
 - Use `bun <file>` instead of `node <file>` or `ts-node <file>`
 - Use `bun test` instead of other test runners
+  * `bun test` output is intercepted by `ctx-wire` and compacted. `bun: ok` (exit:0) means all tests passed
 - Use `bun build <file.html|file.ts|file.css>` instead of other builders
 - Use `bun install` to install dependencies when allowed to do so
 - Use `bun run <script>` to run custom scripts
@@ -71,9 +72,10 @@ Use internal Bun APIs when possible (`Bun.sql`, `Bun.file`, ...) by default inst
 
 ### Before Committing
 
+1. Check typescript: `bun check`
 1. Run tests: `bun test` (or repo default)
-2. Verify Docker builds: `docker build .`
-3. Check for unnecessary dependencies
+1. Verify Docker builds: `docker build .`
+1. Check for unnecessary dependencies
 
 ### File Locations
 

@@ -12,8 +12,8 @@ export interface TripRow {
 	vehicle_id: string
 	start_time: DateTime
 	end_time: DateTime
-	start_location: Location | null
-	end_location: Location | null
+start_location: Location
+		end_location: Location
 	daypart: Daypart
 	/** trip duration (MIN) */
 	duration: number
@@ -41,8 +41,8 @@ export interface TripWithLocationRow {
 	speed: number | null
 	consumption: number | null
 	odometer: number | null
-	start_location: string | null
-	end_location: string | null
+start_location: string
+		end_location: string
 	weatherStart: WeatherSnapshot | null
 }
 
@@ -52,8 +52,8 @@ function mapTripRow(raw: Record<string, unknown>): TripRow {
 		vehicle_id: raw.vehicle_id as string,
 		start_time: toUtcDateTime(raw.start_time as Date),
 		end_time: toUtcDateTime(raw.end_time as Date),
-		start_location: (raw.start_location as "home" | "work" | null) ?? null,
-		end_location: (raw.end_location as "home" | "work" | null) ?? null,
+start_location: raw.start_location as "home" | "work",
+			end_location: raw.end_location as "home" | "work",
 		daypart: raw.daypart as Daypart,
 		duration: raw.duration as number,
 		distance: toNumber(raw.distance as string | null) ?? 0,
@@ -78,8 +78,8 @@ function mapTripWithLocationRow(raw: Record<string, unknown>): TripWithLocationR
 		speed: toNumber(raw.speed as string | null),
 		consumption: toNumber(raw.consumption as string | null),
 		odometer: toNumber(raw.odometer as string | null),
-		start_location: (raw.start_location as string | null) ?? null,
-		end_location: (raw.end_location as string | null) ?? null,
+start_location: raw.start_location as string,
+			end_location: raw.end_location as string,
 		weatherStart: (raw.weather_start as WeatherSnapshot | null) ?? null
 	}
 }
@@ -106,8 +106,8 @@ export const tripsQueries = {
 				${input.vehicle_id},
 				${fromUtcDateTime(input.start_time)},
 				${fromUtcDateTime(input.end_time)},
-				${input.start_location ?? null},
-				${input.end_location ?? null},
+				${input.start_location},
+				${input.end_location},
 				${input.daypart},
 				${input.duration},
 				${input.distance},
@@ -121,26 +121,12 @@ export const tripsQueries = {
 		`
 		const trip = mapTripRow(rows[0] as unknown as Record<string, unknown>)
 
-		const startCoords = input.start_location
-			? locationCoords(input.start_location)
-			: null
-		const endCoords = input.end_location
-			? locationCoords(input.end_location)
-			: null
-
-		if (startCoords || endCoords) {
-			const start: WeatherParam = {
-				location: {
-					latitude: startCoords!.latitude,
-					longitude: startCoords!.longitude
-				},
+		const start: WeatherParam = {
+				location: locationCoords(input.start_location),
 				time: input.start_time
 			}
 			const end: WeatherParam = {
-				location: {
-					latitude: endCoords!.latitude,
-					longitude: endCoords!.longitude
-				},
+				location: locationCoords(input.end_location),
 				time: input.end_time
 			}
 			await storeWeather(trip.id, start, end)
@@ -149,7 +135,6 @@ export const tripsQueries = {
 			if (updated.length > 0) {
 				return mapTripRow(updated[0] as unknown as Record<string, unknown>)
 			}
-		}
 
 		return trip
 	},
