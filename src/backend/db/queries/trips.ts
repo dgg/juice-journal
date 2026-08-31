@@ -1,20 +1,19 @@
 import { DateTime } from "luxon"
 
-import { locationsQueries } from "./locations"
-
 import { db } from "../client"
 import { toNumber, toUtcDateTime, fromUtcDateTime } from "../convert"
-import type { TripInput, Daypart } from "../../types"
+import type { TripInput, Daypart, Location } from "../../types"
 import type { WeatherSnapshot } from "../../weather/types"
 import { storeWeather, type WeatherParam } from "../../weather/storage"
+import { locationCoords } from "../../utils/coords"
 
 export interface TripRow {
 	id: string
 	vehicle_id: string
 	start_time: DateTime
 	end_time: DateTime
-	start_location_id: string | null
-	end_location_id: string | null
+	start_location: Location | null
+	end_location: Location | null
 	daypart: Daypart
 	/** trip duration (MIN) */
 	duration: number
@@ -53,8 +52,8 @@ function mapTripRow(raw: Record<string, unknown>): TripRow {
 		vehicle_id: raw.vehicle_id as string,
 		start_time: toUtcDateTime(raw.start_time as Date),
 		end_time: toUtcDateTime(raw.end_time as Date),
-		start_location_id: (raw.start_location_id as string | null) ?? null,
-		end_location_id: (raw.end_location_id as string | null) ?? null,
+		start_location: (raw.start_location as "home" | "work" | null) ?? null,
+		end_location: (raw.end_location as "home" | "work" | null) ?? null,
 		daypart: raw.daypart as Daypart,
 		duration: raw.duration as number,
 		distance: toNumber(raw.distance as string | null) ?? 0,
@@ -92,8 +91,8 @@ export const tripsQueries = {
 				vehicle_id,
 				start_time,
 				end_time,
-				start_location_id,
-				end_location_id,
+				start_location,
+				end_location,
 				daypart,
 				duration,
 				distance,
@@ -107,8 +106,8 @@ export const tripsQueries = {
 				${input.vehicle_id},
 				${fromUtcDateTime(input.start_time)},
 				${fromUtcDateTime(input.end_time)},
-				${input.start_location_id ?? null},
-				${input.end_location_id ?? null},
+				${input.start_location ?? null},
+				${input.end_location ?? null},
 				${input.daypart},
 				${input.duration},
 				${input.distance},
@@ -122,25 +121,25 @@ export const tripsQueries = {
 		`
 		const trip = mapTripRow(rows[0] as unknown as Record<string, unknown>)
 
-		const startLoc = input.start_location_id
-			? await locationsQueries.findLocationById(input.start_location_id)
+		const startCoords = input.start_location
+			? locationCoords(input.start_location)
 			: null
-		const endLoc = input.end_location_id
-			? await locationsQueries.findLocationById(input.end_location_id)
+		const endCoords = input.end_location
+			? locationCoords(input.end_location)
 			: null
 
-		if (startLoc || endLoc) {
+		if (startCoords || endCoords) {
 			const start: WeatherParam = {
 				location: {
-					latitude: startLoc!.latitude,
-					longitude: startLoc!.longitude
+					latitude: startCoords!.latitude,
+					longitude: startCoords!.longitude
 				},
 				time: input.start_time
 			}
 			const end: WeatherParam = {
 				location: {
-					latitude: endLoc!.latitude,
-					longitude: endLoc!.longitude
+					latitude: endCoords!.latitude,
+					longitude: endCoords!.longitude
 				},
 				time: input.end_time
 			}
@@ -259,11 +258,9 @@ export const tripsQueries = {
 					t.consumption,
 					t.odometer,
 					t.weather_start,
-					start_loc.label as start_location,
-					end_loc.label as end_location
+					t.start_location,
+					t.end_location
 				FROM trips t
-				LEFT JOIN locations start_loc ON t.start_location_id = start_loc.id
-				LEFT JOIN locations end_loc ON t.end_location_id = end_loc.id
 				WHERE t.end_time >= ${params.startUtc.toISO()}
 					AND t.end_time < ${params.endUtc.toISO()}
 					AND t.vehicle_id = ${params.vehicleId}
@@ -281,11 +278,9 @@ export const tripsQueries = {
 					t.consumption,
 					t.odometer,
 					t.weather_start,
-					start_loc.label as start_location,
-					end_loc.label as end_location
+					t.start_location,
+					t.end_location
 				FROM trips t
-				LEFT JOIN locations start_loc ON t.start_location_id = start_loc.id
-				LEFT JOIN locations end_loc ON t.end_location_id = end_loc.id
 				WHERE t.end_time >= ${params.startUtc.toISO()}
 					AND t.end_time < ${params.endUtc.toISO()}
 				ORDER BY t.end_time DESC

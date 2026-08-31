@@ -4,7 +4,6 @@ import { Hono } from "hono"
 
 import { tripsQueries, type TripWithLocationRow } from "../db/queries/trips"
 import { vehiclesQueries } from "../db/queries/vehicles"
-import { locationsQueries } from "../db/queries/locations"
 import { statsQueries } from "../db/queries/stats"
 
 import { displayTz, currentMonthBoundsUtc, prevMonthBoundsUtc } from "../utils/dates"
@@ -14,8 +13,6 @@ import type { Env } from "../utils/logger"
 import { tripInputSchema, type TripInputRaw } from "../types"
 import {
 	validateVehicle,
-	validateStartLocation,
-	validateEndLocation,
 	validateTripConflict,
 	validateOdometer
 } from "../api/validators"
@@ -34,8 +31,8 @@ interface FormBody {
 	speed?: string
 	consumption?: string
 	odometer?: string
-	start_location_id?: string
-	end_location_id?: string
+	start_location?: string
+	end_location?: string
 }
 
 function parseFormTripInput(body: FormBody): TripInputRaw {
@@ -56,8 +53,8 @@ function parseFormTripInput(body: FormBody): TripInputRaw {
 		daypart: (body.daypart as "morning" | "afternoon") || "morning",
 		duration: duration > 0 ? duration : 0,
 		distance: parseFloat(body.distance || "0") || 0,
-		start_location_id: body.start_location_id || undefined,
-		end_location_id: body.end_location_id || undefined,
+		start_location: (body.start_location as "home" | "work") || undefined,
+		end_location: (body.end_location as "home" | "work") || undefined,
 		speed: body.speed ? parseFloat(body.speed) : undefined,
 		consumption: body.consumption ? parseFloat(body.consumption) : undefined,
 		odometer: body.odometer ? parseFloat(body.odometer) : undefined
@@ -73,22 +70,18 @@ export async function getTripFormPage(c: Context<Env>) {
 
 	const defaultDaypart = now.hour < 13 ? "morning" : "afternoon"
 
-	const homeLocation = await locationsQueries.findLocationByLabel("home")
-	const workLocation = await locationsQueries.findLocationByLabel("work")
-
-	let startLocationId: string | null = null
-	let endLocationId: string | null = null
+	let startLocation: "home" | "work" | null = null
+	let endLocation: "home" | "work" | null = null
 
 	if (defaultDaypart === "morning") {
-		startLocationId = homeLocation?.id ?? null
-		endLocationId = workLocation?.id ?? null
+		startLocation = "home"
+		endLocation = "work"
 	} else {
-		startLocationId = workLocation?.id ?? null
-		endLocationId = homeLocation?.id ?? null
+		startLocation = "work"
+		endLocation = "home"
 	}
 
 	const vehicles = await vehiclesQueries.listAllVehicles()
-	const locations = await locationsQueries.listAllLocations()
 	const defaultVehicleId = await tripsQueries.findLatestTripVehicleId()
 
 	return c.html(
@@ -96,9 +89,8 @@ export async function getTripFormPage(c: Context<Env>) {
 			nowDate={nowDate}
 			nowTime={nowTime}
 			defaultDaypart={defaultDaypart}
-			startLocationId={startLocationId}
-			endLocationId={endLocationId}
-			locations={locations.map((l) => ({ id: l.id, label: l.label }))}
+			startLocation={startLocation}
+			endLocation={endLocation}
 			vehicles={vehicles.map((v) => ({ id: v.id, description: v.description }))}
 			defaultVehicleId={defaultVehicleId}
 		/>
@@ -127,8 +119,6 @@ export async function htmlCreationHandler(c: Context<Env>) {
 
 	const parsed = tripInputSchema.parse(input)
 	await validateVehicle(parsed)
-	await validateStartLocation(parsed)
-	await validateEndLocation(parsed)
 	await validateTripConflict(parsed)
 	await validateOdometer(parsed)
 

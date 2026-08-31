@@ -2,11 +2,7 @@ import type { FC } from "hono/jsx"
 import { Layout } from "../Layout"
 import { Header } from "../components/Header"
 import { StickyCta } from "../components/StickyCta"
-
-interface LocationOption {
-	id: string
-	label: string
-}
+import type { Daypart, Location } from "../../backend/types"
 
 interface VehicleOption {
 	id: string
@@ -16,10 +12,9 @@ interface VehicleOption {
 interface TripFormPageProps {
 	nowDate: string
 	nowTime: string
-	defaultDaypart: "morning" | "afternoon"
-	startLocationId: string | null
-	endLocationId: string | null
-	locations: LocationOption[]
+	defaultDaypart: Daypart
+	startLocation: Location | null
+	endLocation: Location | null
 	vehicles: VehicleOption[]
 	defaultVehicleId: string | null
 }
@@ -28,9 +23,8 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 	nowDate,
 	nowTime,
 	defaultDaypart,
-	startLocationId,
-	endLocationId,
-	locations,
+	startLocation,
+	endLocation,
 	vehicles,
 	defaultVehicleId
 }) => {
@@ -126,16 +120,14 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 						<label>
 							<span class="icon-flag" aria-hidden="true"></span> Start
 							location
-							<select name="start_location_id">
+							<select name="start_location">
 								<option value="">—</option>
-								{locations.map((loc) => (
-									<option
-										value={loc.id}
-										selected={loc.id === startLocationId}
-									>
-										{loc.label}
-									</option>
-								))}
+								<option value="home" selected={startLocation === "home"}>
+									home
+								</option>
+								<option value="work" selected={startLocation === "work"}>
+									work
+								</option>
 							</select>
 						</label>
 						<label>
@@ -144,16 +136,14 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 								aria-hidden="true"
 							></span>{" "}
 							End location
-							<select name="end_location_id">
+							<select name="end_location">
 								<option value="">—</option>
-								{locations.map((loc) => (
-									<option
-										value={loc.id}
-										selected={loc.id === endLocationId}
-									>
-										{loc.label}
-									</option>
-								))}
+								<option value="home" selected={endLocation === "home"}>
+									home
+								</option>
+								<option value="work" selected={endLocation === "work"}>
+									work
+								</option>
 							</select>
 						</label>
 					</div>

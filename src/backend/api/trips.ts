@@ -34,12 +34,12 @@ export const apiTrips = new Hono()
 				id: trip.id,
 				vehicle: trip.vehicle_id,
 				start: {
-					location: trip.start_location_id,
+					location: trip.start_location,
 					time: trip.start_time.toISO()!,
 					weather: trip.weather_start
 				},
 				end: {
-					location: trip.end_location_id,
+					location: trip.end_location,
 					time: trip.end_time.toISO()!,
 					weather: trip.weather_end
 				},

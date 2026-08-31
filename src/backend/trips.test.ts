@@ -284,37 +284,6 @@ describe.skip("Trips API Database", () => {
 				)
 			}
 		})
-
-		it("should reject invalid location_id FK", async () => {
-			try {
-				await db`
-          INSERT INTO trips (
-            vehicle_id,
-            start_time,
-            end_time,
-            daypart,
-            duration,
-            distance,
-            start_location_id
-          )
-          VALUES (
-            ${TEST_VEHICLE_ID},
-            '2026-07-06T08:00:00Z',
-            '2026-07-06T08:45:00Z',
-            'morning',
-            45,
-            10.0,
-            'invalid-test-id4'
-          )
-        `
-				expect().fail("Should have thrown foreign key constraint")
-			} catch (error) {
-				const errorMsg = String(error)
-				expect(errorMsg.includes("foreign key") || errorMsg.includes("Key")).toBe(
-					true
-				)
-			}
-		})
 	})
 
 	describe("Timestamps", () => {
