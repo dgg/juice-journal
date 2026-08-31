@@ -1,7 +1,6 @@
 import { Hono } from "hono"
 import { requestId } from "hono/request-id"
 import { structuredLogger } from "@hono/structured-logger"
-import { problemDetailsHandler } from "hono-problem-details"
 import { rootLogger, type Env } from "./utils/logger.ts"
 
 import { apiTrips } from "./api/trips.ts"
@@ -25,13 +24,13 @@ app.use(
 	})
 )
 
-app.onError(
+/*app.onError(
 	problemDetailsHandler({
 		autoInstance: true,
 		includeStack: process.env.NODE_ENV !== "production",
 		defaultType: "about:blank"
 	})
-)
+)*/
 
 app
 	// api handlers

@@ -1,4 +1,5 @@
 import { Hono } from "hono"
+import { problemDetailsHandler } from "hono-problem-details"
 import { zodProblemHook } from "hono-problem-details/zod"
 import { zValidator } from "@hono/zod-validator"
 
@@ -13,7 +14,13 @@ import type { TripInput, TripCreationRaw } from "../types"
 const problemHook = zodProblemHook() as unknown as any
 
 export const apiTrips = new Hono()
-
+	.onError(
+		problemDetailsHandler({
+			autoInstance: true,
+			includeStack: process.env.NODE_ENV !== "production",
+			defaultType: "about:blank"
+		})
+	)
 	.get("/health", (c) => c.json({ status: "ok" }))
 
 	.post(
