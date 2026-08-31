@@ -100,7 +100,7 @@ The form SHALL auto-derive the daypart from the start time using a threshold of 
 
 ### Requirement: Location presets from daypart at render
 
-The form SHALL pre-select start and end locations based on the auto-derived daypart: morning SHALL preset start location to "home" and end location to "work"; afternoon SHALL swap them (start "work", end "home"). The preset SHALL happen at render time only; the user can override either location freely. The location options SHALL be a fixed pair ("home", "work") sourced from the `location_enum` type — no database query SHALL be performed to populate or pre-select locations. If the user submits without selecting a location, the corresponding field SHALL be null.
+The form SHALL pre-select start and end locations based on the auto-derived daypart: morning SHALL preset start location to "home" and end location to "work"; afternoon SHALL swap them (start "work", end "home"). The preset SHALL happen at render time only; the user can override either location freely. The location options SHALL be a fixed pair ("home", "work") sourced from the `location_enum` type — no database query SHALL be performed to populate or pre-select locations. Both `start_location` and `end_location` SHALL be required; the user MUST select a value for each.
 
 #### Scenario: Morning commute presets home to work
 

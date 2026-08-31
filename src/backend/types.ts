@@ -27,8 +27,8 @@ export const tripInputSchema = z.object({
 	duration: z.number().int().positive(),
 	/** trip distance (qudt:KiloM) */
 	distance: z.number().positive(),
-	start_location: location.optional(),
-	end_location: location.optional(),
+	start_location: location,
+	end_location: location,
 	/* trip average speed (qudt:KiloM-PER-HR) */
 	speed: z.number().positive().optional(),
 	/** trip average consumotion (qudt_:KiloW-HR-PER-HUNDRED-KiloM) */

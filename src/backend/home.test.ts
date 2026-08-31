@@ -88,13 +88,15 @@ describe.skip("homeHandler", () => {
 		await db`
 			INSERT INTO trips (
 				vehicle_id, start_time, end_time, daypart, duration, distance,
-				speed, consumption
+				speed, consumption,
+				start_location, end_location
 			) VALUES (
 				${TEST_VEHICLE_ID},
 				${tripDate.toUTC().toISO()},
 				${tripDate.plus({ minutes: 45 }).toUTC().toISO()},
 				'morning', 45, 15.0,
-				60.0, 18.5
+				60.0, 18.5,
+				'home', 'work'
 			)
 		`
 
@@ -118,12 +120,14 @@ describe.skip("homeHandler", () => {
 		// Insert a trip that makes findLatestTripVehicleId return test vehicle
 		await db`
 			INSERT INTO trips (
-				vehicle_id, start_time, end_time, daypart, duration, distance
+				vehicle_id, start_time, end_time, daypart, duration, distance,
+				start_location, end_location
 			) VALUES (
 				${TEST_VEHICLE_ID},
 				${DateTime.now().plus({ hours: 1 }).toUTC().toISO()},
 				${DateTime.now().plus({ hours: 1, minutes: 10 }).toUTC().toISO()},
-				'morning', 10, 5.0
+				'morning', 10, 5.0,
+				'home', 'work'
 			)
 		`
 		// Delete it so handler sees no trips for this vehicle
@@ -147,12 +151,14 @@ describe.skip("homeHandler", () => {
 
 		await db`
 			INSERT INTO trips (
-				vehicle_id, start_time, end_time, daypart, duration, distance
+				vehicle_id, start_time, end_time, daypart, duration, distance,
+				start_location, end_location
 			) VALUES (
 				${TEST_VEHICLE_ID},
 				${tripDate.toUTC().toISO()},
 				${tripDate.plus({ minutes: 30 }).toUTC().toISO()},
-				'afternoon', 30, 12.0
+				'afternoon', 30, 12.0,
+				'home', 'work'
 			)
 		`
 
@@ -171,26 +177,30 @@ describe.skip("homeHandler", () => {
 		await db`
 			INSERT INTO trips (
 				vehicle_id, start_time, end_time, daypart, duration, distance,
-				consumption
+				consumption,
+				start_location, end_location
 			) VALUES (
 				${TEST_VEHICLE_ID},
 				${currentDate.toUTC().toISO()},
 				${currentDate.plus({ minutes: 45 }).toUTC().toISO()},
 				'morning', 45, 15.0,
-				20.0
+				20.0,
+				'home', 'work'
 			)
 		`
 
 		await db`
 			INSERT INTO trips (
 				vehicle_id, start_time, end_time, daypart, duration, distance,
-				consumption
+				consumption,
+				start_location, end_location
 			) VALUES (
 				${TEST_VEHICLE_ID},
 				${prevDate.toUTC().toISO()},
 				${prevDate.plus({ minutes: 45 }).toUTC().toISO()},
 				'morning', 45, 15.0,
-				22.0
+				22.0,
+				'home', 'work'
 			)
 		`
 
@@ -208,23 +218,27 @@ describe.skip("homeHandler", () => {
 
 		await db`
 			INSERT INTO trips (
-				vehicle_id, start_time, end_time, daypart, duration, distance
+				vehicle_id, start_time, end_time, daypart, duration, distance,
+				start_location, end_location
 			) VALUES (
 				${TEST_VEHICLE_ID_2},
 				${now.toUTC().toISO()},
 				${now.plus({ minutes: 30 }).toUTC().toISO()},
-				'afternoon', 30, 10.0
+				'afternoon', 30, 10.0,
+				'home', 'work'
 			)
 		`
 
 		await db`
 			INSERT INTO trips (
-				vehicle_id, start_time, end_time, daypart, duration, distance
+				vehicle_id, start_time, end_time, daypart, duration, distance,
+				start_location, end_location
 			) VALUES (
 				${TEST_VEHICLE_ID},
 				${now.minus({ minutes: 5 }).toUTC().toISO()},
 				${now.minus({ minutes: 5 }).plus({ minutes: 30 }).toUTC().toISO()},
-				'morning', 30, 10.0
+				'morning', 30, 10.0,
+				'home', 'work'
 			)
 		`
 
@@ -244,13 +258,15 @@ describe.skip("GET /trips/fragments/list", () => {
 		await db`
 			INSERT INTO trips (
 				vehicle_id, start_time, end_time, daypart, duration, distance,
-				consumption
+				consumption,
+				start_location, end_location
 			) VALUES (
 				${TEST_VEHICLE_ID},
 				${now.toUTC().toISO()},
 				${now.plus({ minutes: 30 }).toUTC().toISO()},
 				'morning', 30, 12.0,
-				18.5
+				18.5,
+				'home', 'work'
 			)
 		`
 
@@ -313,13 +329,15 @@ describe.skip("POST /trips", () => {
 		await db`
 			INSERT INTO trips (
 				vehicle_id, start_time, end_time, daypart, duration, distance,
-				consumption
+				consumption,
+				start_location, end_location
 			) VALUES (
 				${TEST_VEHICLE_ID},
 				${tripDate.toUTC().toISO()},
 				${tripDate.plus({ minutes: 30 }).toUTC().toISO()},
 				'afternoon', 30, 12.0,
-				18.5
+				18.5,
+				'home', 'work'
 			)
 		`
 
@@ -331,7 +349,9 @@ describe.skip("POST /trips", () => {
 			end_time: "08:45",
 			daypart: "morning",
 			distance: "15.0",
-			consumption: "20.0"
+			consumption: "20.0",
+			start_location: "home",
+			end_location: "work"
 		})
 
 		const result = await htmlCreationHandler(mockCtx as any)

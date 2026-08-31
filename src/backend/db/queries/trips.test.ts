@@ -70,7 +70,9 @@ describe.skip("tripsQueries", () => {
 				end_time: utcIso("2026-07-21T08:45:00Z"),
 				daypart: "morning",
 				duration: 45,
-				distance: 15.5
+				distance: 15.5,
+				start_location: "home",
+				end_location: "work"
 			})
 
 			const trips = await tripsQueries.findTripsByMonth({
@@ -111,7 +113,9 @@ describe.skip("tripsQueries", () => {
 				end_time: utcIso("2099-12-31T23:30:00Z"),
 				daypart: "afternoon",
 				duration: 30,
-				distance: 10.0
+				distance: 10.0,
+				start_location: "home",
+				end_location: "work"
 			})
 
 			const vid = await tripsQueries.findLatestTripVehicleId()

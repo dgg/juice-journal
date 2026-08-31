@@ -35,7 +35,9 @@ async function seedTrip(opts: {
 	await tripsQueries.createTrip({
 		vehicle_id: TEST_VEHICLE_ID,
 		start_time: opts.start,
+		start_location: "home",
 		end_time: opts.end,
+		end_location: "work",
 		daypart: "morning",
 		duration: opts.duration,
 		distance: opts.distance,
@@ -62,7 +64,9 @@ describe.skip("statsQueries", () => {
 			await tripsQueries.createTrip({
 				vehicle_id: TEST_VEHICLE_ID,
 				start_time: utcIso("2026-07-10T08:00:00Z"),
+				start_location: "home",
 				end_time: utcIso("2026-07-10T08:45:00Z"),
+				end_location: "work",
 				daypart: "morning",
 				duration: 45,
 				distance: 15.0,
@@ -71,7 +75,9 @@ describe.skip("statsQueries", () => {
 			await tripsQueries.createTrip({
 				vehicle_id: TEST_VEHICLE_ID,
 				start_time: utcIso("2026-07-11T08:00:00Z"),
+				start_location: "home",
 				end_time: utcIso("2026-07-11T08:30:00Z"),
+				end_location: "work",
 				daypart: "morning",
 				duration: 30,
 				distance: 10.0,
