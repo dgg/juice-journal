@@ -34,7 +34,7 @@ The `tripInputSchema` SHALL mark `vehicle_id`, `start_time`, `end_time`, `daypar
 
 ### Requirement: Field types and constraints enforced
 
-The schema SHALL enforce: `vehicle_id` as a 16-character nanoid-format string, `start_time`/`end_time` as ISO 8601 datetimes with offset (`z.iso.datetime({ offset: true })`) transformed to UTC Luxon `DateTime` via `DateTime.fromISO(s, { setZone: true }).toUTC()`, `daypart` enum `["morning","afternoon"]`, `duration_min` integer, `distance_km` positive number, `start_location_id`/`end_location_id` as optional 16-character nanoid-format strings, and optional `avg_speed_kmh`/`avg_consumption_kwh_100km`/`odometer_km` numbers. The transform SHALL run inside `zValidator` so that `c.req.valid('json')` yields the transformed `DateTime` values.
+The schema SHALL enforce: `vehicle_id` as a 16-character nanoid-format string, `start_time`/`end_time` as ISO 8601 datetimes with offset (`z.iso.datetime({ offset: true })`) transformed to UTC Luxon `DateTime` via `DateTime.fromISO(s, { setZone: true }).toUTC()`, `daypart` enum `["morning","afternoon"]`, `duration` integer, `distance` positive number, `start_location`/`end_location` as optional `location_enum` values (`"home"` or `"work"`), and optional `speed`/`consumption`/`odometer` numbers. The transform SHALL run inside `zValidator` so that `c.req.valid('json')` yields the transformed `DateTime` values.
 
 #### Scenario: Valid ISO datetime with offset transforms to UTC DateTime
 
@@ -50,9 +50,9 @@ The schema SHALL enforce: `vehicle_id` as a 16-character nanoid-format string, `
 
 #### Scenario: Non-positive distance rejected
 
-- **GIVEN** a body with `distance_km: 0` (or negative)
+- **GIVEN** a body with `distance: 0` (or negative)
 - **WHEN** the schema is validated
-- **THEN** the `422` problem+json response's `errors` extension array SHALL include an entry referencing `distance_km` stating it must be greater than 0
+- **THEN** the `422` problem+json response's `errors` extension array SHALL include an entry referencing `distance` stating it must be greater than 0
 
 #### Scenario: Non-ISO timestamp rejected
 
@@ -72,6 +72,18 @@ The schema SHALL enforce: `vehicle_id` as a 16-character nanoid-format string, `
 - **WHEN** the schema is validated
 - **THEN** the `422` problem+json response's `errors` extension array SHALL include an entry referencing `vehicle_id` stating it must be a 16-character nanoid
 
+#### Scenario: Invalid location enum rejected
+
+- **GIVEN** a body with `start_location: "gym"`
+- **WHEN** the schema is validated
+- **THEN** the `422` problem+json response's `errors` extension array SHALL include an entry referencing `start_location` stating it must be `'home'` or `'work'`
+
+#### Scenario: Null location accepted
+
+- **GIVEN** a body with `start_location: null` and `end_location: null`
+- **WHEN** the schema is validated
+- **THEN** the body SHALL be accepted; both fields SHALL be `null` in the validated output
+
 ### Requirement: Validation error response
 
 The `zValidator` error hook SHALL be `zodProblemHook()` from `hono-problem-details/zod`, producing a `422` `application/problem+json` response with `title: "Validation Error"`, `detail: "Request validation failed"`, and an `errors` extension array surfacing Zod's native issue objects (flattened to the top level per RFC 9457 §3.1). The legacy `{ error: "Validation failed", details: [...] }` envelope SHALL no longer be produced. Tests SHALL be updated to assert `422`, `application/problem+json`, and the presence of relevant entries in the `errors` extension.
@@ -84,7 +96,7 @@ The `zValidator` error hook SHALL be `zodProblemHook()` from `hono-problem-detai
 
 ### Requirement: Async foreign-key, uniqueness, and odometer checks in a single validation middleware
 
-The system SHALL verify that `vehicle_id` (always) and `start_location_id`/`end_location_id` (when provided) reference existing rows, plus the `(vehicle_id, end_time)` uniqueness pre-check, plus the odometer monotonicity check, in a SINGLE async Hono middleware that runs AFTER `zValidator` and BEFORE `creationHandler`. The middleware SHALL read the validated input via `c.req.valid("json")` (the transformed `DateTime`-bearing value). On a missing reference, the middleware SHALL `throw` a `FOREIGN_KEY_VIOLATION` problem with status `422`. On a duplicate `(vehicle_id, end_time)`, the middleware SHALL `throw` a `TRIP_CONFLICT` problem with status `409`. On an odometer reading lower than the previous reading, the middleware SHALL `throw` a `FOREIGN_KEY_VIOLATION` problem with status `422`.
+The system SHALL verify that `vehicle_id` (always) references an existing row, plus the `(vehicle_id, end_time)` uniqueness pre-check, plus the odometer monotonicity check, in a SINGLE async Hono middleware that runs AFTER `zValidator` and BEFORE `creationHandler`. The middleware SHALL read the validated input via `c.req.valid("json")` (the transformed `DateTime`-bearing value). On a missing `vehicle_id` reference, the middleware SHALL `throw` a `FOREIGN_KEY_VIOLATION` problem with status `422`. On a duplicate `(vehicle_id, end_time)`, the middleware SHALL `throw` a `TRIP_CONFLICT` problem with status `409`. On an odometer reading lower than the previous reading, the middleware SHALL `throw` a `FOREIGN_KEY_VIOLATION` problem with status `422`. Location values (`start_location`, `end_location`) SHALL NOT require a foreign-key check — they are constrained to the `location_enum` type by the Zod schema, so no row-existence query is needed.
 
 #### Scenario: Middleware reads transformed DateTime, not raw body
 
@@ -100,9 +112,15 @@ The system SHALL verify that `vehicle_id` (always) and `start_location_id`/`end_
 
 #### Scenario: Non-existent start_location rejected
 
-- **GIVEN** a structurally valid body providing a `start_location_id` not present in the referenced table
-- **WHEN** the FK-check middleware runs
-- **THEN** the system SHALL respond `422` `application/problem+json` whose `errors` extension identifies `start_location_id` and whose `detail` indicates the location does not exist
+- **GIVEN** a structurally valid body with `start_location` set to a value outside `"home"` / `"work"`
+- **WHEN** the `zValidator` middleware runs the schema
+- **THEN** the `422` problem+json response's `errors` extension array SHALL include an entry referencing `start_location` stating it must be `'home'` or `'work'` — the value is rejected at the Zod schema level by the enum constraint, NOT by a foreign-key existence check (no `locations` table exists)
+
+#### Scenario: Location enum requires no FK check
+
+- **GIVEN** a structurally valid body with `start_location='home'`
+- **WHEN** the validation middleware runs
+- **THEN** the middleware SHALL NOT issue a database query to verify the location exists; the `location_enum` constraint in the Zod schema is sufficient
 
 #### Scenario: Handler contains no FK or conflict logic
 
