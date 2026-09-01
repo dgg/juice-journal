@@ -24,14 +24,6 @@ app.use(
 	})
 )
 
-/*app.onError(
-	problemDetailsHandler({
-		autoInstance: true,
-		includeStack: process.env.NODE_ENV !== "production",
-		defaultType: "about:blank"
-	})
-)*/
-
 app
 	// api handlers
 	.route("/api", apiTrips)

@@ -2,7 +2,10 @@ import type { FC } from "hono/jsx"
 import { Layout } from "../Layout"
 import { Header } from "../components/Header"
 import { StickyCta } from "../components/StickyCta"
+
+import { tripInputSchema } from "../../backend/types"
 import type { Daypart, Location } from "../../backend/types"
+
 
 interface VehicleOption {
 	id: string
@@ -13,8 +16,8 @@ interface TripFormPageProps {
 	nowDate: string
 	nowTime: string
 	defaultDaypart: Daypart
-	startLocation: Location | null
-	endLocation: Location | null
+	startLocation: Location
+	endLocation: Location
 	vehicles: VehicleOption[]
 	defaultVehicleId: string | null
 }
@@ -32,7 +35,13 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 		<Layout title="Log trip — Juice Journal">
 			<main class="container">
 				<Header month="Log new trip" vehicle={null} />
-				<form class="trip-form" action="/trips" method="post" hx-post="/trips">
+				<form
+					class="trip-form"
+					action="/trips"
+					method="post"
+					hx-post="/trips"
+					hx-disabled-elt="button"
+				>
 					{/* Row 1: date + daypart */}
 					<div class="grid">
 						<label>
@@ -88,12 +97,18 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 						<label>
 							<span class="icon-route" aria-hidden="true"></span> Distance{" "}
 							<small data-tooltip="qudt:KiloM">(km)</small>
-							<input name="distance" type="number" step="0.1" required />
+							<input
+								name="distance"
+								type="number"
+								step="0.1"
+								required
+								min="0"
+							/>
 						</label>
 						<label>
 							<span class="icon-circle-gauge" aria-hidden="true"></span>{" "}
 							Odometer <small data-tooltip="qudt:KiloM">(km)</small>
-							<input name="odometer" type="number" step="0.1" />
+							<input name="odometer" type="number" step="0.1" min="0" />
 						</label>
 					</div>
 
@@ -103,7 +118,7 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 							<span class="icon-gauge" aria-hidden="true"></span>
 							Avg speed{" "}
 							<small data-tooltip="qudt:KiloM-PER-HR">(km/h)</small>
-							<input name="speed" type="number" step="1" />
+							<input name="speed" type="number" step="1" min="0" />
 						</label>
 						<label>
 							<span class="icon-ev-charger" aria-hidden="true"></span>{" "}
@@ -111,7 +126,7 @@ export const TripFormPage: FC<TripFormPageProps> = ({
 							<small data-tooltip="qudt_:KiloW-HR-PER-HUNDRED-KiloM">
 								(kWh/100km)
 							</small>
-							<input name="consumption" type="number" step="0.1" />
+							<input name="consumption" type="number" step="0.1" min="0" />
 						</label>
 					</div>
 

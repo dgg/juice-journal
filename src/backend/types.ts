@@ -15,27 +15,32 @@ const location = z.enum(LOCATIONS)
 export type Location = z.infer<typeof location>
 
 const datetime = z.iso
-		.datetime({ offset: true })
-		.transform((s) => DateTime.fromISO(s, { setZone: true }).toUTC())
+	.datetime({ offset: true })
+	.transform((s) => DateTime.fromISO(s, { setZone: true }).toUTC())
 
-export const tripInputSchema = z.object({
-	vehicle_id: nanoid,
-	start_time: datetime,
-	end_time: datetime,
-	daypart,
-	/** trip duration (qudt:MIN) */
-	duration: z.number().int().positive(),
-	/** trip distance (qudt:KiloM) */
-	distance: z.number().positive(),
-	start_location: location,
-	end_location: location,
-	/* trip average speed (qudt:KiloM-PER-HR) */
-	speed: z.number().positive().optional(),
-	/** trip average consumotion (qudt_:KiloW-HR-PER-HUNDRED-KiloM) */
-	consumption: z.number().positive().optional(),
-	/** odometer reading (qudt:KiloM) */
-	odometer: z.number().optional()
-})
+export const tripInputSchema = z
+	.object({
+		vehicle_id: nanoid,
+		start_time: datetime,
+		end_time: datetime,
+		daypart,
+		/** trip duration (qudt:MIN) */
+		duration: z.number().int().positive(),
+		/** trip distance (qudt:KiloM) */
+		distance: z.number().positive(),
+		start_location: location,
+		end_location: location,
+		/* trip average speed (qudt:KiloM-PER-HR) */
+		speed: z.number().positive().optional(),
+		/** trip average consumotion (qudt_:KiloW-HR-PER-HUNDRED-KiloM) */
+		consumption: z.number().positive().optional(),
+		/** odometer reading (qudt:KiloM) */
+		odometer: z.number().optional()
+	})
+	.refine((input) => input.start_location !== input.end_location, {
+		error: "locations can't be the same",
+		path: ["end_location"]
+	})
 
 const waypoint = z.object({
 	location: location.nullable(),
