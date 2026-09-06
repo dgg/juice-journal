@@ -83,7 +83,6 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 				<fieldset class="daypart-selector">
 					<legend>Time of day</legend>
 					<label>
-
 						<input
 							type="radio"
 							name="daypart"
@@ -197,7 +196,7 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 					{fe("speed", errors) && <small id="speed-err">{errors!.speed}</small>}
 				</label>
 				<label>
-					<span class="icon-ev-charger" aria-hidden="true"></span> Consumption{" "}
+					<span class="icon-ev-charger" aria-hidden="true"></span> Efficiency{" "}
 					<small data-tooltip="qudt_:KiloW-HR-PER-HUNDRED-KiloM">
 						(kWh/100km)
 					</small>
