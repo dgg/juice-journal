@@ -10,7 +10,6 @@ import { formatDurationHm } from "../utils/format"
 import type { Env } from "../utils/logger"
 
 import { StatsSummaryGrid } from "../../frontend/fragments/StatsSummaryGrid"
-import { errorHandler } from "./error"
 
 export async function getPartialStats(c: Context<Env>) {
 	const displayTz_ = displayTz()
@@ -66,5 +65,4 @@ export async function getPartialStats(c: Context<Env>) {
 }
 
 export const summaryDomain = new Hono<Env>()
-	.onError(errorHandler)
 	.get("/fragments/grid", getPartialStats)

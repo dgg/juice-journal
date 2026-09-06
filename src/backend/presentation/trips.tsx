@@ -15,8 +15,6 @@ import { TripFormPage } from "../../frontend/pages/TripFormPage"
 import { TripFormFragment } from "../../frontend/fragments/TripFormFragment"
 import { TripListFragment } from "../../frontend/fragments/TripListFragment"
 
-import { errorHandler } from "./error"
-
 async function buildTripFormProps(
 	c: Context<Env>,
 	opts?: { errors?: Record<string, string>; submitted?: Record<string, string> }
@@ -67,6 +65,7 @@ async function schemaMiddleware(c: Context<Env>, next: () => Promise<void>) {
 	const body = (await c.req.parseBody()) as Record<string, string>
 	const result = tripFormSchema.safeParse(body)
 	if (!result.success) {
+		console.log(result.error.issues)
 		return c.html(
 			<TripFormFragment
 				{...await buildTripFormProps(c, {
@@ -83,14 +82,15 @@ async function schemaMiddleware(c: Context<Env>, next: () => Promise<void>) {
 
 async function consistencyMiddleware(c: Context<Env>, next: () => Promise<void>) {
 	const input: TripInput = c.get("tripInput")
-	const issues = await validateTripFormConsistency(input)
-	if (issues.length > 0) {
+	const error = await validateTripFormConsistency(input)
+	if (error.issues.length > 0) {
 		const body = (await c.req.parseBody()) as Record<string, string>
 		return c.html(
 			<TripFormFragment
 				{...await buildTripFormProps(c, {
 					submitted: body,
-					errors: zodIssuesToFieldMap(issues)
+
+					errors: zodIssuesToFieldMap(error.issues)
 				})}
 			/>,
 			200
@@ -100,7 +100,6 @@ async function consistencyMiddleware(c: Context<Env>, next: () => Promise<void>)
 }
 
 export async function htmlCreationHandler(c: Context<Env>) {
-	throw new Error("boom!")
 	const input: TripInput = c.get("tripInput")
 	await tripsQueries.createTrip(input)
 	if (c.req.header("HX-Request")) {
@@ -111,7 +110,6 @@ export async function htmlCreationHandler(c: Context<Env>) {
 }
 
 export const tripsDomain = new Hono<Env>()
-	.onError(errorHandler)
 	.get("/creation", getTripFormPage)
 	.post("/", schemaMiddleware, consistencyMiddleware, htmlCreationHandler)
 	.get("/fragments/list", getPartialTrips)

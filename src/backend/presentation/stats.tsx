@@ -12,7 +12,6 @@ import type { Env } from "../utils/logger"
 
 import { StatsPage } from "../../frontend/pages/StatsPage"
 import { StatsChartsFragment } from "../../frontend/fragments/StatsChartsFragment"
-import { errorHandler } from "./error"
 
 const STATS_PERIODS = ["week", "month", "year"] as const
 const YEAR_GRANULARITY = ["month", "week"] as const
@@ -307,6 +306,5 @@ async function getPartialTripStats(c: Context<Env>) {
 }
 
 export const statsDomain = new Hono<Env>()
-	.onError(errorHandler)
 	.get("/", statsHandler)
 	.get("/fragments/charts", getPartialTripStats)
