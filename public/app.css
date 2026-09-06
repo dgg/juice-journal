@@ -291,11 +291,11 @@ small.badge {
 		color 0.15s;
 }
 
-.daypart-selector label:first-child span {
+.daypart-selector label:first-of-type span {
 	border-radius: var(--pico-border-radius) 0 0 var(--pico-border-radius);
 }
 
-.daypart-selector label:last-child span {
+.daypart-selector label:last-of-type span {
 	border-radius: 0 var(--pico-border-radius) var(--pico-border-radius) 0;
 }
 
@@ -342,6 +342,9 @@ small.badge {
 .trip-form .grid {
 	grid-template-columns: 1fr 1fr;
 	margin-bottom: 0.75rem;
+}
+
+.trip-form .grid--daypart {
 	align-items: flex-end;
 }
 
@@ -351,8 +354,6 @@ small.badge {
 
 .trip-form label small {
 	font-size: 0.7rem;
-	font-weight: 400;
-	color: var(--pico-muted-color);
 }
 
 .trip-form label {
