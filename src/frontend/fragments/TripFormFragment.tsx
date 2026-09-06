@@ -1,4 +1,7 @@
 import type { FC } from "hono/jsx"
+
+import { ZodError } from "zod"
+
 import { StickyCta } from "../components/StickyCta"
 import type { Daypart, Location } from "../../backend/types"
 

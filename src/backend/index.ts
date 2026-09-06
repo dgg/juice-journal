@@ -9,6 +9,7 @@ import { homeDomain } from "./presentation/home.tsx"
 import { tripsDomain } from "./presentation/trips.tsx"
 import { statsDomain } from "./presentation/stats.tsx"
 import { summaryDomain } from "./presentation/summary.tsx"
+import { errorHandler } from "./presentation/error.tsx"
 
 const app = new Hono<Env>()
 
@@ -24,7 +25,7 @@ app.use(
 	})
 )
 
-app.onError()
+app.onError(errorHandler)
 
 app
 	// api handlers
