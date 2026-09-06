@@ -21,8 +21,8 @@
 		"db:up": "bunx --bun --no-install dbmate up",
 		"db:down": "bunx --bun --no-install dbmate down",
 		"db:new": "bunx --bun --no-install dbmate new",
-		"serve": "bun src/backend/index.tsx",
-		"dev": "bun --watch src/backend/index.tsx",
+		"serve": "bun src/backend/index.ts",
+		"dev": "bun --watch src/backend/index.ts",
 		"check": "bun x --bun --no-install tsc --noEmit"
 	},
 	"dependencies": {

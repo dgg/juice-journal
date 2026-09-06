@@ -12,6 +12,7 @@ import type { Env } from "../utils/logger"
 
 import { StatsPage } from "../../frontend/pages/StatsPage"
 import { StatsChartsFragment } from "../../frontend/fragments/StatsChartsFragment"
+import { errorHandler } from "./error"
 
 const STATS_PERIODS = ["week", "month", "year"] as const
 const YEAR_GRANULARITY = ["month", "week"] as const
@@ -70,7 +71,10 @@ export function resolveAnchor(
 	}
 }
 
-export function formatDateForPeriod(dt: DateTime, period: "week" | "month" | "year"): string {
+export function formatDateForPeriod(
+	dt: DateTime,
+	period: "week" | "month" | "year"
+): string {
 	switch (period) {
 		case "week":
 			return dt.toFormat("kkkk-'W'WW")
@@ -175,7 +179,8 @@ async function computeStatsView(params: {
 
 	if (hasTrips) {
 		// Determine bucket: trip for week, day for month, yearGranularity for year
-		const bucket = period === "year" ? yearGranularity : period === "month" ? "day" : "trip"
+		const bucket =
+			period === "year" ? yearGranularity : period === "month" ? "day" : "trip"
 
 		const rows = await statsQueries.periodSeries({
 			startUtc: bounds.current.startUtc,
@@ -213,7 +218,8 @@ async function computeStatsView(params: {
 	const prevDate = formatDateForPeriod(now.minus({ [unit]: 1 }), period)
 	const nextRaw = now.plus({ [unit]: 1 })
 	const nowStart = DateTime.now().setZone(displayTz).startOf(period)
-	const nextDate = nextRaw.startOf(period) <= nowStart ? formatDateForPeriod(nextRaw, period) : null
+	const nextDate =
+		nextRaw.startOf(period) <= nowStart ? formatDateForPeriod(nextRaw, period) : null
 
 	// Year options for year picker
 	let yearOptions: number[] = []
@@ -221,7 +227,10 @@ async function computeStatsView(params: {
 		const earliestYear = await tripsQueries.findEarliestTripYear()
 		const currentYear = DateTime.now().setZone(displayTz).year
 		const startYear = earliestYear ?? currentYear
-		yearOptions = Array.from({ length: currentYear - startYear + 1 }, (_, i) => startYear + i).reverse()
+		yearOptions = Array.from(
+			{ length: currentYear - startYear + 1 },
+			(_, i) => startYear + i
+		).reverse()
 	}
 
 	return {
@@ -269,7 +278,12 @@ async function statsHandler(c: Context<Env>) {
 	const displayTz_ = displayTz()
 	const now = resolveAnchor(date, period, displayTz_)
 
-	const view = await computeStatsView({ period, yearGranularity, displayTz: displayTz_, now })
+	const view = await computeStatsView({
+		period,
+		yearGranularity,
+		displayTz: displayTz_,
+		now
+	})
 
 	return c.html(<StatsPage data={view} />)
 }
@@ -282,11 +296,17 @@ async function getPartialTripStats(c: Context<Env>) {
 	const displayTz_ = displayTz()
 	const now = resolveAnchor(date, period, displayTz_)
 
-	const view = await computeStatsView({ period, yearGranularity, displayTz: displayTz_, now })
+	const view = await computeStatsView({
+		period,
+		yearGranularity,
+		displayTz: displayTz_,
+		now
+	})
 
 	return c.html(<StatsChartsFragment data={view} />)
 }
 
 export const statsDomain = new Hono<Env>()
+	.onError(errorHandler)
 	.get("/", statsHandler)
 	.get("/fragments/charts", getPartialTripStats)

@@ -12,6 +12,7 @@ import { statsQueries } from "../db/queries/stats"
 import type { StatWithDelta } from "./stats"
 
 import { HomePage } from "../../frontend/pages/HomePage"
+import { errorHandler } from "./error"
 
 interface HomeData {
 	vehicle: {
@@ -104,4 +105,4 @@ export async function homeHandler(c: Context<Env>) {
 	return c.html(<HomePage data={data} />)
 }
 
-export const homeDomain = new Hono<Env>().get("/", homeHandler)
+export const homeDomain = new Hono<Env>().onError(errorHandler).get("/", homeHandler)

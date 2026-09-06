@@ -2,12 +2,10 @@ import { DateTime } from "luxon"
 import { Hono } from "hono"
 
 import type { Context } from "hono"
-import { tripsQueries, type TripWithLocationRow } from "../db/queries/trips"
+import { tripsQueries } from "../db/queries/trips"
 import { vehiclesQueries } from "../db/queries/vehicles"
-import { statsQueries } from "../db/queries/stats"
 
-import { displayTz, currentMonthBoundsUtc, prevMonthBoundsUtc } from "../utils/dates"
-import { formatDurationHm } from "../utils/format"
+import { displayTz, currentMonthBoundsUtc } from "../utils/dates"
 import type { Env } from "../utils/logger"
 
 import { tripFormSchema, type TripInput, type Daypart } from "../types"
@@ -16,15 +14,22 @@ import { validateTripFormConsistency, zodIssuesToFieldMap } from "./formValidato
 import { TripFormPage } from "../../frontend/pages/TripFormPage"
 import { TripFormFragment } from "../../frontend/fragments/TripFormFragment"
 import { TripListFragment } from "../../frontend/fragments/TripListFragment"
-import { StatsSummaryGrid } from "../../frontend/fragments/StatsSummaryGrid"
 
-async function buildTripFormProps(c: Context<Env>, opts?: { errors?: Record<string, string>; submitted?: Record<string, string> }) {
+import { errorHandler } from "./error"
+
+async function buildTripFormProps(
+	c: Context<Env>,
+	opts?: { errors?: Record<string, string>; submitted?: Record<string, string> }
+) {
 	const tz = displayTz()
 	const now = DateTime.now().setZone(tz)
 	const nowDate = now.toFormat("yyyy-MM-dd")
 	const nowTime = now.toFormat("HH:mm")
 	const defaultDaypart: Daypart = now.hour < 13 ? "morning" : "afternoon"
-	const [startLocation, endLocation] = defaultDaypart === "morning" ? ["home" as const, "work" as const] : ["work" as const, "home" as const]
+	const [startLocation, endLocation] =
+		defaultDaypart === "morning"
+			? ["home" as const, "work" as const]
+			: ["work" as const, "home" as const]
 	const vehicles = await vehiclesQueries.listAllVehicles()
 	const defaultVehicleId = await tripsQueries.findLatestTripVehicleId()
 
@@ -42,7 +47,7 @@ async function buildTripFormProps(c: Context<Env>, opts?: { errors?: Record<stri
 }
 
 export async function getTripFormPage(c: Context<Env>) {
-	return c.html(<TripFormPage {...(await buildTripFormProps(c))} />)
+	return c.html(<TripFormPage {...await buildTripFormProps(c)} />)
 }
 
 export async function getPartialTrips(c: Context<Env>) {
@@ -63,7 +68,12 @@ async function schemaMiddleware(c: Context<Env>, next: () => Promise<void>) {
 	const result = tripFormSchema.safeParse(body)
 	if (!result.success) {
 		return c.html(
-			<TripFormFragment {...(await buildTripFormProps(c, { submitted: body, errors: zodIssuesToFieldMap(result.error.issues) }))} />,
+			<TripFormFragment
+				{...await buildTripFormProps(c, {
+					submitted: body,
+					errors: zodIssuesToFieldMap(result.error.issues)
+				})}
+			/>,
 			200
 		)
 	}
@@ -77,7 +87,12 @@ async function consistencyMiddleware(c: Context<Env>, next: () => Promise<void>)
 	if (issues.length > 0) {
 		const body = (await c.req.parseBody()) as Record<string, string>
 		return c.html(
-			<TripFormFragment {...(await buildTripFormProps(c, { submitted: body, errors: zodIssuesToFieldMap(issues) }))} />,
+			<TripFormFragment
+				{...await buildTripFormProps(c, {
+					submitted: body,
+					errors: zodIssuesToFieldMap(issues)
+				})}
+			/>,
 			200
 		)
 	}
@@ -85,6 +100,7 @@ async function consistencyMiddleware(c: Context<Env>, next: () => Promise<void>)
 }
 
 export async function htmlCreationHandler(c: Context<Env>) {
+	throw new Error("boom!")
 	const input: TripInput = c.get("tripInput")
 	await tripsQueries.createTrip(input)
 	if (c.req.header("HX-Request")) {
@@ -95,6 +111,7 @@ export async function htmlCreationHandler(c: Context<Env>) {
 }
 
 export const tripsDomain = new Hono<Env>()
+	.onError(errorHandler)
 	.get("/creation", getTripFormPage)
 	.post("/", schemaMiddleware, consistencyMiddleware, htmlCreationHandler)
 	.get("/fragments/list", getPartialTrips)
