@@ -1,11 +1,8 @@
 import type { FC } from "hono/jsx"
 import { Layout } from "../Layout"
 import { Header } from "../components/Header"
-import { StickyCta } from "../components/StickyCta"
-
-import { tripInputSchema } from "../../backend/types"
+import { TripFormFragment } from "../fragments/TripFormFragment"
 import type { Daypart, Location } from "../../backend/types"
-
 
 interface VehicleOption {
 	id: string
@@ -20,183 +17,16 @@ interface TripFormPageProps {
 	endLocation: Location
 	vehicles: VehicleOption[]
 	defaultVehicleId: string | null
+	errors?: Record<string, string>
+	submitted?: Record<string, string>
 }
 
-export const TripFormPage: FC<TripFormPageProps> = ({
-	nowDate,
-	nowTime,
-	defaultDaypart,
-	startLocation,
-	endLocation,
-	vehicles,
-	defaultVehicleId
-}) => {
+export const TripFormPage: FC<TripFormPageProps> = (props) => {
 	return (
 		<Layout title="Log trip — Juice Journal">
 			<main class="container">
 				<Header month="Log new trip" vehicle={null} />
-				<form
-					class="trip-form"
-					action="/trips"
-					method="post"
-					hx-post="/trips"
-					hx-disabled-elt="button"
-				>
-					{/* Row 1: date + daypart */}
-					<div class="grid">
-						<label>
-							<span class="icon-calendar-days" aria-hidden="true"></span>{" "}
-							Date
-							<input
-								name="trip_date"
-								type="date"
-								value={nowDate}
-								required
-							/>
-						</label>
-						<fieldset class="daypart-selector">
-							<legend>Time of day</legend>
-							<label>
-								<input
-									type="radio"
-									name="daypart"
-									value="morning"
-									checked={defaultDaypart === "morning"}
-								/>
-								<span class="icon-clock-8" aria-hidden="true"></span>
-							</label>
-							<label>
-								<input
-									type="radio"
-									name="daypart"
-									value="afternoon"
-									checked={defaultDaypart === "afternoon"}
-									title="Afternoon"
-								/>
-								<span class="icon-clock-4" aria-hidden="true"></span>
-							</label>
-						</fieldset>
-					</div>
-
-					{/* Row 2: start + end time */}
-					<div class="grid">
-						<label>
-							<span class="icon-clock-arrow-up" aria-hidden="true"></span>{" "}
-							Start time
-							<input name="start_time" type="time" required />
-						</label>
-						<label>
-							<span class="icon-clock-arrow-down" aria-hidden="true"></span>{" "}
-							End time
-							<input name="end_time" type="time" value={nowTime} required />
-						</label>
-					</div>
-
-					{/* Row 3: distance + odometer */}
-					<div class="grid">
-						<label>
-							<span class="icon-route" aria-hidden="true"></span> Distance{" "}
-							<small data-tooltip="qudt:KiloM">(km)</small>
-							<input
-								name="distance"
-								type="number"
-								step="0.1"
-								required
-								min="0"
-							/>
-						</label>
-						<label>
-							<span class="icon-circle-gauge" aria-hidden="true"></span>{" "}
-							Odometer <small data-tooltip="qudt:KiloM">(km)</small>
-							<input name="odometer" type="number" step="0.1" min="0" />
-						</label>
-					</div>
-
-					{/* Row 4: speed + consumption */}
-					<div class="grid">
-						<label>
-							<span class="icon-gauge" aria-hidden="true"></span>
-							Avg speed{" "}
-							<small data-tooltip="qudt:KiloM-PER-HR">(km/h)</small>
-							<input name="speed" type="number" step="1" min="0" />
-						</label>
-						<label>
-							<span class="icon-ev-charger" aria-hidden="true"></span>{" "}
-							Consumption{" "}
-							<small data-tooltip="qudt_:KiloW-HR-PER-HUNDRED-KiloM">
-								(kWh/100km)
-							</small>
-							<input name="consumption" type="number" step="0.1" min="0" />
-						</label>
-					</div>
-
-					{/* Row 5: locations */}
-					<div class="grid">
-						<label>
-							<span class="icon-flag" aria-hidden="true"></span> Start
-							location
-							<select name="start_location">
-								<option value="">—</option>
-								<option value="home" selected={startLocation === "home"}>
-									home
-								</option>
-								<option value="work" selected={startLocation === "work"}>
-									work
-								</option>
-							</select>
-						</label>
-						<label>
-							<span
-								class="icon-flag-triangle-right"
-								aria-hidden="true"
-							></span>{" "}
-							End location
-							<select name="end_location">
-								<option value="">—</option>
-								<option value="home" selected={endLocation === "home"}>
-									home
-								</option>
-								<option value="work" selected={endLocation === "work"}>
-									work
-								</option>
-							</select>
-						</label>
-					</div>
-
-					{/* Row 6: vehicle — full width */}
-					<div class="grid grid--full">
-						<label>
-							<span class="icon-car-front" aria-hidden="true"></span>{" "}
-							Vehicle
-							<select name="vehicle_id" required>
-								{vehicles.length === 0 && (
-									<option value="">No vehicles — add one first</option>
-								)}
-								{vehicles.map((v) => (
-									<option
-										value={v.id}
-										selected={v.id === defaultVehicleId}
-									>
-										{v.description}
-									</option>
-								))}
-							</select>
-						</label>
-					</div>
-
-					{/* Sticky submit bar: Back + Save */}
-					<StickyCta
-						actions={[
-							{
-								href: "/",
-								label: "Back",
-								variant: "secondary",
-								icon: "home"
-							},
-							{ label: "Save trip", type: "submit", icon: "save-plus" }
-						]}
-					/>
-				</form>
+				<TripFormFragment {...props} />
 			</main>
 		</Layout>
 	)

@@ -10,6 +10,8 @@ import { tripsDomain } from "./presentation/trips.tsx"
 import { statsDomain } from "./presentation/stats.tsx"
 import { summaryDomain } from "./presentation/summary.tsx"
 
+import { ErrorPage } from "../frontend/pages/ErrorPage"
+
 const app = new Hono<Env>()
 
 const PORT = process.env.PORT || 3000
@@ -23,6 +25,11 @@ app.use(
 		}
 	})
 )
+
+app.onError((err, c) => {
+	c.var.logger.error({ err, method: c.req.method, path: c.req.path }, "unhandled error")
+	return c.html(<ErrorPage />, 500)
+})
 
 app
 	// api handlers
