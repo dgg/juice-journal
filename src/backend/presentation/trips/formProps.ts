@@ -1,7 +1,7 @@
 import { DateTime } from "luxon"
 import type { ZodError } from "zod"
 
-import type { TripFormIssues, TripFormRaw } from "../types"
+import type { TripFormIssues, TripFormRaw } from "./types"
 import type { Daypart, Location } from "../../types"
 
 import { displayTz } from "../../utils/dates"

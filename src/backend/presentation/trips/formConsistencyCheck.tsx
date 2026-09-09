@@ -2,7 +2,7 @@ import { createMiddleware } from "hono/factory"
 import { ZodError } from "zod"
 import type { $ZodIssue as ZodIssue } from "zod/v4/core"
 
-import type { TripForm, TripsEnv } from "../types"
+import type { TripForm, TripsEnv } from "./types"
 
 import { buildTripFormProps } from "./formProps"
 

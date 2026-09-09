@@ -3,7 +3,7 @@ import { createMiddleware } from "hono/factory"
 import type { ZodSafeParseResult } from "zod"
 
 import { buildTripFormProps } from "./formProps"
-import { tripFormSchema, type TripForm, type TripFormRaw, type TripsEnv } from "../types"
+import { tripFormSchema, type TripForm, type TripFormRaw, type TripsEnv } from "./types"
 
 import { TripFormFragment } from "../../../frontend/fragments/TripFormFragment"
 

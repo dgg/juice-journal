@@ -1,32 +1,16 @@
 import type { FC } from "hono/jsx"
+
 import { Layout } from "../Layout"
-import { Header } from "../components/Header"
 import { StatsSummaryGrid } from "../fragments/StatsSummaryGrid"
-import { TripRow } from "../components/TripRow"
+
 import { EmptyState } from "../components/EmptyState"
+import { Header } from "../components/Header"
 import { StickyCta } from "../components/StickyCta"
-import type { TripWithLocationRow } from "../../backend/db/queries/trips"
-import type { StatWithDelta } from "../../backend/presentation/stats"
+import { TripRow } from "../components/TripRow"
 
-interface HomePageData {
-	vehicle: { id: string; description: string } | null
-	monthLabel: string
-	stats: {
-		totalDistance: StatWithDelta
-		totalTime: StatWithDelta
-		totalTimeHm: string | null
-		avgSpeed: StatWithDelta
-		avgDuration: StatWithDelta
-		avgDurationHm: string | null
-		avgConsumption: StatWithDelta
-		tripCount: StatWithDelta
-		period: "month"
-	}
-	trips: TripWithLocationRow[]
-	hasTrips: boolean
-}
+import type { HomeView } from "../../backend/presentation/home/types"
 
-export const HomePage: FC<{ data: HomePageData }> = ({ data }) => {
+export const HomePage: FC<{ data: HomeView }> = ({ data }) => {
 	return (
 		<Layout title="Juice Journal">
 			<main class="container">

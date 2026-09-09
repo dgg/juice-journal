@@ -2,7 +2,7 @@ import { Hono } from "hono"
 
 import { tripsQueries } from "../../db/queries/trips"
 
-import type { TripsEnv } from "../types"
+import type { TripsEnv } from "./types"
 
 import { buildTripFormProps } from "./formProps"
 

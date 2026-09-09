@@ -3,7 +3,7 @@ import type { FC } from "hono/jsx"
 import { StickyCta } from "../components/StickyCta"
 
 import type { Daypart, Location } from "../../backend/types"
-import type { TripForm, TripFormIssues, TripFormRaw } from "../../backend/presentation/types"
+import type { TripForm, TripFormIssues, TripFormRaw } from "../../backend/presentation/trips/types"
 
 interface VehicleOption {
 	id: string

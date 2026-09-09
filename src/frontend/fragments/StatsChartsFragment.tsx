@@ -1,8 +1,11 @@
 import type { FC } from "hono/jsx"
-import { StatsSummaryGrid } from "./StatsSummaryGrid"
-import { EmptyState } from "../components/EmptyState"
 import { raw } from "hono/html"
-import type { StatsView } from "../../backend/presentation/stats"
+
+import { StatsSummaryGrid } from "./StatsSummaryGrid"
+
+import { EmptyState } from "../components/EmptyState"
+
+import type { StatsView } from "../../backend/presentation/stats/types"
 
 function periodIcon(value: string): string {
 	if (value === "week") return "calendar-1"
