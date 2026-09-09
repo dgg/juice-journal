@@ -1,9 +1,9 @@
 import type { FC } from "hono/jsx"
 
-import { ZodError } from "zod"
-
 import { StickyCta } from "../components/StickyCta"
+
 import type { Daypart, Location } from "../../backend/types"
+import type { TripForm, TripFormIssues, TripFormRaw } from "../../backend/presentation/types"
 
 interface VehicleOption {
 	id: string
@@ -18,27 +18,29 @@ interface TripFormFragmentProps {
 	endLocation: Location
 	vehicles: VehicleOption[]
 	defaultVehicleId: string | null
-	errors?: Record<string, string>
-	submitted?: Record<string, string>
+	form?: TripFormRaw
+	issues?: TripFormIssues
 }
 
 const fv = (
-	key: string,
+	key: keyof TripFormRaw,
 	fallback: string | undefined,
-	submitted?: Record<string, string>
-): string | undefined => submitted?.[key] ?? fallback
+	form?: TripFormRaw
+): string | undefined => form?.[key] ?? fallback
 
-const fe = (key: string, errors?: Record<string, string>): string | undefined =>
-	errors?.[key]
+const fe = (
+	key: keyof TripFormRaw,
+	issues?: TripFormIssues
+): string | undefined => issues?.[key]
 
 function inputProps(
-	name: string,
+	name: keyof TripFormRaw,
 	fallback: string | undefined,
-	submitted?: Record<string, string>,
-	errors?: Record<string, string>
+	form?: TripFormRaw,
+	issues?: TripFormIssues
 ) {
-	const val = fv(name, fallback, submitted)
-	const e = fe(name, errors)
+	const val = fv(name, fallback, form)
+	const e = fe(name, issues)
 	return {
 		value: val,
 		"aria-invalid": e ? ("true" as const) : undefined,
@@ -54,8 +56,8 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 	endLocation,
 	vehicles,
 	defaultVehicleId,
-	errors,
-	submitted
+	issues,
+	form
 }) => {
 	return (
 		<form
@@ -67,7 +69,7 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 			hx-swap="outerHTML"
 			hx-disabled-elt="button"
 		>
-			{errors?.vehicle_id && <small id="vehicle_id-err">{errors.vehicle_id}</small>}
+			{issues?.vehicle_id && <small id="vehicle_id-err">{issues.vehicle_id}</small>}
 
 			{/* Row 1: date + daypart */}
 			<div class="grid grid--daypart">
@@ -76,11 +78,11 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 					<input
 						name="trip_date"
 						type="date"
-						{...inputProps("trip_date", nowDate, submitted, errors)}
+						{...inputProps("trip_date", nowDate, form, issues)}
 						required
 					/>
-					{fe("trip_date", errors) && (
-						<small id="trip_date-err">{errors!.trip_date}</small>
+					{fe("trip_date", issues) && (
+						<small id="trip_date-err">{issues!.trip_date}</small>
 					)}
 				</label>
 				<fieldset class="daypart-selector">
@@ -94,7 +96,7 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 								fv(
 									"daypart",
 									defaultDaypart === "morning" ? "morning" : undefined,
-									submitted
+									form
 								) === "morning"
 							}
 						/>
@@ -111,7 +113,7 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 									defaultDaypart === "afternoon"
 										? "afternoon"
 										: undefined,
-									submitted
+									form
 								) === "afternoon"
 							}
 							title="Afternoon"
@@ -129,11 +131,11 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 					<input
 						name="start_time"
 						type="time"
-						{...inputProps("start_time", undefined, submitted, errors)}
+						{...inputProps("start_time", undefined, form, issues)}
 						required
 					/>
-					{fe("start_time", errors) && (
-						<small id="start_time-err">{errors!.start_time}</small>
+					{fe("start_time", issues) && (
+						<small id="start_time-err">{issues!.start_time}</small>
 					)}
 				</label>
 				<label>
@@ -142,11 +144,11 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 					<input
 						name="end_time"
 						type="time"
-						{...inputProps("end_time", nowTime, submitted, errors)}
+						{...inputProps("end_time", nowTime, form, issues)}
 						required
 					/>
-					{fe("end_time", errors) && (
-						<small id="end_time-err">{errors!.end_time}</small>
+					{fe("end_time", issues) && (
+						<small id="end_time-err">{issues!.end_time}</small>
 					)}
 				</label>
 			</div>
@@ -162,10 +164,10 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 						step="0.1"
 						required
 						min="0"
-						{...inputProps("distance", undefined, submitted, errors)}
+						{...inputProps("distance", undefined, form, issues)}
 					/>
-					{fe("distance", errors) && (
-						<small id="distance-err">{errors!.distance}</small>
+					{fe("distance", issues) && (
+						<small id="distance-err">{issues!.distance}</small>
 					)}
 				</label>
 				<label>
@@ -176,10 +178,10 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 						type="number"
 						step="0.1"
 						min="0"
-						{...inputProps("odometer", undefined, submitted, errors)}
+						{...inputProps("odometer", undefined, form, issues)}
 					/>
-					{fe("odometer", errors) && (
-						<small id="odometer-err">{errors!.odometer}</small>
+					{fe("odometer", issues) && (
+						<small id="odometer-err">{issues!.odometer}</small>
 					)}
 				</label>
 			</div>
@@ -194,9 +196,9 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 						type="number"
 						step="1"
 						min="0"
-						{...inputProps("speed", undefined, submitted, errors)}
+						{...inputProps("speed", undefined, form, issues)}
 					/>
-					{fe("speed", errors) && <small id="speed-err">{errors!.speed}</small>}
+					{fe("speed", issues) && <small id="speed-err">{issues!.speed}</small>}
 				</label>
 				<label>
 					<span class="icon-ev-charger" aria-hidden="true"></span> Efficiency{" "}
@@ -208,10 +210,10 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 						type="number"
 						step="0.1"
 						min="0"
-						{...inputProps("consumption", undefined, submitted, errors)}
+						{...inputProps("consumption", undefined, form, issues)}
 					/>
-					{fe("consumption", errors) && (
-						<small id="consumption-err">{errors!.consumption}</small>
+					{fe("consumption", issues) && (
+						<small id="consumption-err">{issues!.consumption}</small>
 					)}
 				</label>
 			</div>
@@ -222,9 +224,9 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 					<span class="icon-flag" aria-hidden="true"></span> Start location
 					<select
 						name="start_location"
-						aria-invalid={fe("start_location", errors) ? "true" : undefined}
+						aria-invalid={fe("start_location", issues) ? "true" : undefined}
 						aria-describedby={
-							fe("start_location", errors)
+							fe("start_location", issues)
 								? "start_location-err"
 								: undefined
 						}
@@ -236,7 +238,7 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 								fv(
 									"start_location",
 									startLocation as string,
-									submitted
+									form
 								) === "home"
 							}
 						>
@@ -248,15 +250,15 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 								fv(
 									"start_location",
 									startLocation as string,
-									submitted
+									form
 								) === "work"
 							}
 						>
 							work
 						</option>
 					</select>
-					{fe("start_location", errors) && (
-						<small id="start_location-err">{errors!.start_location}</small>
+					{fe("start_location", issues) && (
+						<small id="start_location-err">{issues!.start_location}</small>
 					)}
 				</label>
 				<label>
@@ -264,16 +266,16 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 					location
 					<select
 						name="end_location"
-						aria-invalid={fe("end_location", errors) ? "true" : undefined}
+						aria-invalid={fe("end_location", issues) ? "true" : undefined}
 						aria-describedby={
-							fe("end_location", errors) ? "end_location-err" : undefined
+							fe("end_location", issues) ? "end_location-err" : undefined
 						}
 					>
 						<option value="">—</option>
 						<option
 							value="home"
 							selected={
-								fv("end_location", endLocation as string, submitted) ===
+								fv("end_location", endLocation as string, form) ===
 								"home"
 							}
 						>
@@ -282,15 +284,15 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 						<option
 							value="work"
 							selected={
-								fv("end_location", endLocation as string, submitted) ===
+								fv("end_location", endLocation as string, form) ===
 								"work"
 							}
 						>
 							work
 						</option>
 					</select>
-					{fe("end_location", errors) && (
-						<small id="end_location-err">{errors!.end_location}</small>
+					{fe("end_location", issues) && (
+						<small id="end_location-err">{issues!.end_location}</small>
 					)}
 				</label>
 			</div>
@@ -302,9 +304,9 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 					<select
 						name="vehicle_id"
 						required
-						aria-invalid={fe("vehicle_id", errors) ? "true" : undefined}
+						aria-invalid={fe("vehicle_id", issues) ? "true" : undefined}
 						aria-describedby={
-							fe("vehicle_id", errors) ? "vehicle_id-err" : undefined
+							fe("vehicle_id", issues) ? "vehicle_id-err" : undefined
 						}
 					>
 						{vehicles.length === 0 && (
@@ -317,7 +319,7 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 									fv(
 										"vehicle_id",
 										defaultVehicleId ?? undefined,
-										submitted
+										form
 									) === v.id
 								}
 							>
@@ -325,8 +327,8 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 							</option>
 						))}
 					</select>
-					{fe("vehicle_id", errors) && (
-						<small id="vehicle_id-err">{errors!.vehicle_id}</small>
+					{fe("vehicle_id", issues) && (
+						<small id="vehicle_id-err">{issues!.vehicle_id}</small>
 					)}
 				</label>
 			</div>

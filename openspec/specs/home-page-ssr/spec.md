@@ -147,22 +147,6 @@ The system SHALL adapt layout for different screen sizes, optimizing for mobile 
 - **WHEN** user views the home page on different screen sizes
 - **THEN** system adjusts layout appropriately (phone: stacked elements, desktop: split layout)
 
-### Requirement: Trip list fragment route
-
-The system SHALL expose a fragment route `GET /trips/fragments/list` that returns the current-month trip list markup (bare, no `Layout`) for HTMX region swaps, scoped to the displayed vehicle.
-
-#### Scenario: Fragment returns trip list markup
-
-- **GIVEN** trips exist for the current month for the displayed vehicle
-- **WHEN** a `GET /trips/fragments/list` request is received
-- **THEN** the system SHALL respond with the trip list HTML (using the same trip row component as the home page) and no surrounding document
-
-#### Scenario: Fragment empty state
-
-- **GIVEN** no trips exist for the current month
-- **WHEN** a `GET /trips/fragments/list` request is received
-- **THEN** the system SHALL respond with the empty-state markup
-
 ### Requirement: Stats fragment route
 
 The system SHALL expose a fragment route `GET /summary/fragments/grid` that returns the same hero + grid summary markup rendered on the home page (bare, no `Layout`) for HTMX region swaps, scoped to the displayed vehicle. The fragment SHALL contain all six stat cards with month-over-month deltas and SHALL NOT render a period switcher, navigation, charts, or the Chart.js script. After a trip is created via `POST /trips`, the out-of-band stats refresh SHALL swap this fragment so the home page stats panel updates without a full reload.
