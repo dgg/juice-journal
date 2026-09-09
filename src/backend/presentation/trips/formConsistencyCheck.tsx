@@ -2,14 +2,14 @@ import { createMiddleware } from "hono/factory"
 import { ZodError } from "zod"
 import type { $ZodIssue as ZodIssue } from "zod/v4/core"
 
-import type { TripForm, TripsEnv } from "./types"
+import type { TripForm, TripsEnv } from "../types"
 
 import { buildTripFormProps } from "./formProps"
 
-import { vehiclesQueries } from "../db/queries/vehicles"
-import { tripsQueries } from "../db/queries/trips"
+import { vehiclesQueries } from "../../db/queries/vehicles"
+import { tripsQueries } from "../../db/queries/trips"
 
-import { TripFormFragment } from "../../frontend/fragments/TripFormFragment"
+import { TripFormFragment } from "../../../frontend/fragments/TripFormFragment"
 
 async function checkVehicleExists(input: TripForm): Promise<ZodIssue[]> {
 	const issues: ZodIssue[] = []

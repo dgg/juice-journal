@@ -6,9 +6,9 @@ import { rootLogger, type Env } from "./utils/logger.ts"
 import { apiTrips } from "./api/trips.ts"
 
 import { homeDomain } from "./presentation/home.tsx"
-import { tripsDomain } from "./presentation/trips.tsx"
+import { tripsDomain } from "./presentation/trips/trips.tsx"
 import { statsDomain } from "./presentation/stats.tsx"
-import { summaryDomain } from "./presentation/summary.tsx"
+
 import { errorHandler } from "./presentation/error.tsx"
 
 const app = new Hono<Env>()
@@ -34,7 +34,6 @@ app
 	.route("/", homeDomain)
 	.route("/trips", tripsDomain)
 	.route("/stats", statsDomain)
-	.route("/summary", summaryDomain)
 
 app.get("/static/*", async (c) => {
 	const path = c.req.path.replace(/^\/static\//, "")

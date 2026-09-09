@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, afterEach } from "bun:test"
 
 import { db } from "./db/client"
 import { homeHandler } from "./presentation/home.tsx"
-import { getPartialStats } from "./presentation/summary.tsx"
+
 import { DateTime } from "luxon"
 
 const TEST_VEHICLE_ID = "TestVehicleHomeH"
@@ -247,23 +247,5 @@ describe("homeHandler", () => {
 
 		expect(result.status).toBe(200)
 		expect(html).toContain("Second Vehicle")
-	})
-})
-
-describe("GET /summary/fragments/grid", () => {
-	it("returns stats fragment with six stat cards", async () => {
-		const mockCtx = createMockContext()
-		const result = await getPartialStats(mockCtx as any)
-		const html = await result.text()
-
-		expect(result.status).toBe(200)
-		expect(html).toContain("Total distance")
-		expect(html).toContain("Total time driven")
-		expect(html).toContain("Avg speed")
-		expect(html).toContain("Avg duration")
-		expect(html).toContain("Avg consumption")
-		expect(html).toContain("Trips")
-		expect(html).not.toContain("#stats-region")
-		expect(html).not.toContain("Layout")
 	})
 })
