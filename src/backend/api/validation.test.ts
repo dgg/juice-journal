@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test"
-import { tripInputSchema } from "./types"
+import { tripInputSchema } from "../types"
 
 describe("Trip Input Schema (Zod)", () => {
 	describe("Required Fields", () => {
