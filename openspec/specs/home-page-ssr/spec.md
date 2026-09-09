@@ -147,36 +147,15 @@ The system SHALL adapt layout for different screen sizes, optimizing for mobile 
 - **WHEN** user views the home page on different screen sizes
 - **THEN** system adjusts layout appropriately (phone: stacked elements, desktop: split layout)
 
-### Requirement: Stats fragment route
-
-The system SHALL expose a fragment route `GET /summary/fragments/grid` that returns the same hero + grid summary markup rendered on the home page (bare, no `Layout`) for HTMX region swaps, scoped to the displayed vehicle. The fragment SHALL contain all six stat cards with month-over-month deltas and SHALL NOT render a period switcher, navigation, charts, or the Chart.js script. After a trip is created via `POST /trips`, the out-of-band stats refresh SHALL swap this fragment so the home page stats panel updates without a full reload.
-
-#### Scenario: Fragment returns the hero + grid summary markup
-
-- **WHEN** a `GET /summary/fragments/grid` request is received
-- **THEN** the system SHALL respond with the hero + grid stats summary HTML (two hero cards, four grid-tier cards, MoM deltas on every card) and no surrounding document, no period switcher, and no chart scripts
-
-#### Scenario: Fragment empty month
-
-- **GIVEN** no trips exist for the current month for the displayed vehicle
-- **WHEN** a `GET /summary/fragments/grid` request is received
-- **THEN** the system SHALL respond with the hero + grid markup with all six cards rendering the empty `--` state and neutral deltas
-
-#### Scenario: Out-of-band refresh after trip creation
-
-- **GIVEN** a valid trip form submission to `POST /trips`
-- **WHEN** the system processes the request
-- **THEN** the response SHALL include the hero + grid stats fragment marked `hx-swap-oob="true"` so the home page stats panel refreshes alongside the new trip row, without a full page reload
-
 ### Requirement: Trip creation via HTML endpoint
 
-The system SHALL accept trip creation via `POST /trips` (form-encoded, HTMX-submitted) and respond with HTML containing the new trip row plus an out-of-band refresh of the stats region, so the trip list and stats update from a single response without a page reload. This endpoint SHALL exist alongside `POST /api/trips` (JSON), which remains the contract for API/tooling consumers.
+The system SHALL accept trip creation via `POST /trips` (form-encoded, HTMX-submitted) and respond with an `HX-Redirect` to `/`, which re-renders the home page with updated stats and trip list. This endpoint SHALL exist alongside `POST /api/trips` (JSON), which remains the contract for API/tooling consumers.
 
-#### Scenario: Successful trip creation updates list and stats
+#### Scenario: Successful trip creation redirects to home
 
 - **GIVEN** a valid trip form submission to `POST /trips`
 - **WHEN** the system processes the request
-- **THEN** it SHALL respond with the new `TripRow` markup and a stats grid fragment marked `hx-swap-oob="true"` so the browser appends the row to the list and refreshes stats in one response
+- **THEN** it SHALL respond with an `HX-Redirect` header pointing to `/` so the browser navigates to the home page with refreshed stats and trip list
 
 #### Scenario: Validation failure returns inline errors
 
@@ -210,4 +189,4 @@ The system SHALL render a trip creation form at `GET /trips/creation` composed t
 #### Scenario: Form posts via HTMX
 
 - **WHEN** the user submits the trip form
-- **THEN** the form SHALL be submitted via HTMX to `POST /trips` and the response SHALL update the trip list and stats without a full reload
+- **THEN** the form SHALL be submitted via HTMX to `POST /trips` and the response SHALL redirect to the home page (via `HX-Redirect`) with refreshed trip list and stats

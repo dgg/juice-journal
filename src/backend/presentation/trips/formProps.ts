@@ -1,15 +1,13 @@
 import { DateTime } from "luxon"
 import type { ZodError } from "zod"
 
-import type { TripFormRaw } from "./types"
-import type { Daypart, Location } from "../types"
+import type { TripFormIssues, TripFormRaw } from "../types"
+import type { Daypart, Location } from "../../types"
 
-import { toFieldIssues } from "./formValidators"
+import { displayTz } from "../../utils/dates"
 
-import { displayTz } from "../utils/dates"
-
-import { vehiclesQueries } from "../db/queries/vehicles"
-import { tripsQueries } from "../db/queries/trips"
+import { vehiclesQueries } from "../../db/queries/vehicles"
+import { tripsQueries } from "../../db/queries/trips"
 
 export interface PropsArgs {
 	error?: ZodError
@@ -17,6 +15,16 @@ export interface PropsArgs {
 }
 
 // TODO: return interface?
+
+const toFieldIssues = (err?: ZodError): TripFormIssues | undefined =>
+	err?.issues.reduce(
+		(map, issue) => {
+			const key = issue.path[0] as keyof TripFormRaw
+			map[key] = issue.message
+			return map
+		},
+		{} as Record<keyof TripFormRaw, string>
+	)
 
 export const buildTripFormProps = async (opts?: PropsArgs) => {
 	const tz = displayTz()
