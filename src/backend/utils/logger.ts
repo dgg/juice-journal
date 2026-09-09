@@ -1,5 +1,4 @@
 import pino from "pino"
-import type { TripInput } from "../types"
 
 const isProduction = process.env.NODE_ENV === "production"
 const logLevel = process.env.LOG_LEVEL || (isProduction ? "info" : "debug")
@@ -24,6 +23,5 @@ export const rootLogger = pino(
 export type Env = {
 	Variables: {
 		logger: pino.Logger
-		tripInput: TripInput
 	}
 }
