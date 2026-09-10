@@ -1,0 +1,14 @@
+*
+!src/
+!public/
+!package.json
+!bun.lock
+!tsconfig.json
+src/**/*.test.ts
+src/**/*.test.tsx
+src/**/*.spec.ts
+src/**/*.spec.tsx
+src/**/__tests__/
+src/docker-compose.*
+src/TestDb.ts
+src/fixture-setup.ts

@@ -20,6 +20,7 @@ app.use(
 	structuredLogger({
 		createLogger: (c) => rootLogger.child({ requestId: c.var.requestId }),
 		onResponse: (logger, c, elapsedMs) => {
+			if (c.req.path === "/api/health") return
 			logger.info({ method: c.req.method, path: c.req.path, elapsedMs })
 		}
 	})
