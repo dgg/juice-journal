@@ -29,9 +29,9 @@
 ## 6. Verification
 
 - [x] 6.1 `docker build .` succeeds with distroless base
-- [ ] 6.2 `docker compose up` starts `app` after `db` healthy + `migrator` completed
-- [ ] 6.3 `GET http://localhost:3000/api/health` returns 200
-- [ ] 6.4 `GET http://localhost:3000/static/app.css` returns 200 (not 404)
-- [ ] 6.5 `GET http://localhost:3000/static/scripts/stats.mjs` returns 200 (not 404)
+- [x] 6.2 `docker compose up` starts `app` after `db` healthy + `migrator` completed
+- [x] 6.3 `GET http://localhost:3000/api/health` returns 200
+- [x] 6.4 `GET http://localhost:3000/static/app.css` returns 200 (not 404)
+- [x] 6.5 `GET http://localhost:3000/static/scripts/stats.mjs` returns 200 (not 404)
 - [x] 6.6 No test files in image: `ls -R /usr/src/app/src` shows no `*.test.ts` or `TestDb.ts`
 - [x] 6.7 `bun check` and `bun test` pass on Bun 1.4.2 (version bump verification)
