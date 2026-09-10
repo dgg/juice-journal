@@ -10,7 +10,6 @@ RUN bun install --production
 
 # Copy source code
 COPY src ./src
-COPY db ./db
 
 # Expose port
 EXPOSE 3000
