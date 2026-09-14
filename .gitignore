@@ -143,3 +143,6 @@ vite.config.ts.timestamp-*
 .vite/
 
 .playwright-cli/
+
+# Service account key files
+secrets/
