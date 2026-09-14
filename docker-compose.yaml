@@ -1,7 +1,6 @@
 services:
   db:
     image: postgres:${PG_VERSION:-18.6-alpine}
-    container_name: juice-journal-db
     restart: unless-stopped
     environment:
       POSTGRES_DB: juice_journal_db
@@ -20,7 +19,6 @@ services:
 
   migrator:
     image: ghcr.io/amacneil/dbmate:${DBMATE_VERSION:-2.35.1}
-    container_name: juice-journal-migrator
     restart: no
     environment:
       DATABASE_URL: postgres://juice_journal_usr:juice_journal_pwd@db:5432/juice_journal_db?sslmode=disable
@@ -32,16 +30,48 @@ services:
       db:
         condition: service_healthy
 
-  weather:
-    image: dhi.io/wiremock:${WIREMOCK_VERSION:-3.13}
+  idp:
+    image: mockserver/mockserver:${MOCKSERVER_VERSION:-5.15.0}
     ports:
-      - "8081:8080"
+      - "8080:1080"
+    environment:
+      MOCKSERVER_LOG_LEVEL: INFO
+      MOCKSERVER_INITIALIZATION_JSON_PATH: /opt/mocks/weather.json
     volumes:
-      - ./data/mocks:/home/wiremock/mappings
-      - ./data/forecast.mock.json:/home/wiremock/__files/forecast.json
-      - ./data/archive.mock.json:/home/wiremock/__files/archive.json
+      - ./data/mocks:/opt/mocks
+
+  idp-init:
+    image: curlimages/curl:${CURL_IMAGE_TAG:-8.22.0}
+    restart: no
+    depends_on:
+      idp:
+        condition: service_healthy
+    command:
+      - "sh"
+      - "-c"
+      - >
+        curl -s -X PUT "http://idp:1080/mockserver/oidc"
+        -H "Content-Type: application/json"
+        -d '{
+          "issuer": "http://localhost:8080",
+          "clientId": "juice-journal-dev",
+          "clientSecret": "dev-secret",
+          "audience": "juice-journal-api",
+          "scopes": ["openid","email","profile"],
+          "signingAlgorithm": "RS256",
+          "tokenExpirySeconds": 3600,
+          "opaqueAccessToken": true,
+          "additionalClaims": {
+            "sub": "1234567890",
+            "email": "jj@example.com",
+            "email_verified": true,
+            "name": "Dev User"
+          }
+        }'
 
   juice-journal:
+    profiles:
+      - app
     build:
       context: .
       dockerfile: Dockerfile
@@ -56,6 +86,13 @@ services:
     environment:
       DATABASE_URL: postgres://juice_journal_usr:juice_journal_pwd@db:5432/juice_journal_db?sslmode=disable
       NODE_ENV: production
+      OAUTH_ISSUER_BASE_URL: ${OAUTH_ISSUER_BASE_URL:-http://idp:1080}
+      GOOGLE_WEB_CLIENT_ID: ${GOOGLE_WEB_CLIENT_ID:-}
+      GOOGLE_WEB_CLIENT_SECRET: ${GOOGLE_WEB_CLIENT_SECRET:-}
+      GOOGLE_WEB_REDIRECT_URI: ${GOOGLE_WEB_REDIRECT_URI:-http://localhost:3000/auth/google/callback}
+      ALLOWED_GOOGLE_EMAILS: ${ALLOWED_GOOGLE_EMAILS:-dgon@gmail.com}
+      ALLOWED_SERVICE_ACCOUNTS: ${ALLOWED_SERVICE_ACCOUNTS:-juice-journal-importer@dev.iam.gserviceaccount.com}
+      JJ_SECRET: ${JJ_SECRET:-dev-secret-change-me}
     ports:
       - "3000:3000"
     healthcheck:

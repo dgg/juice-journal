@@ -13,6 +13,8 @@ import type { Env } from "../../utils/logger"
 
 import { StatsPage } from "../../../frontend/pages/StatsPage"
 import { StatsChartsFragment } from "../../../frontend/fragments/StatsChartsFragment"
+
+import { webAuth } from "../../../auth/web-auth"
 import {
 	statsQuerySchema,
 	type Period,
@@ -172,6 +174,7 @@ const calculateViewData = async (qs: StatsQuery): Promise<StatsView> => {
 }
 
 export const statsDomain = new Hono<Env>()
+	.use(webAuth)
 	.get("/", zValidator("query", statsQuerySchema), async (c) => {
 		const view = await calculateViewData(c.req.valid("query"))
 		return c.html(<StatsPage data={view} />)

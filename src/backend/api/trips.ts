@@ -10,6 +10,8 @@ import { tripsQueries, type TripRow } from "../db/queries/trips"
 import { tripInputSchema } from "../types"
 import type { TripInput, TripCreationRaw } from "../types"
 
+import { apiAuth } from "../../auth/api-auth"
+
 // generic soup workaround
 const problemHook = zodProblemHook() as unknown as any
 
@@ -22,6 +24,9 @@ export const apiTrips = new Hono()
 		})
 	)
 	.get("/health", (c) => c.json({ status: "ok" }))
+
+	// All routes below /health require bearer auth
+	.use("/*", apiAuth)
 
 	.post(
 		"/trips",

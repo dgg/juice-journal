@@ -1,0 +1,35 @@
+[
+	{
+		"httpRequest": {
+			"method": "GET",
+			"path": "/v1/forecast"
+		},
+		"httpResponse": {
+			"statusCode": 200,
+			"body": {
+				"type": "FILE",
+				"filePath": "/opt/mocks/forecast.mock.json",
+				"templateType": "VELOCITY",
+				"contentType": "application/json"
+			}
+		}
+	},
+	{
+		"httpRequest": {
+			"method": "GET",
+			"path": "/v1/archive"
+		},
+		"httpResponse": {
+			"statusCode": 200,
+			"headers": {
+				"Content-Type": "application/json"
+			},
+			"body": {
+				"type": "FILE",
+				"filePath": "/opt/mocks/archive.mock.json",
+				"templateType": "VELOCITY",
+				"contentType": "application/json"
+			}
+		}
+	}
+]

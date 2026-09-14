@@ -10,6 +10,8 @@ import { tripsQueries, type TripWithLocationRow } from "../../db/queries/trips"
 import { vehiclesQueries, type VehicleRow } from "../../db/queries/vehicles"
 import { statsQueries, type PeriodAggregates } from "../../db/queries/stats"
 
+import { webAuth } from "../../../auth/web-auth"
+
 import { HomePage } from "../../../frontend/pages/HomePage"
 import type { HomeView } from "./types"
 
@@ -92,7 +94,7 @@ const findVehicle = async (): Promise<VehicleRow | null> => {
 	return vehicle
 }
 
-export const homeDomain = new Hono<Env>().get("/", async (c) => {
+export const homeDomain = new Hono<Env>().use(webAuth).get("/", async (c) => {
 	const vehicle = await findVehicle()
 	const vehicleId = vehicle?.id ?? null
 

@@ -1,4 +1,5 @@
 import pino from "pino"
+import type { Principal } from "../../auth/types"
 
 const isProduction = process.env.NODE_ENV === "production"
 const logLevel = process.env.LOG_LEVEL || (isProduction ? "info" : "debug")
@@ -23,5 +24,6 @@ export const rootLogger = pino(
 export type Env = {
 	Variables: {
 		logger: pino.Logger
+		principal?: Principal
 	}
 }

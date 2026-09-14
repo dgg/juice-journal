@@ -1,5 +1,8 @@
+@BEARER_TOKEN={{$dotenv API_TOKEN}}
+
 POST {{$dotenv PROTOCOL}}://{{$dotenv HOST}}:{{$dotenv PORT}}/api/trips
 Content-Type: application/json
+Authorization: Bearer {{$dotenv BEARER_TOKEN}}
 
 {
 	"vehicle_id": "j0cVfdhdq2nlBvPL",

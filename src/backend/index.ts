@@ -11,6 +11,8 @@ import { statsDomain } from "./presentation/stats/stats.tsx"
 
 import { errorHandler } from "./presentation/error.tsx"
 
+import { authRoutes } from "../auth/auth-routes.tsx"
+
 const app = new Hono<Env>()
 
 const PORT = process.env.PORT || 3000
@@ -29,6 +31,8 @@ app.use(
 app.onError(errorHandler)
 
 app
+	// auth routes (not behind any auth middleware)
+	.route("/auth", authRoutes)
 	// api handlers
 	.route("/api", apiTrips)
 	// htmx handlers
