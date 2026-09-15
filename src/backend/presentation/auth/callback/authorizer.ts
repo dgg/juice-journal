@@ -1,8 +1,7 @@
 import { createMiddleware } from "hono/factory"
 
-import { type IdTokenPayload, type TokenResponse } from "../oauth-callback"
+import type { CallbackVars, IdTokenPayload } from "./types"
 
-import type { CallbackVars } from "./types"
 import { isAllowedUser } from "../../../auth/allowlist"
 
 export const authorizeIdentity = createMiddleware<{ Variables: CallbackVars }>(

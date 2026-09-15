@@ -1,7 +1,5 @@
 import * as z from "zod"
 
-import {createFactory} from "hono/factory"
-
 import { STATE_COOKIE_NAME } from "../cookie"
 
 export const callbackQuerySchema = z.object({
