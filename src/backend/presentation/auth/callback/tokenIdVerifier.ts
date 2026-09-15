@@ -1,8 +1,6 @@
 import { createMiddleware } from "hono/factory"
 
-import { type TokenResponse } from "../oauth-callback"
-
-import type { CallbackVars } from "./types"
+import type { CallbackVars, TokenResponse } from "./types"
 
 export const verifyTokenId = createMiddleware<{ Variables: CallbackVars }>(
 	async (c, next) => {

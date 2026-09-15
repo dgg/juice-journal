@@ -1,8 +1,17 @@
 import { createMiddleware } from "hono/factory"
 
-import { type TokenResponse, decodeIdToken } from "../oauth-callback"
+import type { CallbackVars, IdTokenPayload, TokenResponse } from "./types"
 
-import type { CallbackVars } from "./types"
+const decodeIdToken = (idToken: string): IdTokenPayload => {
+	const parts = idToken.split(".")
+	if (parts.length < 2) {
+		throw new Error("invalid id_token: expected JWT with 3 parts")
+	}
+	const payloadB64 = parts[1]!
+	const padded = payloadB64.replace(/-/g, "+").replace(/_/g, "/")
+	const decoded = Buffer.from(padded, "base64").toString("utf-8")
+	return JSON.parse(decoded) as IdTokenPayload
+}
 
 export const decodeTokenId = createMiddleware<{ Variables: CallbackVars }>(
 	async (c, next) => {
