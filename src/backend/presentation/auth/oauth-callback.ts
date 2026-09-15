@@ -1,12 +1,12 @@
 import { getOidcEndpoints } from "../../auth/discovery"
 
-interface IdTokenPayload {
+export interface IdTokenPayload {
 	sub?: string
 	email?: string
 	email_verified?: boolean
 }
 
-interface TokenResponse {
+export interface TokenResponse {
 	access_token: string
 	id_token?: string
 	refresh_token?: string

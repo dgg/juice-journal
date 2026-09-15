@@ -1,6 +1,9 @@
 import { createHmac, timingSafeEqual } from "crypto"
 
 const COOKIE_NAME = "jj_session"
+
+const STATE_COOKIE_NAME = "jj_oauth_state"
+
 const MAX_AGE_SECONDS = 7 * 24 * 60 * 60 // 7 days
 
 interface CookiePayload {
@@ -67,4 +70,4 @@ export function verifyCookie(cookie: string, secret?: string): CookiePayload | n
 	}
 }
 
-export { COOKIE_NAME, MAX_AGE_SECONDS }
+export { COOKIE_NAME, MAX_AGE_SECONDS, STATE_COOKIE_NAME }
