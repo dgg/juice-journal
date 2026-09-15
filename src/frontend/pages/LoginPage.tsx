@@ -10,9 +10,14 @@ export const LoginPage: FC = () => {
 						<h1>Juice Journal</h1>
 						<p>Sign in to continue</p>
 					</hgroup>
-				<a href="/auth/google/start" role="button" hx-boost="false">
-					Sign in
-				</a>
+					<a
+						id="sign-in"
+						href="/auth/google/start"
+						role="button"
+						hx-boost="false"
+					>
+						<span class="icon-log-in" aria-hidden="true"></span> Sign in
+					</a>
 				</article>
 			</main>
 		</Layout>
