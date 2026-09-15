@@ -11,7 +11,7 @@ import { TripFormPage } from "../../../frontend/pages/TripFormPage"
 import { formSchemaValidator } from "./formSchemaValidator"
 import { formConsistencyCheck } from "./formConsistencyCheck"
 
-import { webAuth } from "../../../auth/web-auth"
+import { webAuth } from "../auth/web-auth"
 
 export const tripsDomain = new Hono<TripsEnv>()
 	.use(webAuth)

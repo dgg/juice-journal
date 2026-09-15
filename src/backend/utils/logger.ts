@@ -1,5 +1,5 @@
 import pino from "pino"
-import type { Principal } from "../../auth/types"
+import type { Principal } from "../auth/types"
 
 const isProduction = process.env.NODE_ENV === "production"
 const logLevel = process.env.LOG_LEVEL || (isProduction ? "info" : "debug")

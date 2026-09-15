@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from "bun:test"
 import { Hono } from "hono"
 import { webAuth } from "./web-auth"
 import { signCookie } from "./cookie"
-import { refreshAllowlists } from "./allowlist"
+import { refreshAllowlists } from "../../auth/allowlist"
 
 const TEST_SECRET = "test-secret-key-for-tests"
 

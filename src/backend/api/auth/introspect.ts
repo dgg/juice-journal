@@ -1,6 +1,6 @@
 import { TokenCache } from "./token-cache"
-import { isServiceAccountEmail } from "./types"
-import { getOidcEndpoints } from "./discovery"
+import { isServiceAccountEmail } from "../../auth/types"
+import { getOidcEndpoints } from "../../auth/discovery"
 
 export interface IntrospectionResult {
 	email: string

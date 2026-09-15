@@ -11,7 +11,7 @@ import { statsDomain } from "./presentation/stats/stats.tsx"
 
 import { errorHandler } from "./presentation/error.tsx"
 
-import { authRoutes } from "../auth/auth-routes.tsx"
+import { authRoutes } from "./presentation/auth/auth-routes.tsx"
 
 const app = new Hono<Env>()
 

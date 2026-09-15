@@ -1,9 +1,9 @@
 import type { MiddlewareHandler } from "hono"
 import { getCookie } from "hono/cookie"
-import type { Env } from "../backend/utils/logger"
+import type { Env } from "../../utils/logger"
 import { COOKIE_NAME, verifyCookie } from "./cookie"
-import { isAllowedUser } from "./allowlist"
-import type { Principal } from "./types"
+import { isAllowedUser } from "../../auth/allowlist"
+import type { Principal } from "../../auth/types"
 
 export const webAuth: MiddlewareHandler<Env> = async (c, next) => {
 	const cookie = getCookie(c, COOKIE_NAME)

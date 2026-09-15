@@ -1,4 +1,4 @@
-import { getOidcEndpoints } from "./discovery"
+import { getOidcEndpoints } from "../../auth/discovery"
 
 interface IdTokenPayload {
 	sub?: string
