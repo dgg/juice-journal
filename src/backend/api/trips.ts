@@ -27,7 +27,6 @@ export const apiTrips = new Hono()
 
 	// All routes below /health require bearer auth
 	.use("/*", apiAuth)
-
 	.post(
 		"/trips",
 		// validate input schema

@@ -1,11 +1,12 @@
-import type { MiddlewareHandler } from "hono"
+import { createMiddleware } from "hono/factory"
 import { getCookie } from "hono/cookie"
-import type { Env } from "../../utils/logger"
+
 import { COOKIE_NAME, verifyCookie } from "./cookie"
+
 import { isAllowedUser } from "../../auth/allowlist"
 import type { Principal } from "../../auth/types"
 
-export const webAuth: MiddlewareHandler<Env> = async (c, next) => {
+export const webAuth = createMiddleware(async (c, next) => {
 	const cookie = getCookie(c, COOKIE_NAME)
 	if (!cookie) {
 		return c.redirect("/auth/login")
@@ -29,4 +30,4 @@ export const webAuth: MiddlewareHandler<Env> = async (c, next) => {
 	}
 	c.set("principal", principal)
 	await next()
-}
+})

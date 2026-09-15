@@ -1,11 +1,12 @@
-import type { MiddlewareHandler } from "hono"
-import type { Env } from "../../utils/logger"
+import { createMiddleware } from "hono/factory"
+
 import { introspectToken, TokenRejectedError } from "./introspect"
+
 import { isAuthorized } from "../../auth/allowlist"
 import type { Principal } from "../../auth/types"
 
-function unauthorized(detail: string) {
-	return Response.json(
+const unauthorized = (detail: string) =>
+	Response.json(
 		{
 			type: "about:blank",
 			status: 401,
@@ -17,9 +18,22 @@ function unauthorized(detail: string) {
 			headers: { "Content-Type": "application/problem+json" }
 		}
 	)
-}
 
-export const apiAuth: MiddlewareHandler<Env> = async (c, next) => {
+const forbidden = () =>
+	Response.json(
+		{
+			type: "about:blank",
+			status: 403,
+			title: "Forbidden",
+			detail: "identity not authorized"
+		},
+		{
+			status: 403,
+			headers: { "Content-Type": "application/problem+json" }
+		}
+	)
+
+export const apiAuth = createMiddleware(async (c, next) => {
 	const authHeader = c.req.header("Authorization")
 	if (!authHeader || !authHeader.startsWith("Bearer ")) {
 		return unauthorized("missing bearer token")
@@ -41,18 +55,7 @@ export const apiAuth: MiddlewareHandler<Env> = async (c, next) => {
 	}
 
 	if (!isAuthorized(result.email, result.isServiceAccount)) {
-		return Response.json(
-			{
-				type: "about:blank",
-				status: 403,
-				title: "Forbidden",
-				detail: "identity not authorized"
-			},
-			{
-				status: 403,
-				headers: { "Content-Type": "application/problem+json" }
-			}
-		)
+		return forbidden()
 	}
 
 	const principal: Principal = {
@@ -64,4 +67,4 @@ export const apiAuth: MiddlewareHandler<Env> = async (c, next) => {
 	}
 	c.set("principal", principal)
 	await next()
-}
+})
