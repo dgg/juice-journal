@@ -1,0 +1,38 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build and push image
+        run: |
+          SHORT_SHA="${GITHUB_SHA:0:7}"
+          docker buildx build \
+            --tag ghcr.io/dgg/juice-journal:latest \
+            --tag ghcr.io/dgg/juice-journal:sha-${SHORT_SHA} \
+            --push .
+
+      #- name: Deploy to Render
+      #  env:
+      #    RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+      #  run: curl "$RENDER_DEPLOY_HOOK"
+
+      - name: Log out from GitHub Container Registry
+        if: always()
+        run: docker logout ghcr.io
