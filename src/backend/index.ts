@@ -43,7 +43,6 @@ app
 app.get("/static/*", async (c) => {
 	const path = c.req.path.replace(/^\/static\//, "")
 	const file = Bun.file(`./public/${path}`)
-	console.log(file, await file.exists())
 	if (!(await file.exists())) return c.notFound()
 	return new Response(file)
 })
