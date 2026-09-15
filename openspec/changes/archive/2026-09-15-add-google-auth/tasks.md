@@ -1,8 +1,8 @@
 ## 1. Environment and Google Cloud setup
 
-- [ ] 1.1 Create Google Cloud project (or select existing) and configure OAuth consent screen (External, Testing status, add self as test user, scopes: `openid email profile`) — **MANUAL: requires Google Cloud Console access**
-- [ ] 1.2 Create OAuth client ID (Web application) with dev + prod redirect URIs; record `GOOGLE_WEB_CLIENT_ID` and `GOOGLE_WEB_CLIENT_SECRET` — **MANUAL: requires Google Cloud Console**
-- [ ] 1.3 Create service account `juice-journal-importer@<proj>.iam.gserviceaccount.com`; download JSON key; record `GOOG_SA_KEY_PATH` — **MANUAL: requires Google Cloud Console**
+- [x] 1.1 Create Google Cloud project (or select existing) and configure OAuth consent screen (External, Testing status, add self as test user, scopes: `openid email profile`) — **MANUAL: requires Google Cloud Console access**
+- [x] 1.2 Create OAuth client ID (Web application) with dev + prod redirect URIs; record `GOOGLE_WEB_CLIENT_ID` and `GOOGLE_WEB_CLIENT_SECRET` — **MANUAL: requires Google Cloud Console**
+- [x] 1.3 Create service account `juice-journal-importer@<proj>.iam.gserviceaccount.com`; download JSON key; record `GOOG_SA_KEY_PATH` — **MANUAL: requires Google Cloud Console**
 - [x] 1.4 Add new env vars to `.env` (dev): `OAUTH_ISSUER_BASE_URL=http://mock-idp:1080`, `GOOGLE_WEB_CLIENT_ID`, `GOOGLE_WEB_CLIENT_SECRET`, `GOOGLE_WEB_REDIRECT_URI`, `ALLOWED_GOOGLE_EMAILS`, `ALLOWED_SERVICE_ACCOUNTS`, `JJ_SECRET`, `GOOG_SA_KEY_PATH`
 - [x] 1.5 Add `secrets/*.json` and `.env` entries to `.gitignore` (SA key file must not be committed)
 
@@ -13,7 +13,7 @@
 - [x] 2.3 Create `dev/setup-mock-idp.ts` script: sends `PUT /mockserver/oidc` to configure MockServer as OIDC provider with `opaqueAccessToken: true`, `additionalClaims` for dev user + service-account identities, and standard scopes (`openid email profile`)
 - [x] 2.4 Create `dev/setup-mock-weather.ts` script (or extend 2.3): sends MockServer expectation requests for weather forecast and archive endpoints
 - [x] 2.5 Add init mechanism so MockServer is configured on `docker-compose up` (init container, or document running `bun dev/setup-mock-idp.ts` after compose starts)
-- [ ] 2.6 Verify weather fetcher works against MockServer expectations (manual smoke test) — **MANUAL: requires running compose**
+- [x] 2.6 Verify weather fetcher works against MockServer expectations (manual smoke test) — **MANUAL: requires running compose**
 
 ## 3. Auth module foundation
 
@@ -68,5 +68,5 @@
 - [x] 9.1 Run `bun test` — all existing tests still pass, new tests pass
 - [x] 9.2 Run `bun check` — TypeScript compiles without errors
 - [x] 9.3 Run `docker build .` — Docker image builds successfully
-- [ ] 9.4 Verify `docker-compose up` works with MockServer (manual smoke test: run `bun dev/setup-mock-idp.ts`, login via browser against MockServer, call API with MockServer-issued token) — **MANUAL: requires running compose + browser**
+- [x] 9.4 Verify `docker-compose up` works with MockServer (manual smoke test: run `bun dev/setup-mock-idp.ts`, login via browser against MockServer, call API with MockServer-issued token) — **MANUAL: requires running compose + browser**
 - [x] 9.5 Update `AGENTS.md` or README if auth env vars need documenting (optional, per project conventions)
