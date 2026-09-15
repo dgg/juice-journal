@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test"
 import { introspectToken, clearIntrospectionCache, TokenRejectedError } from "./introspect"
-import { resetDiscoveryCache } from "./discovery"
+import { resetDiscoveryCache } from "../../auth/discovery"
 
 const ORIGINAL_ISSUER = process.env.OAUTH_ISSUER_BASE_URL
 const ORIGINAL_FETCH = globalThis.fetch

@@ -14,7 +14,7 @@ import type { Env } from "../../utils/logger"
 import { StatsPage } from "../../../frontend/pages/StatsPage"
 import { StatsChartsFragment } from "../../../frontend/fragments/StatsChartsFragment"
 
-import { webAuth } from "../../../auth/web-auth"
+import { webAuth } from "../auth/web-auth"
 import {
 	statsQuerySchema,
 	type Period,

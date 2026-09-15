@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from "bun:test"
 import { Hono } from "hono"
 import { apiAuth } from "./api-auth"
-import { refreshAllowlists } from "./allowlist"
+import { refreshAllowlists } from "../../auth/allowlist"
 import { clearIntrospectionCache } from "./introspect"
-import { resetDiscoveryCache } from "./discovery"
+import { resetDiscoveryCache } from "../../auth/discovery"
 
 let fetchMock: typeof globalThis.fetch | null = null
 

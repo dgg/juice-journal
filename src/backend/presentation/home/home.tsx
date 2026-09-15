@@ -10,7 +10,7 @@ import { tripsQueries, type TripWithLocationRow } from "../../db/queries/trips"
 import { vehiclesQueries, type VehicleRow } from "../../db/queries/vehicles"
 import { statsQueries, type PeriodAggregates } from "../../db/queries/stats"
 
-import { webAuth } from "../../../auth/web-auth"
+import { webAuth } from "../auth/web-auth"
 
 import { HomePage } from "../../../frontend/pages/HomePage"
 import type { HomeView } from "./types"

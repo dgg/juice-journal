@@ -1,8 +1,8 @@
 import type { MiddlewareHandler } from "hono"
-import type { Env } from "../backend/utils/logger"
+import type { Env } from "../../utils/logger"
 import { introspectToken, TokenRejectedError } from "./introspect"
-import { isAuthorized } from "./allowlist"
-import type { Principal } from "./types"
+import { isAuthorized } from "../../auth/allowlist"
+import type { Principal } from "../../auth/types"
 
 function unauthorized(detail: string) {
 	return Response.json(

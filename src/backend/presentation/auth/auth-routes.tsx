@@ -1,12 +1,12 @@
 import { Hono } from "hono"
 import { getCookie, setCookie, deleteCookie } from "hono/cookie"
 import { randomBytes } from "crypto"
-import type { Env } from "../backend/utils/logger"
+import type { Env } from "../../utils/logger"
 import { COOKIE_NAME, signCookie, verifyCookie, MAX_AGE_SECONDS } from "./cookie"
-import { isAllowedUser } from "./allowlist"
+import { isAllowedUser } from "../../auth/allowlist"
 import { exchangeCode, decodeIdToken } from "./oauth-callback"
-import { getOidcEndpoints } from "./discovery"
-import { LoginPage } from "../frontend/pages/LoginPage"
+import { getOidcEndpoints } from "../../auth/discovery"
+import { LoginPage } from "../../../frontend/pages/LoginPage"
 
 const STATE_COOKIE_NAME = "jj_oauth_state"
 const STATE_MAX_AGE_SECONDS = 300 // 5 minutes
