@@ -1,0 +1,17 @@
+{
+	"name": "importer",
+	"module": "index.ts",
+	"devDependencies": {
+		"@types/bun": "latest",
+		"@types/luxon": "^3.7.5"
+	},
+	"peerDependencies": {
+		"typescript": "^7"
+	},
+	"private": true,
+	"type": "module",
+	"dependencies": {
+		"@fast-csv/parse": "^5.0.7",
+		"luxon": "^3.7.2"
+	}
+}
