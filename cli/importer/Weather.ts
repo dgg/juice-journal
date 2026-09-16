@@ -17,7 +17,7 @@ const reducer = (
 	const snapshot: WeatherSnapshot = {
 		humidity: weather.hourly.relative_humidity_2m[i]!,
 		observedAt: time,
-		precipitation: weather.hourly.showers[i]!,
+		precipitation: weather.hourly.precipitation[i]!,
 		temperature: weather.hourly.temperature_2m[i]!,
 		weatherCode: weather.hourly.weather_code[i]!,
 		wind: {
@@ -88,7 +88,7 @@ interface HistoricWeather {
 		time: string[]
 		temperature_2m: number[]
 		relative_humidity_2m: number[]
-		showers: number[]
+		precipitation: number[]
 		weather_code: number[]
 		wind_speed_10m: number[]
 		wind_direction_10m: number[]

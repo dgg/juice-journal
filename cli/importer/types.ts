@@ -1,8 +1,9 @@
 import type { DateTime, Duration } from "luxon"
 import type { Location, WeatherSnapshot } from "./Weather"
-import type { Daypart, Waypoint } from "./types"
 
-export type Daypart = "morning" | "afternoon"export interface Raw {
+export type Daypart = "morning" | "afternoon"
+
+export interface Raw {
 	start: string
 	end: string
 	duration: string
