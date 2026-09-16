@@ -146,3 +146,5 @@ vite.config.ts.timestamp-*
 
 # Service account key files
 secrets/
+
+import/
