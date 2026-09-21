@@ -19,4 +19,8 @@ export class DateRange {
 	public get end(): DateTime | null {
 		return this.#end
 	}
+
+	public get empty() : boolean{
+		return !this.#start || !this.#end
+	}
 }

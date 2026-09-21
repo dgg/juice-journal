@@ -1,6 +1,6 @@
 import { SQL, sql } from "bun"
 
-import type { Daypart, Transformed, TripData } from "./types"
+import type { Daypart, TripData } from "./types"
 import type { Location, WeatherSnapshot } from "./Weather"
 
 const DATABASE_URL = process.env.DATABASE_URL
