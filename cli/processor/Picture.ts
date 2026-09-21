@@ -3,7 +3,7 @@ import { DateTime } from "luxon"
 const NAME_PATTERN: RegExp =
 	/^(?:\w)+_(?<yyyy>\d{4})(?<MM>\d{2})(?<dd>\d{2})_(?<hh>\d{2})(?<mm>\d{2})/
 
-export class PicName {
+export class Picture {
 	readonly fileName: string
 	readonly year: number
 	readonly month: number
@@ -36,6 +36,6 @@ export class PicName {
 				minute
 			},
 			{ zone: "UTC" }
-		)
+		).setZone("Europe/Copenhagen")
 	}
 }

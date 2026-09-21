@@ -1,5 +1,9 @@
 import { DateTime, Duration, type DateObjectUnits } from "luxon"
-import type { PicName } from "./PicName"
+import type { Logger } from "pino"
+
+import type { Picture } from "./Picture"
+import type { Location } from "./Weather"
+
 import {
 	START_PATTERN,
 	type Daypart,
@@ -7,10 +11,13 @@ import {
 	type TripData,
 	type Waypoint
 } from "./types"
-import type { Location } from "./Weather"
 
-export const transformer = (name: PicName, response: OcrResponse): TripData => {
-	const endTime = name.date
+export const transformer = (
+	logger: Logger,
+	picture: Picture,
+	response: OcrResponse
+): TripData => {
+	const endTime = picture.date
 	const hhmm = response.start.match(START_PATTERN)!.groups!["hhmm"]!
 	const startHour = Duration.fromISOTime(hhmm)
 
@@ -41,11 +48,18 @@ export const transformer = (name: PicName, response: OcrResponse): TripData => {
 		// can't set the weather just yet
 	}
 
+	const duration = endTime.diff(startTime)
+
+	logger.info(
+		{ daypart, start, end, duration: duration.as("minutes") },
+		"information transformed"
+	)
+
 	return {
 		daypart,
 		consumption: response.consumption,
 		distance: response.distance,
-		duration: endTime.diff(startTime),
+		duration,
 		end,
 		speed: response.speed,
 		start
