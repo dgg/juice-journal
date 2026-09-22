@@ -48,9 +48,9 @@ async function seedTrip(opts: {
 }
 
 describe.skip("statsQueries", () => {
-	describe("monthlyAggregates (backwards compat)", () => {
+	describe("periodAggregates", () => {
 		it("returns null aggregates when no trips", async () => {
-			const result = await statsQueries.monthlyAggregates({
+			const result = await statsQueries.periodAggregates({
 				startUtc: utcIso("2026-01-01T00:00:00Z"),
 				endUtc: utcIso("2026-02-01T00:00:00Z"),
 				vehicleId: TEST_VEHICLE_ID
@@ -84,7 +84,7 @@ describe.skip("statsQueries", () => {
 				consumption: 18.0
 			})
 
-			const result = await statsQueries.monthlyAggregates({
+			const result = await statsQueries.periodAggregates({
 				startUtc: utcIso("2026-07-01T00:00:00Z"),
 				endUtc: utcIso("2026-08-01T00:00:00Z"),
 				vehicleId: TEST_VEHICLE_ID
@@ -96,7 +96,7 @@ describe.skip("statsQueries", () => {
 		})
 
 		it("works without vehicle filter", async () => {
-			const result = await statsQueries.monthlyAggregates({
+			const result = await statsQueries.periodAggregates({
 				startUtc: utcIso("2026-07-01T00:00:00Z"),
 				endUtc: utcIso("2026-08-01T00:00:00Z")
 			})

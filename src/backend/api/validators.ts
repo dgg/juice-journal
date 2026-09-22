@@ -1,6 +1,6 @@
 import { ProblemDetailsError } from "hono-problem-details"
 
-import { vehiclesQueries } from "../db/queries/vehicles"
+import { Exists } from "../db/queries/vehicles/Exists"
 import { tripsQueries } from "../db/queries/trips"
 
 import type { TripInput } from "../types"
@@ -9,7 +9,7 @@ import { problems } from "../problems"
 
 export async function validateVehicle(req: TripInput): Promise<void> {
 	try {
-		const exists = await vehiclesQueries.vehicleExists(req.vehicle_id)
+		const exists: boolean = await new Exists(req.vehicle_id).execute()
 		if (!exists) {
 			throw problems.create("FOREIGN_KEY_VIOLATION", {
 				detail: `Vehicle '${req.vehicle_id}' does not exist`,

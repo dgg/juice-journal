@@ -6,14 +6,14 @@ import type { TripForm, TripsEnv } from "./types"
 
 import { buildTripFormProps } from "./formProps"
 
-import { vehiclesQueries } from "../../db/queries/vehicles"
 import { tripsQueries } from "../../db/queries/trips"
+import { Exists } from "../../db/queries/vehicles/Exists"
 
 import { TripFormFragment } from "../../../frontend/fragments/TripFormFragment"
 
 async function checkVehicleExists(input: TripForm): Promise<ZodIssue[]> {
 	const issues: ZodIssue[] = []
-	const exists = await vehiclesQueries.vehicleExists(input.vehicle_id)
+	const exists: boolean = await new Exists(input.vehicle_id).execute()
 	if (!exists) {
 		issues.push({
 			code: "custom",

@@ -7,8 +7,8 @@ import { formatDurationHm } from "../../utils/format"
 import type { Env } from "../../utils/logger"
 
 import { tripsQueries, type TripWithLocationRow } from "../../db/queries/trips"
-import { vehiclesQueries, type VehicleRow } from "../../db/queries/vehicles"
 import { statsQueries, type PeriodAggregates } from "../../db/queries/stats"
+import { GetFromLatestTrip, type VehicleRow } from "../../db/queries/vehicles/GetFromLatestTrip"
 
 import { webAuth } from "../auth/web-auth"
 
@@ -87,15 +87,8 @@ const calculateIntervals = (
 	return { current, prev }
 }
 
-const findVehicle = async (): Promise<VehicleRow | null> => {
-	const vehicleId = await tripsQueries.findLatestTripVehicleId()
-	const vehicle = vehicleId ? await vehiclesQueries.findVehicleById(vehicleId) : null
-
-	return vehicle
-}
-
 export const homeDomain = new Hono<Env>().use(webAuth).get("/", async (c) => {
-	const vehicle = await findVehicle()
+	const vehicle = await new GetFromLatestTrip().execute()
 	const vehicleId = vehicle?.id ?? null
 
 	const tz = displayTz()

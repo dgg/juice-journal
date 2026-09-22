@@ -151,17 +151,3 @@ describe.skip("tripsQueries", () => {
 		})
 	})
 })
-
-describe.skip("vehiclesQueries", () => {
-	describe("vehicleExists", () => {
-		it("returns true for existing vehicle", async () => {
-			const exists = await vehiclesQueries.vehicleExists(TEST_VEHICLE_ID)
-			expect(exists).toBe(true)
-		})
-
-		it("returns false for non-existing vehicle", async () => {
-			const exists = await vehiclesQueries.vehicleExists("nonexistent")
-			expect(exists).toBe(false)
-		})
-	})
-})

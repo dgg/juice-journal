@@ -73,20 +73,6 @@ return {
 			}
 	},
 
-	// Backwards compatibility alias - keep existing callers working
-	monthlyAggregates: async function (params: {
-		startUtc: DateTime
-		endUtc: DateTime
-		vehicleId?: string
-	}) {
-		const result = await this.periodAggregates(params)
-		return {
-			avgConsumption: result.avgConsumption,
-			avgDuration: result.avgDuration,
-			totalDistance: result.totalDistance
-		}
-	},
-
 	async periodSeries(params: {
 		startUtc: DateTime
 		endUtc: DateTime

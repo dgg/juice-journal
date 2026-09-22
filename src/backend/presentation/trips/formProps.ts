@@ -6,8 +6,8 @@ import type { Daypart, Location } from "../../types"
 
 import { displayTz } from "../../utils/dates"
 
-import { vehiclesQueries } from "../../db/queries/vehicles"
 import { tripsQueries } from "../../db/queries/trips"
+import { FindAll, type VehicleRow } from "../../db/queries/vehicles/FindAll"
 
 export interface PropsArgs {
 	error?: ZodError
@@ -34,7 +34,7 @@ export const buildTripFormProps = async (opts?: PropsArgs) => {
 	const defaultDaypart: Daypart = now.hour < 13 ? "morning" : "afternoon"
 	const [startLocation, endLocation]: [Location, Location] =
 		defaultDaypart === "morning" ? ["home", "work"] : ["work", "home"]
-	const vehicles = await vehiclesQueries.listAllVehicles()
+	const vehicles: VehicleRow[] = await new FindAll().execute()
 	const defaultVehicleId = await tripsQueries.findLatestTripVehicleId()
 
 	return {

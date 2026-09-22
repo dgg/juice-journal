@@ -12,19 +12,5 @@ export const vehiclesQueries = {
 		`
 		if (rows.length === 0) return null
 		return rows[0] as unknown as VehicleRow
-	},
-
-	async vehicleExists(id: string): Promise<boolean> {
-		const rows = await db`
-			SELECT id FROM vehicles WHERE id = ${id}
-		`
-		return rows.length > 0
-	},
-
-	async listAllVehicles(): Promise<VehicleRow[]> {
-		const rows = await db`
-			SELECT id, description FROM vehicles ORDER BY description
-		`
-		return rows as unknown as VehicleRow[]
 	}
 }

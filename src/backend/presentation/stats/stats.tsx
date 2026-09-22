@@ -5,7 +5,7 @@ import { zValidator } from "@hono/zod-validator"
 
 import { tripsQueries } from "../../db/queries/trips"
 import { statsQueries } from "../../db/queries/stats"
-import { vehiclesQueries } from "../../db/queries/vehicles"
+import { GetFromLatestTrip } from "../../db/queries/vehicles/GetFromLatestTrip"
 
 import { displayTz, periodBoundsUtc } from "../../utils/dates"
 import { formatDurationHm } from "../../utils/format"
@@ -30,8 +30,7 @@ const computeStatsView = async (params: {
 	tz: string
 	now: DateTime
 }): Promise<StatsView> => {
-	const vehicleId = await tripsQueries.findLatestTripVehicleId()
-	const vehicle = vehicleId ? await vehiclesQueries.findVehicleById(vehicleId) : null
+	const vehicle = await new GetFromLatestTrip().execute()
 
 	const { period, yearGranularity, tz, now } = params
 
@@ -42,12 +41,12 @@ const computeStatsView = async (params: {
 		statsQueries.periodAggregates({
 			startUtc: bounds.current.startUtc,
 			endUtc: bounds.current.endUtc,
-			vehicleId: vehicleId ?? undefined
+			vehicleId: vehicle?.id ?? undefined
 		}),
 		statsQueries.periodAggregates({
 			startUtc: prevBounds.startUtc,
 			endUtc: prevBounds.endUtc,
-			vehicleId: vehicleId ?? undefined
+			vehicleId: vehicle?.id ?? undefined
 		})
 	])
 
@@ -74,7 +73,7 @@ const computeStatsView = async (params: {
 		const rows = await statsQueries.periodSeries({
 			startUtc: bounds.current.startUtc,
 			endUtc: bounds.current.endUtc,
-			vehicleId: vehicleId ?? undefined,
+			vehicleId: vehicle?.id ?? undefined,
 			bucket,
 			displayTz: tz
 		})
