@@ -1,28 +1,30 @@
 import { describe, it, expect } from "bun:test"
 import { DateTime } from "luxon"
 import { TripRow } from "../components/TripRow"
+import type { TripSnapshot } from "../../backend/db/queries/trips/FindTrips"
+import type { WeatherSnapshot } from "../../backend/weather/types"
 
 function dt(s: string) {
 	return DateTime.fromISO(s, { setZone: true }).toUTC()
 }
 
 describe("TripRow", () => {
-	const baseTrip = {
+	const baseTrip: TripSnapshot = {
 		id: "t1",
 		start_time: dt("2026-08-26T06:00:00Z"),
 		end_time: dt("2026-08-26T06:45:00Z"),
-		daypart: "morning" as const,
+		daypart: "morning",
 		duration: 45,
 		distance: 15,
 		speed: 60,
 		consumption: 18.5,
 		odometer: 50000,
-		start_location: "Home",
-		end_location: "Work",
-		weatherStart: null
+		start_location: "home",
+		end_location: "work",
+		weather_start: null
 	}
 
-	const weatherSnapshot = {
+	const weatherSnapshot: WeatherSnapshot = {
 		observedAt: dt("2026-08-26T06:00:00Z"),
 		weatherCode: 61,
 		temperature: 13,

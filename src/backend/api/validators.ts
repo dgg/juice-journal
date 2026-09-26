@@ -1,7 +1,8 @@
 import { ProblemDetailsError } from "hono-problem-details"
 
-import { Exists } from "../db/queries/vehicles/Exists"
-import { tripsQueries } from "../db/queries/trips"
+import { Exists as VehicleExists } from "../db/queries/vehicles/Exists"
+import { Exists as TripExists } from "../db/queries/trips/Exists"
+import { GetLatestOdometer } from "../db/queries/trips/GetLatestOdometer"
 
 import type { TripInput } from "../types"
 
@@ -9,7 +10,7 @@ import { problems } from "../problems"
 
 export async function validateVehicle(req: TripInput): Promise<void> {
 	try {
-		const exists: boolean = await new Exists(req.vehicle_id).execute()
+		const exists: boolean = await new VehicleExists(req.vehicle_id).execute()
 		if (!exists) {
 			throw problems.create("FOREIGN_KEY_VIOLATION", {
 				detail: `Vehicle '${req.vehicle_id}' does not exist`,
@@ -39,10 +40,7 @@ export async function validateVehicle(req: TripInput): Promise<void> {
 
 export async function validateTripConflict(req: TripInput): Promise<void> {
 	try {
-		const exists = await tripsQueries.existsTripByVehicleAndEndTime({
-			vehicleId: req.vehicle_id,
-			endTime: req.end_time
-		})
+		const exists = await new TripExists(req.vehicle_id, req.end_time).execute()
 		if (exists) {
 			throw problems.create("TRIP_CONFLICT", {
 				detail: `A trip with this vehicle_id and end_time already exists`,
@@ -74,7 +72,7 @@ export async function validateTripConflict(req: TripInput): Promise<void> {
 export async function validateOdometer(req: TripInput): Promise<void> {
 	if (req.odometer === undefined) return
 	try {
-		const latest = await tripsQueries.findLatestOdometerForVehicle(req.vehicle_id)
+		const latest = await new GetLatestOdometer(req.vehicle_id).execute()
 		if (latest !== null && req.odometer < latest) {
 			throw problems.create("FOREIGN_KEY_VIOLATION", {
 				detail: `Odometer reading ${req.odometer} is lower than the previous reading ${latest}`,

@@ -1,7 +1,5 @@
 import { Hono } from "hono"
 
-import { tripsQueries } from "../../db/queries/trips"
-
 import type { TripsEnv } from "./types"
 
 import { buildTripFormProps } from "./formProps"
@@ -12,6 +10,7 @@ import { formSchemaValidator } from "./formSchemaValidator"
 import { formConsistencyCheck } from "./formConsistencyCheck"
 
 import { webAuth } from "../auth/web-auth"
+import { Insert } from "../../db/queries/trips/Insert"
 
 export const tripsDomain = new Hono<TripsEnv>()
 	.use(webAuth)
@@ -21,7 +20,7 @@ export const tripsDomain = new Hono<TripsEnv>()
 	)
 	// handle form post
 	.post("/", formSchemaValidator, formConsistencyCheck, async (c) => {
-		await tripsQueries.createTrip(c.var.form)
+		await new Insert(c.var.form).execute()
 		if (c.req.header("HX-Request")) {
 			c.header("HX-Redirect", "/")
 			return c.text("", 200)

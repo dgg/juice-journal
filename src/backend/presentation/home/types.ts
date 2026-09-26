@@ -1,6 +1,6 @@
 import type { StatWithDelta } from "../types"
 
-import type { TripWithLocationRow } from "../../db/queries/trips"
+import type { TripSnapshot } from "../../db/queries/trips/FindTrips"
 
 export interface HomeView {
 	vehicle: {
@@ -19,6 +19,6 @@ export interface HomeView {
 		tripCount: StatWithDelta
 		period: "month"
 	}
-	trips: TripWithLocationRow[]
+	trips: TripSnapshot[]
 	hasTrips: boolean
 }

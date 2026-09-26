@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "bun:test"
 
 import { DbInstance } from "../../../../fixture-setup"
 import { FindAll } from "./FindAll"
-import type { VehicleRow } from "../vehicles"
+import type { VehicleRow } from "../vehicles/VehicleRow"
 
 const VEHICLE_A = "testveh_findall_A"
 const VEHICLE_B = "testveh_findall_B"

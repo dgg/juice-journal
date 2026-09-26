@@ -4,6 +4,11 @@ export function displayTz(): string {
 	return process.env.DISPLAY_TZ || "Europe/Copenhagen"
 }
 
+export interface UtcTimeRange {
+	startUtc: DateTime
+	endUtc: DateTime
+}
+
 /**
  * Computes the current calendar month's bounds in UTC.
  * Returns inclusive start and exclusive end as UTC DateTime instances.
@@ -11,7 +16,7 @@ export function displayTz(): string {
 export function currentMonthBoundsUtc(
 	zone: string,
 	now: DateTime = DateTime.now()
-): { startUtc: DateTime; endUtc: DateTime } {
+): UtcTimeRange {
 	const nowInZone = now.setZone(zone)
 	const monthStart = nowInZone.startOf("month")
 	const nextMonthStart = monthStart.plus({ months: 1 })
@@ -28,7 +33,7 @@ export function currentMonthBoundsUtc(
 export function prevMonthBoundsUtc(
 	zone: string,
 	now: DateTime = DateTime.now()
-): { startUtc: DateTime; endUtc: DateTime } {
+): UtcTimeRange {
 	const nowInZone = now.setZone(zone)
 	const prevMonthStart = nowInZone.startOf("month").minus({ months: 1 })
 	const currentMonthStart = prevMonthStart.plus({ months: 1 })
@@ -45,7 +50,7 @@ export function prevMonthBoundsUtc(
 export function currentWeekBoundsUtc(
 	zone: string,
 	now: DateTime = DateTime.now()
-): { startUtc: DateTime; endUtc: DateTime } {
+): UtcTimeRange {
 	const nowInZone = now.setZone(zone)
 	const weekStart = nowInZone.startOf("week")
 	const nextWeekStart = weekStart.plus({ weeks: 1 })
@@ -62,7 +67,7 @@ export function currentWeekBoundsUtc(
 export function prevWeekBoundsUtc(
 	zone: string,
 	now: DateTime = DateTime.now()
-): { startUtc: DateTime; endUtc: DateTime } {
+): UtcTimeRange {
 	const nowInZone = now.setZone(zone)
 	const prevWeekStart = nowInZone.startOf("week").minus({ weeks: 1 })
 	const currentWeekStart = prevWeekStart.plus({ weeks: 1 })
@@ -79,7 +84,7 @@ export function prevWeekBoundsUtc(
 export function currentYearBoundsUtc(
 	zone: string,
 	now: DateTime = DateTime.now()
-): { startUtc: DateTime; endUtc: DateTime } {
+): UtcTimeRange {
 	const nowInZone = now.setZone(zone)
 	const yearStart = nowInZone.startOf("year")
 	const nextYearStart = yearStart.plus({ years: 1 })
@@ -96,7 +101,7 @@ export function currentYearBoundsUtc(
 export function prevYearBoundsUtc(
 	zone: string,
 	now: DateTime = DateTime.now()
-): { startUtc: DateTime; endUtc: DateTime } {
+): UtcTimeRange {
 	const nowInZone = now.setZone(zone)
 	const prevYearStart = nowInZone.startOf("year").minus({ years: 1 })
 	const currentYearStart = prevYearStart.plus({ years: 1 })
@@ -114,7 +119,7 @@ export function periodBoundsUtc(
 	period: 'week' | 'month' | 'year',
 	zone: string,
 	now: DateTime = DateTime.now()
-): { current: { startUtc: DateTime; endUtc: DateTime }; previous: { startUtc: DateTime; endUtc: DateTime } } {
+): { current: UtcTimeRange; previous: UtcTimeRange } {
 	switch (period) {
 		case 'week':
 			return {

@@ -1,13 +1,22 @@
-import type { Context } from "hono"
 import { DateTime } from "luxon"
 import { Hono } from "hono"
 import { zValidator } from "@hono/zod-validator"
 
-import { tripsQueries } from "../../db/queries/trips"
-import { statsQueries } from "../../db/queries/stats"
-import { GetFromLatestTrip } from "../../db/queries/vehicles/GetFromLatestTrip"
+import {
+	BucketAggregations,
+	type BucketedStats
+} from "../../db/queries/stats/BucketAggregations"
+import { PeriodAggregates } from "../../db/queries/stats/PeriodAggregates"
+import { PeriodTrips, type StatTrip } from "../../db/queries/stats/PeriodTrips"
 
-import { displayTz, periodBoundsUtc } from "../../utils/dates"
+import {
+	GetFromLatestTrip,
+	type VehicleRow
+} from "../../db/queries/vehicles/GetFromLatestTrip"
+
+import { GetEarliestYear } from "../../db/queries/trips/GetEarliestYear"
+
+import { displayTz, periodBoundsUtc, type UtcTimeRange } from "../../utils/dates"
 import { formatDurationHm } from "../../utils/format"
 import type { Env } from "../../utils/logger"
 
@@ -15,6 +24,7 @@ import { StatsPage } from "../../../frontend/pages/StatsPage"
 import { StatsChartsFragment } from "../../../frontend/fragments/StatsChartsFragment"
 
 import { webAuth } from "../auth/web-auth"
+
 import {
 	statsQuerySchema,
 	type Period,
@@ -22,7 +32,52 @@ import {
 	type StatsView,
 	type YearGranularity
 } from "./types"
+
 import { formatDate, formatDateLabel, resolveAnchor } from "./period"
+
+type StrictSharedProperties<T, U> = {
+	[
+		K in keyof T & keyof U as T[K] extends U[K]
+			? U[K] extends T[K]
+				? K
+				: never
+			: never
+	]: T[K]
+}
+
+type TripOrAggregation = StrictSharedProperties<StatTrip, BucketedStats> &
+	Partial<Pick<StatTrip, "daypart">>
+
+const loadTripsOrAggregations = async (
+	period: Period,
+	granularity: YearGranularity,
+	range: UtcTimeRange,
+	vehicle: VehicleRow
+): Promise<TripOrAggregation[]> => {
+	if (period === "year") {
+		const yearAggregations = await new BucketAggregations(
+			vehicle.id,
+			range.startUtc,
+			range.endUtc,
+			granularity
+		).execute()
+		return yearAggregations
+	} else if (period === "month") {
+		const dayAggregations = await new BucketAggregations(
+			vehicle.id,
+			range.startUtc,
+			range.endUtc,
+			"day"
+		).execute()
+		return dayAggregations
+	}
+	const trips = await new PeriodTrips(
+		vehicle.id,
+		range.startUtc,
+		range.endUtc
+	).execute()
+	return trips
+}
 
 const computeStatsView = async (params: {
 	period: Period
@@ -37,24 +92,62 @@ const computeStatsView = async (params: {
 	const bounds = periodBoundsUtc(period, tz, now)
 	const prevBounds = bounds.previous
 
-	const [currentStats, prevStats] = await Promise.all([
-		statsQueries.periodAggregates({
-			startUtc: bounds.current.startUtc,
-			endUtc: bounds.current.endUtc,
-			vehicleId: vehicle?.id ?? undefined
-		}),
-		statsQueries.periodAggregates({
-			startUtc: prevBounds.startUtc,
-			endUtc: prevBounds.endUtc,
-			vehicleId: vehicle?.id ?? undefined
-		})
-	])
-
 	const label = formatDateLabel(period, now, tz)
 	const weekBoundsLabel =
 		period === "week"
 			? `${now.setZone(tz).startOf("week").toFormat("dd MMM")} – ${now.setZone(tz).startOf("week").plus({ days: 6 }).toFormat("dd MMM")}`
 			: null
+
+	if (!vehicle) {
+		const nowStart = DateTime.now().setZone(tz).startOf(period)
+		const unit = period === "week" ? "weeks" : period === "month" ? "months" : "years"
+		const prevDate = formatDate(period, now.minus({ [unit]: 1 }))
+		const nextRaw = now.plus({ [unit]: 1 })
+		const nextDate =
+			nextRaw.startOf(period) <= nowStart ? formatDate(period, nextRaw) : null
+
+		let yearOptions: number[] = []
+		if (period === "year") {
+			const currentYear = DateTime.now().setZone(tz).year
+			yearOptions = [currentYear]
+		}
+
+		return {
+			period,
+			yearGranularity,
+			label,
+			weekBoundsLabel,
+			vehicle: null,
+			stats: {
+				totalDistance: { value: null, prev: null },
+				totalTime: { value: null, prev: null },
+				totalTimeHm: null,
+				avgSpeed: { value: null, prev: null },
+				avgDuration: { value: null, prev: null },
+				avgDurationHm: null,
+				avgConsumption: { value: null, prev: null },
+				tripCount: { value: null, prev: null }
+			},
+			series: {
+				labels: [],
+				distance: [],
+				duration: [],
+				speed: [],
+				consumption: []
+			},
+			hasTrips: false,
+			date: formatDate(period, now),
+			prevDate,
+			nextDate,
+			yearOptions
+		}
+	}
+
+	const [currentStats, prevStats] = await Promise.all([
+		new PeriodAggregates(vehicle.id, bounds.current.startUtc, bounds.current.endUtc).execute(),
+		new PeriodAggregates(vehicle.id, prevBounds.startUtc, prevBounds.endUtc).execute()
+	])
+
 	const hasTrips = currentStats.tripCount !== null && currentStats.tripCount > 0
 
 	let series: StatsView["series"] = {
@@ -66,17 +159,15 @@ const computeStatsView = async (params: {
 	}
 
 	if (hasTrips) {
-		// Determine bucket: trip for week, day for month, yearGranularity for year
 		const bucket =
 			period === "year" ? yearGranularity : period === "month" ? "day" : "trip"
 
-		const rows = await statsQueries.periodSeries({
-			startUtc: bounds.current.startUtc,
-			endUtc: bounds.current.endUtc,
-			vehicleId: vehicle?.id ?? undefined,
-			bucket,
-			displayTz: tz
-		})
+		const rows: TripOrAggregation[] = await loadTripsOrAggregations(
+			period,
+			yearGranularity,
+			bounds.current,
+			vehicle
+		)
 
 		series = {
 			labels: rows.map((r) => {
@@ -101,7 +192,6 @@ const computeStatsView = async (params: {
 		}
 	}
 
-	// Compute prev/next dates
 	const unit = period === "week" ? "weeks" : period === "month" ? "months" : "years"
 	const prevDate = formatDate(period, now.minus({ [unit]: 1 }))
 	const nextRaw = now.plus({ [unit]: 1 })
@@ -109,10 +199,9 @@ const computeStatsView = async (params: {
 	const nextDate =
 		nextRaw.startOf(period) <= nowStart ? formatDate(period, nextRaw) : null
 
-	// Year options for year picker
 	let yearOptions: number[] = []
 	if (period === "year") {
-		const earliestYear = await tripsQueries.findEarliestTripYear()
+		const earliestYear = await new GetEarliestYear().execute()
 		const currentYear = DateTime.now().setZone(tz).year
 		const startYear = earliestYear ?? currentYear
 		yearOptions = Array.from(
@@ -126,7 +215,7 @@ const computeStatsView = async (params: {
 		yearGranularity,
 		label,
 		weekBoundsLabel,
-		vehicle: vehicle ? { id: vehicle.id, description: vehicle.description } : null,
+		vehicle: { id: vehicle.id, description: vehicle.description },
 		stats: {
 			totalDistance: {
 				value: currentStats.totalDistance,

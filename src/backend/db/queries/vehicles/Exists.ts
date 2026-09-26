@@ -4,17 +4,21 @@ import { DbQuery } from "../DbQuery"
 
 type IdRow = Pick<VehicleRow, "id">
 
-export class Exists extends DbQuery<boolean> {
+export class Exists extends DbQuery<IdRow, boolean> {
 	readonly #id: string
 	constructor(id: string) {
 		super()
 		this.#id = id
 	}
 
-	protected async doExecute(db: SQL): Promise<boolean> {
+	protected override mapResults(rows: IdRow[]): boolean {
+		return rows.length > 0
+	}
+
+	protected async doQuery(db: SQL): Promise<IdRow[]> {
 		const ids: IdRow[] = await db`
 SELECT id FROM vehicles WHERE id = ${this.#id}
 `
-		return ids.length > 0
+return ids
 	}
 }

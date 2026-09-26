@@ -5,12 +5,13 @@ import { zValidator } from "@hono/zod-validator"
 
 import { validateTripInput } from "./validators"
 
-import { tripsQueries, type TripRow } from "../db/queries/trips"
+import type { TripDetail } from "../db/queries/trips/trips"
 
 import { tripInputSchema } from "../types"
 import type { TripInput, TripCreationRaw } from "../types"
 
 import { apiAuth } from "./auth/api-auth"
+import { Insert } from "../db/queries/trips/Insert"
 
 // generic soup workaround
 const problemHook = zodProblemHook() as unknown as any
@@ -40,7 +41,7 @@ export const apiTrips = new Hono()
 		// handle creation
 		async (c) => {
 			const input: TripInput = c.req.valid("json")
-			const trip: TripRow = await tripsQueries.createTrip(input)
+			const trip: TripDetail = await new Insert(input).execute()
 			const response: TripCreationRaw = {
 				id: trip.id,
 				vehicle: trip.vehicle_id,

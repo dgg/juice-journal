@@ -6,14 +6,15 @@ import type { TripForm, TripsEnv } from "./types"
 
 import { buildTripFormProps } from "./formProps"
 
-import { tripsQueries } from "../../db/queries/trips"
-import { Exists } from "../../db/queries/vehicles/Exists"
+import { GetLatestOdometer } from "../../db/queries/trips/GetLatestOdometer"
+import { Exists as ExisteTrip } from "../../db/queries/trips/Exists"
+import { Exists as ExistsVehicle } from "../../db/queries/vehicles/Exists"
 
 import { TripFormFragment } from "../../../frontend/fragments/TripFormFragment"
 
 async function checkVehicleExists(input: TripForm): Promise<ZodIssue[]> {
 	const issues: ZodIssue[] = []
-	const exists: boolean = await new Exists(input.vehicle_id).execute()
+	const exists: boolean = await new ExistsVehicle(input.vehicle_id).execute()
 	if (!exists) {
 		issues.push({
 			code: "custom",
@@ -26,10 +27,7 @@ async function checkVehicleExists(input: TripForm): Promise<ZodIssue[]> {
 
 async function checkTripConflict(input: TripForm): Promise<ZodIssue[]> {
 	const issues: ZodIssue[] = []
-	const exists = await tripsQueries.existsTripByVehicleAndEndTime({
-		vehicleId: input.vehicle_id,
-		endTime: input.end_time
-	})
+	const exists = await new ExisteTrip(input.vehicle_id, input.end_time).execute()
 	if (exists) {
 		issues.push({
 			code: "custom",
@@ -43,7 +41,7 @@ async function checkTripConflict(input: TripForm): Promise<ZodIssue[]> {
 async function checkOdometerMonotonicity(input: TripForm): Promise<ZodIssue[]> {
 	const issues: ZodIssue[] = []
 	if (input.odometer !== undefined) {
-		const latest = await tripsQueries.findLatestOdometerForVehicle(input.vehicle_id)
+		const latest = await new GetLatestOdometer(input.vehicle_id).execute()
 		if (latest !== null && input.odometer < latest) {
 			issues.push({
 				code: "custom",

@@ -3,7 +3,7 @@ import { rootLogger } from "../utils/logger"
 import { fetchWeather, WeatherFetchError } from "./fetcher"
 import { type WeatherParam } from "./types"
 
-import { tripsQueries } from "../db/queries/trips"
+import { UpdateWeather } from "../db/queries/trips/UpdateWeather"
 
 const RETRY_DELAYS = [5_000, 30_000]
 const MAX_RETRIES = 2
@@ -16,7 +16,7 @@ const tryStore = async (
 ): Promise<boolean> => {
 	try {
 		const weather = await fetchWeather(start, end)
-		await tripsQueries.updateWeather(tripId, weather.start, weather.end)
+		await new UpdateWeather(tripId, weather.start, weather.end).execute()
 		if (attempt > 1) {
 			rootLogger.info({ tripId, attempt }, "Weather async retry succeeded")
 			rootLogger.debug(

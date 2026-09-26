@@ -4,11 +4,15 @@ import { DbQuery } from "../DbQuery"
 
 export type { VehicleRow }
 
-export class FindAll extends DbQuery<VehicleRow[]> {
-	protected async doExecute(db: SQL): Promise<VehicleRow[]> {
-		const vehicles: VehicleRow[] = await db`
+export class FindAll extends DbQuery<VehicleRow, VehicleRow[]> {
+	protected override mapResults(rows: VehicleRow[]): VehicleRow[] {
+		return rows
+	}
+
+	protected async doQuery(db: SQL): Promise<VehicleRow[]> {
+		const row: VehicleRow[] = await db`
 SELECT id, description FROM vehicles ORDER BY description
 `
-		return vehicles
+		return row
 	}
 }

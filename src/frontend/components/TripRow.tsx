@@ -1,10 +1,9 @@
 import type { FC } from "hono/jsx"
 import { formatNumber } from "../format"
 import { weatherCodeToIcon, windDirectionToClass } from "../weather/display"
-import type { TripWithLocationRow } from "../../backend/db/queries/trips"
-import type { WeatherSnapshot } from "../../backend/weather/types"
+import type { TripSnapshot } from "../../backend/db/queries/trips/FindTrips"
 
-export const TripRow: FC<{ trip: TripWithLocationRow }> = ({ trip }) => {
+export const TripRow: FC<{ trip: TripSnapshot }> = ({ trip }) => {
 	const displayTz = process.env.DISPLAY_TZ || "Europe/Copenhagen"
 	const dateStr = trip.end_time.setZone(displayTz).toFormat("EEE, MMM d")
 	const startTimeStr = trip.start_time.setZone(displayTz).toFormat("HH:mm")
@@ -101,9 +100,9 @@ export const TripRow: FC<{ trip: TripWithLocationRow }> = ({ trip }) => {
 							></span>
 						</dd>
 					</>
-					{trip.weatherStart &&
+					{trip.weather_start &&
 						(() => {
-							const w = trip.weatherStart
+							const w = trip.weather_start
 							const windClass = windDirectionToClass(w.wind.direction)
 							return (
 								<>

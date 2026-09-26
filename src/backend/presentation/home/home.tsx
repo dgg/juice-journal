@@ -1,4 +1,3 @@
-import type { Context } from "hono"
 import { DateTime } from "luxon"
 import { Hono } from "hono"
 
@@ -6,21 +5,31 @@ import { displayTz, currentMonthBoundsUtc, prevMonthBoundsUtc } from "../../util
 import { formatDurationHm } from "../../utils/format"
 import type { Env } from "../../utils/logger"
 
-import { tripsQueries, type TripWithLocationRow } from "../../db/queries/trips"
-import { statsQueries, type PeriodAggregates } from "../../db/queries/stats"
-import { GetFromLatestTrip, type VehicleRow } from "../../db/queries/vehicles/GetFromLatestTrip"
+import type { TripSnapshot } from "../../db/queries/trips/FindTrips"
+
+import {
+	GetFromLatestTrip,
+	type VehicleRow
+} from "../../db/queries/vehicles/GetFromLatestTrip"
+import {
+	NULL_STATS,
+	PeriodAggregates,
+	type AggregatedStats
+} from "../../db/queries/stats/PeriodAggregates"
 
 import { webAuth } from "../auth/web-auth"
 
 import { HomePage } from "../../../frontend/pages/HomePage"
+
 import type { HomeView } from "./types"
+import { FindTrips } from "../../db/queries/trips/FindTrips"
 
 const computeHomeView = (
 	vehicle: VehicleRow | null,
 	localNow: DateTime,
-	currentStats: PeriodAggregates,
-	prevStats: PeriodAggregates,
-	trips: TripWithLocationRow[]
+	currentStats: AggregatedStats,
+	prevStats: AggregatedStats,
+	trips: TripSnapshot[]
 ): HomeView => {
 	const hasTrips = trips.length > 0
 	return {
@@ -56,21 +65,13 @@ interface UtcInterval {
 }
 
 async function queryStats(
-	vehicleId: string | null,
+	vehicleId: string,
 	current: UtcInterval,
 	prev: UtcInterval
-): Promise<[PeriodAggregates, PeriodAggregates]> {
+): Promise<[AggregatedStats, AggregatedStats]> {
 	return await Promise.all([
-		statsQueries.periodAggregates({
-			startUtc: current.start,
-			endUtc: current.end,
-			vehicleId: vehicleId ?? undefined
-		}),
-		statsQueries.periodAggregates({
-			startUtc: prev.start,
-			endUtc: prev.end,
-			vehicleId: vehicleId ?? undefined
-		})
+		new PeriodAggregates(vehicleId, current.start, current.end).execute(),
+		new PeriodAggregates(vehicleId, prev.start, prev.end).execute()
 	])
 }
 
@@ -89,19 +90,18 @@ const calculateIntervals = (
 
 export const homeDomain = new Hono<Env>().use(webAuth).get("/", async (c) => {
 	const vehicle = await new GetFromLatestTrip().execute()
-	const vehicleId = vehicle?.id ?? null
 
 	const tz = displayTz()
 	const now = DateTime.now()
 	const { current, prev } = calculateIntervals(now, tz)
 
-	const [currentStats, prevStats] = await queryStats(vehicleId, current, prev)
+	const [currentStats, prevStats] = vehicle
+		? await queryStats(vehicle.id, current, prev)
+		: ([NULL_STATS, NULL_STATS] as const)
 
-	const trips = await tripsQueries.findTripsWithLocations({
-		startUtc: current.start,
-		endUtc: current.end,
-		vehicleId: vehicleId ?? undefined
-	})
+	const trips = vehicle
+		? await new FindTrips(current.start, current.end, vehicle.id).execute()
+		: []
 
 	const data: HomeView = computeHomeView(
 		vehicle,

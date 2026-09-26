@@ -67,7 +67,7 @@ export const tripCreationSchema = z.object({
 	/** trip average consumotion (KiloW-HR-PER-HUNDRED-KiloM) */
 	consumption: z.number().positive().nullable(),
 	/** odometer reading (KiloM) */
-	odometer: z.number().nullable(),
+	odometer: z.number().positive().nullable(),
 	tracking: z.object({
 		created: datetime,
 		updated: datetime
