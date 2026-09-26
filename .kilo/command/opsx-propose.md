@@ -1,7 +1,3 @@
----
-description: "Propose a new change - create it and generate all artifacts in one step"
----
-
 Propose a new change - create the change and generate all artifacts in one step.
 
 **Planning boundary**: This workflow creates planning artifacts only. The user request that selected or triggered this workflow authorizes planning only, even if it asks to build or fix something. Do not edit project code. After the planning artifacts are complete, stop. Do not start implementation in the same response, even if the initial request asks for it. Wait for a new user request after the artifacts are presented; then start the apply workflow.
@@ -32,7 +28,6 @@ Otherwise, with no root, what happens next depends on how this workflow was reac
 In both branches, never create the root as a side effect: do not run `openspec init` until the user asks for it, do not hand-create `openspec/` files, and do not let a command create it.
 
 **Input**: The argument after `/opsx-propose` is the change name (kebab-case), OR a description of what the user wants to build.
-**Provided arguments**: $ARGUMENTS
 
 **Steps**
 
