@@ -66,7 +66,7 @@ export const TripRow: FC<{ trip: TripSnapshot }> = ({ trip }) => {
 							<dd class="trip-detail-pill">
 								<span class="icon-gauge" aria-hidden="true"></span>
 								<data value={trip.speed}>
-									{formatNumber(trip.speed, 0)}
+									{formatNumber(trip.speed, 1)}
 									<small class="pill__unit">&nbsp;km/h</small>
 								</data>
 							</dd>

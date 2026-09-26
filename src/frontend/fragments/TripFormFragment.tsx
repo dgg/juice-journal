@@ -194,7 +194,7 @@ export const TripFormFragment: FC<TripFormFragmentProps> = ({
 					<input
 						name="speed"
 						type="number"
-						step="1"
+						step="0.1"
 						min="0"
 						{...inputProps("speed", undefined, form, issues)}
 					/>
