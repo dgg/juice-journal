@@ -15,24 +15,8 @@ const Scripts = () => (
 		/>
 		<script src="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.0/all/global.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.0/themes/breezy/global.js"></script>
-		<link
-			rel="stylesheet"
-			href="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.0/skeleton.css"
-			crossorigin="anonymous"
-		/>
-		<link
-			rel="stylesheet"
-			href="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.0/themes/breezy/theme.css"
-			crossorigin="anonymous"
-		/>
-		<link
-			rel="stylesheet"
-			href="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.0/themes/breezy/palettes/indigo.css"
-			crossorigin="anonymous"
-		/>
 
 		<script src="/static/scripts/stats.mjs" type="module" />
-		<script src="/static/scripts/calendar.mjs" type="module" />
 	</>
 )
 

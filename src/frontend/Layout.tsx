@@ -27,6 +27,21 @@ export const Layout: FC<{ title: string; children?: any }> = ({ title, children 
 						crossorigin="anonymous"
 						referrerpolicy="no-referrer"
 					/>
+					<link
+						rel="stylesheet"
+						href="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.0/skeleton.css"
+						crossorigin="anonymous"
+					/>
+					<link
+						rel="stylesheet"
+						href="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.0/themes/breezy/theme.css"
+						crossorigin="anonymous"
+					/>
+					<link
+						rel="stylesheet"
+						href="https://cdn.jsdelivr.net/npm/fullcalendar@7.1.0/themes/breezy/palettes/indigo.css"
+						crossorigin="anonymous"
+					/>
 					<link rel="stylesheet" href="/static/app.css" />
 					<link
 						rel="stylesheet"
