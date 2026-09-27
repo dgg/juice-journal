@@ -110,11 +110,9 @@ const click = async (info) => {
 
 export class ConsumptionCalendar extends FullCalendar.Calendar {
 	constructor(element, data) {
-		console.log(data)
 		const { trips, period, avgConsumption } = data
 
 		const events = mapEvents(trips, avgConsumption)
-		console.log(events)
 		super(element, {
 			headerToolbar: false,
 			selectable: false,
