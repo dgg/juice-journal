@@ -1,5 +1,7 @@
 import * as z from "zod"
+import type { DateTime } from "luxon"
 import type { StatWithDelta } from "../types"
+import type { Daypart } from "../../types"
 
 const PERIODS = ["year", "week", "month"] as const
 const period = z.enum(PERIODS).default("month")
@@ -22,6 +24,13 @@ export const statsQuerySchema = z.object({
 })
 
 export type StatsQuery = z.output<typeof statsQuerySchema>
+
+export interface CalendarTrip {
+	id: string
+	time: DateTime
+	daypart: Daypart
+	consumption: number | null
+}
 
 export interface StatsView {
 	period: Period
@@ -46,6 +55,7 @@ export interface StatsView {
 		speed: (number | null)[]
 		consumption: (number | null)[]
 	}
+	trips: CalendarTrip[]
 	hasTrips: boolean
 	date: string | null
 	prevDate: string | null

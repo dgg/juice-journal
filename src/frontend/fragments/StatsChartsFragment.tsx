@@ -186,6 +186,19 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 								</div>
 							</div>
 						</article>
+						{data.period !== "year" && (
+							<article>
+								<script id="calendar-data" type="application/json">
+									{raw(JSON.stringify({
+										trips: data.trips,
+										period: data.period,
+										avgConsumption: data.stats.avgConsumption.value
+									}))}
+								</script>
+								<div id="stats-calendar"></div>
+								<div id="trip-detail"></div>
+							</article>
+						)}
 					</div>
 				</>
 			) : (

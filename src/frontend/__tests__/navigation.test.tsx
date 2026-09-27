@@ -203,6 +203,7 @@ describe("StatsPage", () => {
 						speed: [],
 						consumption: []
 					},
+					trips: [],
 					hasTrips: false,
 					date: "2026-08",
 					prevDate: "2026-07",
