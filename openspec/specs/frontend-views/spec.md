@@ -18,7 +18,7 @@ The system SHALL render all HTML via `hono/jsx` server-side components located u
 #### Scenario: No client JS framework shipped
 
 - **WHEN** a page is rendered and served to the browser
-- **THEN** the response SHALL contain no React/Vue/Svelte client runtime; HTMX library + optional Pico/Chart.js assets only
+- **THEN** the response SHALL contain no React/Vue/Svelte client runtime; HTMX library + optional Pico/Chart.js/FullCalendar assets only
 
 ### Requirement: View layering by responsibility
 
