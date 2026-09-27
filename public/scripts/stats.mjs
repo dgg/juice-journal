@@ -1,5 +1,6 @@
 import { DistanceDurationChart } from "./charts/distance-duration.mjs"
 import { SpeedConsumptionChart } from "./charts/speed-consumption.mjs"
+import { ConsumptionCalendar } from "./charts/consumption-calendar.mjs"
 
 let charts = []
 
@@ -8,29 +9,40 @@ const destroyCharts = () => {
 	charts = []
 }
 
-const renderCharts = () => {
-	destroyCharts()
+const loadData = (dataElementId) => {
+	const dataElement = document.getElementById(dataElementId)
+	if (!dataElement?.textContent) return
 
-	const dataEl = document.getElementById("stats-data")
-	if (!dataEl?.textContent) return
-
-	let data
 	try {
-		data = JSON.parse(dataEl.textContent)
+		return JSON.parse(dataElement.textContent)
 	} catch {
 		return
 	}
+}
 
-	if (!data?.labels?.length) return
+const mount = (elementId, data, chartClass) => {
+	const element = document.getElementById(elementId)
+	if (!element || typeof Chart === "undefined" || typeof FullCalendar === "undefined")
+		return
+	const chart = new chartClass(element, data)
+	charts.push(chart)
+	return chart
+}
 
-	const mount = (id, ChartClass) => {
-		const el = document.getElementById(id)
-		if (!el || typeof Chart === "undefined") return
-		charts.push(new ChartClass(el, data))
+const renderCharts = () => {
+	destroyCharts()
+
+	const statsData = loadData("stats-data")
+	if (statsData?.labels?.length) {
+		mount("chart-distance-duration", statsData, DistanceDurationChart)
+		mount("chart-speed-consumption", statsData, SpeedConsumptionChart)
 	}
 
-	mount("chart-distance-duration", DistanceDurationChart)
-	mount("chart-speed-consumption", SpeedConsumptionChart)
+	const calendarData = loadData("calendar-data")
+	if (calendarData?.trips?.length) {
+		const calendar = mount("stats-calendar", calendarData, ConsumptionCalendar)
+		calendar.render()
+	}
 }
 
 if (document.readyState === "loading") {

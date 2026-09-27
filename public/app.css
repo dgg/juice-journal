@@ -642,12 +642,6 @@ small.badge {
 	color: var(--pico-color-amber-500);
 }
 
-.cal-tone--red {
-	color: var(--pico-color-red-500);
-}
-
-.cal-tone--green.cal-tone--bold,
-.cal-tone--amber.cal-tone--bold,
-.cal-tone--red.cal-tone--bold {
+.cal-tone--bold {
 	font-weight: 700;
 }

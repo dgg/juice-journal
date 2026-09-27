@@ -132,11 +132,9 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 
 			<PeriodNavigation data={data} />
 
-<div class="stats-period-label">
-					{data.weekBoundsLabel ? (
-						<small>{data.weekBoundsLabel}</small>
-					) : null}
-					{data.vehicle ? (
+			<div class="stats-period-label">
+				{data.weekBoundsLabel ? <small>{data.weekBoundsLabel}</small> : null}
+				{data.vehicle ? (
 					<small>
 						<span class="icon-car-front" aria-hidden="true"></span>{" "}
 						{data.vehicle.description}
@@ -151,7 +149,11 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 						<div class="year-granularity" role="group">
 							{(["month", "week"] as const).map((g) => (
 								<button
-									class={g === selectedGranularity ? "secondary" : "outline"}
+									class={
+										g === selectedGranularity
+											? "secondary"
+											: "outline"
+									}
 									hx-get="/stats/fragments/charts"
 									hx-target="#stats-region"
 									hx-swap="outerHTML"
@@ -175,6 +177,18 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 							<script id="stats-data" type="application/json">
 								{raw(JSON.stringify(data.series))}
 							</script>
+							{data.period !== "year" && (
+								<script id="calendar-data" type="application/json">
+									{raw(
+										JSON.stringify({
+											trips: data.trips,
+											period: data.period,
+											avgConsumption:
+												data.stats.avgConsumption.value
+										})
+									)}
+								</script>
+							)}
 							<div class="chart-row">
 								<div class="chart-container">
 									<h3>Distance & Duration</h3>
@@ -184,21 +198,14 @@ export const StatsChartsFragment: FC<{ data: StatsView }> = ({ data }) => {
 									<h3>Avg Speed & Consumption</h3>
 									<canvas id="chart-speed-consumption"></canvas>
 								</div>
+								{data.period !== "year" && (
+									<div class="chart-container">
+										<div id="stats-calendar"></div>
+										<div id="trip-detail"></div>
+									</div>
+								)}
 							</div>
 						</article>
-						{data.period !== "year" && (
-							<article>
-								<script id="calendar-data" type="application/json">
-									{raw(JSON.stringify({
-										trips: data.trips,
-										period: data.period,
-										avgConsumption: data.stats.avgConsumption.value
-									}))}
-								</script>
-								<div id="stats-calendar"></div>
-								<div id="trip-detail"></div>
-							</article>
-						)}
 					</div>
 				</>
 			) : (
