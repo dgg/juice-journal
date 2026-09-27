@@ -28,6 +28,7 @@ function makeData(
 			speed: [] as (number | null)[],
 			consumption: [] as (number | null)[]
 		},
+		trips: [] as import("../../backend/presentation/stats/types").CalendarTrip[],
 		hasTrips: false,
 		date: "2026-08",
 		prevDate: "2026-07",

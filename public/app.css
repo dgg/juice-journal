@@ -599,3 +599,55 @@ small.badge {
 	-o-transform: rotate(315deg);
 	transform: rotate(315deg);
 }
+
+/* ── FullCalendar Breezy → Pico palette overrides ── */
+
+:root {
+	--fc-breezy-primary: var(--pico-primary);
+	--fc-breezy-primary-over: var(--pico-primary-hover);
+	--fc-breezy-primary-foreground: var(--pico-primary-inverse);
+
+	--fc-breezy-background: var(--pico-background-color);
+	--fc-breezy-foreground: var(--pico-color);
+	--fc-breezy-faint-foreground: var(--pico-muted-color);
+	--fc-breezy-muted-foreground: var(--pico-muted-color);
+	--fc-breezy-strong-foreground: var(--pico-color);
+
+	--fc-breezy-border: var(--pico-muted-border-color);
+	--fc-breezy-muted-border: var(--pico-secondary-background);
+	--fc-breezy-strong-border: var(--pico-form-element-border-color);
+
+	--fc-breezy-faint: var(--pico-form-element-background-color);
+	--fc-breezy-muted: var(--pico-secondary-background);
+	--fc-breezy-strong: var(--pico-muted-border-color);
+
+	--fc-breezy-event: var(--pico-primary);
+	--fc-breezy-event-contrast: var(--pico-primary-inverse);
+	--fc-breezy-background-event: var(--pico-color-indigo-200);
+	--fc-breezy-highlight: var(--pico-color-cyan-100);
+	--fc-breezy-now: var(--pico-color-red-500);
+
+	--fc-breezy-selected: var(--pico-primary-background);
+	--fc-breezy-popover: var(--pico-background-color);
+	--fc-breezy-popover-border: var(--pico-muted-border-color);
+}
+
+/* ── Calendar event tone colors ── */
+
+.cal-tone--green {
+	color: var(--pico-color-green-500);
+}
+
+.cal-tone--amber {
+	color: var(--pico-color-amber-500);
+}
+
+.cal-tone--red {
+	color: var(--pico-color-red-500);
+}
+
+.cal-tone--green.cal-tone--bold,
+.cal-tone--amber.cal-tone--bold,
+.cal-tone--red.cal-tone--bold {
+	font-weight: 700;
+}

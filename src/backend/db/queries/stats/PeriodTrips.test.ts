@@ -13,6 +13,7 @@ type Trip = Pick<
 	TripDetail,
 	"consumption" | "distance" | "duration" | "speed" | "daypart"
 > & {
+	id: string
 	start_time: string
 	end_time: string
 }
@@ -40,6 +41,7 @@ describe(PeriodTrips.name, () => {
 		})
 		await Promise.all([
 			seedTrip({
+				id: "pt_trip1",
 				start_time: "2026-06-01T08:00:00Z",
 				end_time: "2026-06-01T08:45:00Z",
 				daypart: "morning",
@@ -49,6 +51,7 @@ describe(PeriodTrips.name, () => {
 				consumption: 14
 			}),
 			seedTrip({
+				id: "pt_trip2",
 				start_time: "2026-06-01T15:00:00Z",
 				end_time: "2026-06-01T15:30:00Z",
 				daypart: "afternoon",
@@ -58,6 +61,7 @@ describe(PeriodTrips.name, () => {
 				consumption: 21.0
 			}),
 			seedTrip({
+				id: "pt_trip3",
 				start_time: "2026-06-15T08:00:00Z",
 				end_time: "2026-06-15T08:36:00Z",
 				daypart: "morning",
@@ -85,6 +89,7 @@ describe(PeriodTrips.name, () => {
 			expect(stats).toHaveLength(2) // trips outside period are not returned
 			// early trip
 			expect(stats[0]).toEqual({
+				id: "pt_trip1",
 				duration: 45,
 				distance: 15,
 				speed: 20,
@@ -94,6 +99,7 @@ describe(PeriodTrips.name, () => {
 			})
 			// late trip
 			expect(stats[1]).toEqual({
+				id: "pt_trip2",
 				duration: 30,
 				distance: 10.0,
 				speed: 40.0,

@@ -22,6 +22,9 @@ import type { Env } from "../../utils/logger"
 
 import { StatsPage } from "../../../frontend/pages/StatsPage"
 import { StatsChartsFragment } from "../../../frontend/fragments/StatsChartsFragment"
+import { TripDetailPills } from "../../../frontend/components/TripDetailPills"
+
+import { FindById } from "../../db/queries/trips/FindById"
 
 import { webAuth } from "../auth/web-auth"
 
@@ -135,6 +138,7 @@ const computeStatsView = async (params: {
 				speed: [],
 				consumption: []
 			},
+			trips: [],
 			hasTrips: false,
 			date: formatDate(period, now),
 			prevDate,
@@ -210,7 +214,7 @@ const computeStatsView = async (params: {
 		).reverse()
 	}
 
-	return {
+	const mainReturn: StatsView = {
 		period,
 		yearGranularity,
 		label,
@@ -239,12 +243,29 @@ const computeStatsView = async (params: {
 			tripCount: { value: currentStats.tripCount, prev: prevStats.tripCount }
 		},
 		series,
+		trips: [],
 		hasTrips,
 		date: formatDate(period, now),
 		prevDate,
 		nextDate,
 		yearOptions
 	}
+
+	if (hasTrips && (period === "week" || period === "month")) {
+		const tripRows = await new PeriodTrips(
+			vehicle.id,
+			bounds.current.startUtc,
+			bounds.current.endUtc
+		).execute()
+		mainReturn.trips = tripRows.map((r) => ({
+			id: r.id,
+			time: r.time,
+			daypart: r.daypart,
+			consumption: r.consumption
+		}))
+	}
+
+	return mainReturn
 }
 
 const calculateViewData = async (qs: StatsQuery): Promise<StatsView> => {
@@ -270,4 +291,9 @@ export const statsDomain = new Hono<Env>()
 	.get("/fragments/charts", zValidator("query", statsQuerySchema), async (c) => {
 		const view = await calculateViewData(c.req.valid("query"))
 		return c.html(<StatsChartsFragment data={view} />)
+	})
+	.get("/trips/:id", async (c) => {
+		const trip = await new FindById(c.req.param("id")).execute()
+		if (!trip) return c.notFound()
+		return c.html(<TripDetailPills trip={trip} />)
 	})

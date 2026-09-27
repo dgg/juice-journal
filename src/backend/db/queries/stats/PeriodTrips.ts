@@ -8,6 +8,7 @@ import { DbQuery } from "../DbQuery"
 
 
 export type StatTrip = Pick<TripRow, "daypart" | "duration"> & {
+	id: string
 	time: DateTime
 	distance: number
 	speed: number | null
@@ -25,6 +26,7 @@ export class PeriodTrips extends DbQuery<TripRow, StatTrip[]> {
 
 	protected override mapResults(rows: TripRow[]): StatTrip[] {
 		const trips: StatTrip[] = rows.map(({ daypart, duration, ...r }) => ({
+			id: r.id,
 			daypart,
 			duration,
 			consumption: toNumber(r.consumption),
@@ -38,6 +40,7 @@ export class PeriodTrips extends DbQuery<TripRow, StatTrip[]> {
 	protected async doQuery(db: SQL): Promise<TripRow[]> {
 		const rows: TripRow[] = await db`
 				SELECT
+					trips.id,
 					trips.end_time,
 					trips.daypart,
 					distance,
