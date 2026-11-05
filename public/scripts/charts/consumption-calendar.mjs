@@ -73,18 +73,13 @@ const didMount = (info) => {
 	const daypart = info.event.extendedProps.daypart
 	const bg =
 		daypart === "morning" ? getColorHex("amber", 100) : getColorHex("indigo", 100)
-	const border =
-		daypart === "morning" ? getColorHex("amber", 200) : getColorHex("indigo", 200)
 	const element = info.el
 
 	const setStyle = (focused) => {
 		element.style.outline = "none"
 		element.style.boxShadow = "none"
 		if (bg) element.style.backgroundColor = bg
-		if (border) {
-			element.style.borderColor = border
-			element.style.borderWidth = focused ? "2px" : ""
-		}
+
 	}
 	setStyle(false)
 	element.addEventListener("mouseenter", () => setStyle(false))
