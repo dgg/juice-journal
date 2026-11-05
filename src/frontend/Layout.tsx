@@ -5,7 +5,7 @@ export const Layout: FC<{ title: string; children?: any }> = ({ title, children 
 	return (
 		<>
 			{raw("<!DOCTYPE html>\n")}
-			<html lang="en" data-theme="light">
+			<html lang="en" data-theme="dark">
 				<head>
 					<meta charset="UTF-8" />
 					<meta

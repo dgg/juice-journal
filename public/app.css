@@ -36,11 +36,11 @@
 }
 
 .delta.positive {
-	color: var(--pico-color-red-500);
+	color: var(--pico-color-red-400);
 }
 
 .delta.negative {
-	color: var(--pico-color-green-500);
+	color: var(--pico-color-green-400);
 }
 
 .daypart-indicator {
@@ -56,12 +56,12 @@
 
 .daypart-indicator.morning {
 	background: var(--pico-color-amber-100);
-	color: var(--pico-color-amber-200);
+	color: var(--pico-color-amber-300);
 }
 
 .daypart-indicator.afternoon {
 	background: var(--pico-color-indigo-100);
-	color: var(--pico-color-indigo-200);
+	color: var(--pico-color-indigo-300);
 }
 
 .daypart-indicator .icon-sun,
@@ -124,7 +124,7 @@ small.badge {
 
 .trip-row__consumption {
 	font-weight: 600;
-	color: var(--pico-primary);
+	color: var(--pico-progress-color);
 	white-space: nowrap;
 }
 
@@ -186,6 +186,7 @@ small.badge {
 .stat-card__value {
 	font-size: 1.25rem;
 	font-weight: 600;
+	color: var(--pico-secondary);
 }
 
 .stat-card--hero .stat-card__value {
@@ -250,10 +251,6 @@ small.badge {
 	font-size: 0.875rem;
 }
 
-.trip-form label [class^="icon-"] {
-	margin-right: 0.25rem;
-}
-
 .daypart-selector {
 	display: flex;
 	padding: 0;
@@ -287,9 +284,8 @@ small.badge {
 	display: block;
 	padding: 0.5rem;
 	text-align: center;
-	border: 1px solid var(--pico-muted-border-color);
+	border: 1px solid var(--pico-form-element-border-color);
 	background: var(--pico-background-color);
-	color: var(--pico-muted-color);
 	transition:
 		background 0.15s,
 		color 0.15s;
@@ -303,22 +299,16 @@ small.badge {
 	border-radius: 0 var(--pico-border-radius) var(--pico-border-radius) 0;
 }
 
-.daypart-selector input:checked + span {
-	background: var(--pico-primary-background);
-	color: var(--pico-primary-inverse);
-	border-color: var(--pico-primary-background);
-}
-
 .daypart-selector input[value="morning"]:checked + span {
 	background: var(--pico-color-amber-100);
-	color: var(--pico-color-amber-200);
-	border-color: var(--pico-color-amber-200);
+	color: var(--pico-color-amber-300);
+	border-color: var(--pico-color-amber-100);
 }
 
 .daypart-selector input[value="afternoon"]:checked + span {
 	background: var(--pico-color-indigo-100);
-	color: var(--pico-color-indigo-200);
-	border-color: var(--pico-color-indigo-200);
+	color: var(--pico-color-indigo-300);
+	border-color: var(--pico-color-indigo-100);
 }
 
 .empty-state {
@@ -356,12 +346,17 @@ small.badge {
 	grid-template-columns: 1fr;
 }
 
-.trip-form label small {
-	font-size: 0.7rem;
-}
-
 .trip-form label {
 	margin-bottom: 0;
+	color: var(--pico-form-element-placeholder-color)
+}
+.trip-form label [class^="icon-"] {
+	margin-right: 0.25rem;
+	color: var(--pico-muted-color)
+}
+
+.trip-form label small {
+	font-size: 0.7rem;
 }
 
 .trip-form .daypart-selector span {
@@ -411,6 +406,16 @@ small.badge {
 	align-items: center;
 	justify-content: center;
 	gap: 0.4rem;
+	background: var(--pico-form-element-background-color);
+	color: var(--pico-form-element-color);
+	border-color: var(--pico-form-element-border-color);
+}
+
+.period-switcher button.secondary,
+.year-granularity button.secondary {
+	background: var(--pico-progress-color);
+	color: var(--pico-background-color);
+	border-color: var(--pico-form-element-border-color);
 }
 
 .period-switcher button [class^="icon-"],
@@ -603,9 +608,9 @@ small.badge {
 /* ── FullCalendar Breezy → Pico palette overrides ── */
 
 :root {
-	--fc-breezy-primary: var(--pico-primary);
+	--fc-breezy-primary: var(--pico-progress-color);
 	--fc-breezy-primary-over: var(--pico-primary-hover);
-	--fc-breezy-primary-foreground: var(--pico-primary-inverse);
+	--fc-breezy-primary-foreground: var(--pico-background-color);
 
 	--fc-breezy-background: var(--pico-background-color);
 	--fc-breezy-foreground: var(--pico-color);
@@ -630,18 +635,125 @@ small.badge {
 	--fc-breezy-selected: var(--pico-primary-background);
 	--fc-breezy-popover: var(--pico-background-color);
 	--fc-breezy-popover-border: var(--pico-muted-border-color);
+
+	/* -- */
+	/*
+	bg: "#2d394d",
+	caret: "#ff7a90",
+	main: "#ff7a90",
+	sub: "#4a768d",
+	subAlt: "#263041",
+	text: "#fffaf8",
+	error: "#ee2a3a",
+	errorExtra: "#f04040",
+	colorfulError: "#fc2032",
+	colorfulErrorExtra: "#f04040",
+	*/
+	/*
+	bg #2d394d		page background
+	subAlt #263041	panels / cards / inputs (one step darker than bg)
+	sub #4a768d		borders / secondary surfaces
+	main #ff7a90	coral accent — primary
+	text #fffaf8	body / headings
+	error #ee2a3a	errors / "above avg" delta
+	*/
+	--pico-background-color: #2d394d;
+	--pico-color: #fffaf8;
+	--pico-muted-color: #b3c2d4;
+	/* AA on bg; for labels/pill units */
+	--pico-muted-border-color: #4a768d;
+	--pico-h1-color: #4a768d;
+	--pico-h2-color: #4a768d;
+	--pico-h3-color: #4a768d;
+	--pico-h4-color: #4a768d;
+	--pico-h5-color: #4a768d;
+	--pico-h6-color: #4a768d;
+	--pico-link-color: #ff7a90;
+	--pico-link-underline: #ff6680;
+	--pico-mark-color: #263041;
+	--pico-mark-background: #ff7a90;
+	--pico-ins-color: #7ee0a8;
+	--pico-ins-background: #1f3a2e;
+	--pico-del-color: #ee2a3a;
+	--pico-del-background: #3a1f24;
+	--pico-blockquote-border-color: #4a768d;
+
+	/* ── primary (coral) — button fill coral, text dark for contrast ── */
+	--pico-primary: #fffaf8;
+	--pico-primary-background: #ff7a90;
+	--pico-primary-inverse: #263041;
+	/* dark text on coral ≈ 5:1+ */
+	--pico-primary-hover: #ff6680;
+	/* darker coral */
+	--pico-primary-hover-background: #ff6680;
+
+	/* ── secondary (subAlt panel) ── */
+	--pico-secondary: #4a768d;
+	--pico-secondary-background: #263041;
+	--pico-secondary-inverse: #4a768d;
+	--pico-secondary-hover-background: #2d394d;
+
+	/* ── contrast (white emphasis button) ── */
+	--pico-contrast: #fffaf8;
+	--pico-contrast-background: #263041;
+	--pico-contrast-inverse: #fffaf8;
+	--pico-contrast-hover-background: #f0ece8;
+
+	/* ── forms ── */
+	--pico-form-element-background-color: #263041;
+	--pico-form-element-selected-background-color: #2d394d;
+	--pico-form-element-color: #fffaf8;
+	--pico-form-element-placeholder-color: #4a768d;
+	--pico-form-element-border-color: #263041;
+	--pico-form-element-active-background-color: #263041;
+	--pico-form-element-active-color: #fffaf8;
+	--pico-form-element-active-border-color: #fffaf8;
+	--pico-form-element-focus-color: #fffaf8;
+	--pico-form-element-focus-background-color: #263041;
+	--pico-form-element-disabled-opacity: 0.5;
+	--pico-form-element-valid-border-color: #6cc38f;
+	--pico-form-element-invalid-border-color: #ee2a3a;
+
+	/* ── cards / surfaces ── */
+	--pico-card-background-color: #263041;
+	--pico-card-border-color: #4a768d;
+	--pico-card-box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.25);
+	--pico-card-sectioning-color: #b3c2d4;
+
+	/* ── feedback / misc ── */
+	--pico-progress-background-color: #263041;
+	--pico-progress-color: #ff7a90;
+	--pico-loading-spinner-color: #ff7a90;
+	--pico-modal-overlay-background-color: rgba(15, 20, 30, 0.7);
+	--pico-tooltip-background-color: #263041;
+	--pico-tooltip-color: #b3c2d4;
+	--pico-accordion-border-color: #4a768d;
+	--pico-accordion-active-summary-color: #fffaf8;
+	--pico-accordion-close-summary-color: #b3c2d4;
+	--pico-switch-background-color: #4a768d;
+	--pico-switch-checked-background-color: #ff7a90;
+	--pico-range-thumb-border-color: #263041;
+	--pico-range-thumb-color: #ff7a90;
+	--pico-range-thumb-active-color: #ff6680;
+	--pico-range-thumb-background-color: #ff7a90;
 }
 
 /* ── Calendar event tone colors ── */
 
 .cal-tone--green {
-	color: var(--pico-color-green-500);
+	/*color: var(--pico-color-green-500);*/
+	color: #4a768d
 }
 
 .cal-tone--amber {
-	color: var(--pico-color-amber-500);
+	/*color: var(--pico-color-amber-500);*/
+	color: #ff7a90;
 }
 
 .cal-tone--bold {
 	font-weight: 700;
+}
+
+.fc-breezy-gmc span[class^="icon-"] {
+	color: var(--pico-card-background-color);
 }
